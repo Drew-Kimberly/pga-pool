@@ -1,0 +1,34 @@
+name: Setup Node with Yarn Dependencies
+description: Reusable composition of setup-node, cache, and yarn install actions
+inputs:
+  force-install:
+    description: When 'true', yarn install will be executed regardless of a cache hit
+    required: false
+    default: 'false'
+  cwd:
+    description: Current working directory to execute the action in
+    required: false
+    default: '.'
+outputs:
+  cache-hit:
+    description: Whether or not there was a cache hit
+    value: ${{ steps.dependency-cache.outputs.cache-hit }}
+runs:
+  using: composite
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.13.0'
+    - name: Dependency Cache
+      id: dependency-cache
+      uses: actions/cache@v3
+      with:
+        path: '${{ inputs.cwd }}/node_modules'
+        # Hard-coded NodeJS version must manually be kept in-sync with setup-node.node-version as setup-node action does not output the version.
+        key: yarn-18.13.0-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+    - name: Install Dependencies
+      if: ${{ inputs.force-install == 'true' || steps.dependency-cache.outputs.cache-hit != 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.cwd }}
+      run: yarn --frozen-lockfile --ignore-optional

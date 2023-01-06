@@ -1,0 +1,112 @@
+name: CI
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+on:
+  push:
+    branches:
+      - main
+  pull_request: {}
+
+jobs:
+
+  get-changed-files:
+    name: Get Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      changed-files: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
+      client-changed: ${{ steps.client-changed.outputs.only_modified }}
+      api-changed: ${{ steps.api-changed.outputs.only_modified }}
+      ingestion-changed: ${{ steps.ingestion-changed.outputs.only_modified }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Get list of all changes
+        uses: tj-actions/changed-files@v35.4.0
+        id: changed-files
+      - name: List all changed files
+        run: |
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file"
+          done
+      - name: Check if `client/` has changed
+        uses: tj-actions/changed-files@v35.4.0
+        id: client-changed
+        with:
+          files: |
+            client
+            .github
+      - name: Check if `api/` has changed
+        uses: tj-actions/changed-files@v35.4.0
+        id: api-changed
+        with:
+          files: |
+            api
+            .github
+      - name: Check if `ingestion/` has changed
+        uses: tj-actions/changed-files@v35.4.0
+        id: ingestion-changed
+        with:
+          files: |
+            ingestion
+            .github
+  
+  client-install-dependencies:
+    name: (client) Install Dependencies
+    needs: [get-changed-files]
+    if: needs.get-changed-files.outputs.client-changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup Node with Yarn Dependencies
+        uses: ./.github/actions/setup-node-with-dependencies/
+        with:
+          cwd: client
+          force-install: 'true'
+  
+  client-lint-and-validate:
+    name: (client) Lint and Validate
+    needs: client-install-dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup Node with Yarn Dependencies
+        uses: ./.github/actions/setup-node-with-dependencies/
+        with:
+          cwd: client
+      - name: Lint
+        working-directory: client
+        run: yarn lint
+
+  client-test:
+    name: (client) Test
+    needs: client-install-dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup Node with Yarn Dependencies
+        uses: ./.github/actions/setup-node-with-dependencies/
+        with:
+          cwd: client
+      - name: Test
+        working-directory: client
+        run: yarn test
+
+  client-build:
+    name: (client) Build
+    needs: client-install-dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup Node with Yarn Dependencies
+        uses: ./.github/actions/setup-node-with-dependencies/
+        with:
+          cwd: client
+      - name: Build
+        working-directory: client
+        run: yarn build
