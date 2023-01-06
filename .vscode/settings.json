@@ -1,0 +1,9 @@
+{
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true,
+    },
+    "editor.trimAutoWhitespace": true,
+    "editor.tabSize": 2,
+    "eslint.codeActionsOnSave.mode": "problems",
+    "eslint.packageManager": "yarn"
+}
