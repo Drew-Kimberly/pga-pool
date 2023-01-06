@@ -1,0 +1,63 @@
+{
+    "env": {
+        "browser": true,
+        "jest": true
+    },
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    },
+    "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:react/recommended",
+        "prettier-standard"
+    ],
+    "plugins": [
+        "@typescript-eslint",
+        "prettier",
+        "react",
+        "simple-import-sort"
+    ],
+    "rules": {
+        "no-use-before-define": "off",
+        "no-useless-constructor": "off",
+        "no-unused-vars": "off",
+        "no-new": "off",
+        "@typescript-eslint/no-unused-vars": "warn",
+        "react/react-in-jsx-scope": "off",
+        "prettier/prettier": [
+            "error",
+            {
+                "endOfLine": "auto",
+                "printWidth": 100,
+                "semi": true,
+                "singleQuote": true
+            }
+        ],
+        "simple-import-sort/exports": "error",
+        "simple-import-sort/imports": [
+            "error",
+            {
+                "groups": [
+                    ["^\\w"],
+                    ["^\\u0000"],
+                    ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
+                    ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"]
+                ]
+            }
+        ],
+        "import/no-anonymous-default-export": [
+            "error",
+            {
+                "allowArrowFunction": true,
+                "allowAnonymousFunction": true
+            }
+        ]
+    }
+}
