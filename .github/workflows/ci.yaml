@@ -43,7 +43,10 @@ jobs:
         with:
           files: |
             api/**
+            Dockerfile.api
+            seeds/**
             .github/**
+            .dockerignore
       - name: Check if `ingestion` has changed
         uses: tj-actions/changed-files@v35.4.0
         id: ingestion-changed
@@ -157,15 +160,15 @@ jobs:
 
   api-build:
     name: (api) Build
-    needs: api-install-dependencies
+    needs: [get-changed-files]
+    if: needs.get-changed-files.outputs.api-changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v3
-      - name: Setup Node with Yarn Dependencies
-        uses: ./.github/actions/setup-node-with-dependencies/
+      - name: Docker build
+        uses: docker/build-push-action@v3.2.0
         with:
-          cwd: api
-      - name: Build
-        working-directory: api
-        run: yarn build
+          context: .
+          file: ./Dockerfile.api
+          push: false

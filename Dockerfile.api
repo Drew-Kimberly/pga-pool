@@ -1,0 +1,50 @@
+ARG BASE_IMAGE="node:18.12.1-alpine"
+
+# --- START: base stage ---
+FROM $BASE_IMAGE as base
+
+RUN apk update \
+ && apk upgrade \
+ && apk add bash \
+ && apk add git
+
+# --- START: Production Deps stage ---
+FROM base as prod-deps
+WORKDIR /app
+
+COPY api/package.json api/yarn.lock /app/
+
+RUN yarn install --cwd api --frozen-lockfile --ignore-optional --production
+
+
+# --- START: dev-deps stage ---
+FROM base as dev-deps
+WORKDIR /app
+
+COPY api/package.json api/yarn.lock /app/
+
+RUN yarn install --cwd api --frozen-lockfile --ignore-optional
+
+
+# --- START: build stage ---
+FROM dev-deps as build
+WORKDIR /app
+
+COPY api/nest-cli.json api/tsconfig.build.json api/tsconfig.json seeds /app/
+COPY api/src /app/src/
+
+RUN yarn --cwd api build
+
+
+# --- START: prod stage
+FROM base as prod
+WORKDIR /app
+ENV NODE_ENV=production
+
+USER node
+
+COPY --chown=node:node --from=prod-deps /app/node_modules /app/node_modules
+COPY --chown=node:node --from=build /app/dist /app/dist
+
+EXPOSE 3000
+CMD [ "node", "dist/main.js" ]
