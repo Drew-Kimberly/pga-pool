@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       changed-files: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
-      client-changed: ${{ steps.client-changed.outputs.only_modified }}
-      api-changed: ${{ steps.api-changed.outputs.only_modified }}
-      ingestion-changed: ${{ steps.ingestion-changed.outputs.only_modified }}
+      client-changed: ${{ steps.client-changed.outputs.any_modified }}
+      api-changed: ${{ steps.api-changed.outputs.any_modified }}
+      ingestion-changed: ${{ steps.ingestion-changed.outputs.any_modified }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -30,27 +30,27 @@ jobs:
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             echo "$file"
           done
-      - name: Check if `client/` has changed
+      - name: Check if `client` has changed
         uses: tj-actions/changed-files@v35.4.0
         id: client-changed
         with:
           files: |
-            client
-            .github
-      - name: Check if `api/` has changed
+            client/**
+            .github/**
+      - name: Check if `api` has changed
         uses: tj-actions/changed-files@v35.4.0
         id: api-changed
         with:
           files: |
-            api
-            .github
-      - name: Check if `ingestion/` has changed
+            api/**
+            .github/**
+      - name: Check if `ingestion` has changed
         uses: tj-actions/changed-files@v35.4.0
         id: ingestion-changed
         with:
           files: |
-            ingestion
-            .github
+            ingestion/**
+            .github/**
   
   client-install-dependencies:
     name: (client) Install Dependencies
@@ -109,4 +109,63 @@ jobs:
           cwd: client
       - name: Build
         working-directory: client
+        run: yarn build
+
+  api-install-dependencies:
+    name: (api) Install Dependencies
+    needs: [get-changed-files]
+    if: needs.get-changed-files.outputs.api-changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup Node with Yarn Dependencies
+        uses: ./.github/actions/setup-node-with-dependencies/
+        with:
+          cwd: api
+          force-install: 'true'
+  
+  api-lint-and-validate:
+    name: (api) Lint and Validate
+    needs: api-install-dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup Node with Yarn Dependencies
+        uses: ./.github/actions/setup-node-with-dependencies/
+        with:
+          cwd: api
+      - name: Lint
+        working-directory: api
+        run: yarn lint
+
+  api-test:
+    name: (api) Test
+    needs: api-install-dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup Node with Yarn Dependencies
+        uses: ./.github/actions/setup-node-with-dependencies/
+        with:
+          cwd: api
+      - name: Test
+        working-directory: api
+        run: yarn test
+
+  api-build:
+    name: (api) Build
+    needs: api-install-dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup Node with Yarn Dependencies
+        uses: ./.github/actions/setup-node-with-dependencies/
+        with:
+          cwd: api
+      - name: Build
+        working-directory: api
         run: yarn build
