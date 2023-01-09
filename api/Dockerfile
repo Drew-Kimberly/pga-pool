@@ -45,3 +45,4 @@ USER node
 
 COPY --chown=node:node --from=prod-deps /app/node_modules /app/node_modules
 COPY --chown=node:node --from=build /app/dist /app/dist
+COPY --chown=node:node seeds /app/seeds
