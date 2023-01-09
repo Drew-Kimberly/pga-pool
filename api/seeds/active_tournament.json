@@ -1,8 +1,8 @@
 {
-  "tournament_id": "016",
-  "year": "2023",
+  "id": "016",
   "name": "Sentry Tournament of Champions",
   "date": {
+    "year": "2023",
     "start": "2023-01-05",
     "end": "2023-01-08"
   }

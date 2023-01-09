@@ -1,0 +1,219 @@
+openapi: 3.0.0
+info:
+  title: PGA Pool API
+  version: 1.0.0
+  description: The API for PGA Pool
+  contact:
+    name: Drew Kimberly
+    url: 'https://github.com/Drew-Kimberly'
+servers:
+  - url: 'https://api.pga-pool.drewk.dev'
+    description: Production URL
+  - url: 'http://localhost:3000'
+    description: Local Dev URL
+paths:
+  /pool/{year}/tournaments:
+    parameters:
+      - name: year
+        in: path
+        required: true
+        schema:
+          type: string
+          example: '2023'
+    get:
+      summary: List pool tournaments
+      description: Returns all pool tournaments for the given year
+      operationId: getPoolTournamentsForYear
+      responses:
+        '200':
+          $ref: '#/components/responses/PoolTournamentsResponse'
+      tags:
+        - PoolTournament
+components:
+  responses:
+    PoolTournamentsResponse:
+      description: Response containing a collection of pool tournaments
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PoolTournament'
+            required:
+              - data
+  schemas:
+    PoolTournament:
+      description: Defines a pool tournament
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          example: '2023-016'
+          description: ID in the format of {year}-{pga_tournament_id}
+        active:
+          type: boolean
+          description: Whether the pool tournament is currently live
+        pga_tournament:
+          $ref: '#/components/schemas/PgaTournament'
+        pool_users:
+          type: array
+          items:
+            $ref: '#/components/schemas/PoolUser'
+      required:
+        - id
+        - active
+        - pga_tournament
+        - pool_users
+    PgaTournament:
+      description: Defines a PGA tournament event
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          example: '016'
+        name:
+          type: string
+          example: 'Sentry Tournament of Champions'
+        date:
+          $ref: '#components/schemas/TournamentDate'
+      required:
+        - id
+        - name
+        - year
+        - date
+    PgaPlayer:
+      description: Defines a PGA player (i.e. golfer)
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          example: '46046'
+        name:
+          type: string
+          example: 'Tiger Woods'
+      required:
+        - id
+        - name
+    PgaTournamentPlayer:
+      description: Defines a PGA player participating in a PGA tournament
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        active:
+          type: boolean
+        status:
+          type: string
+          example: 'active'
+        is_round_complete:
+          type: boolean
+        current_round:
+          type: number
+          example: 2
+        current_hole:
+          type: number
+          example: 12
+        starting_hole:
+          type: number
+          example: 1
+        tee_time:
+          type: string
+          format: date-time
+        score_total:
+          type: number
+          example: -3
+        score_thru:
+          type: number
+          example: 9
+        current_position:
+          type: string
+          example: 'T3'
+        withdrawn:
+          type: boolean
+        pga_player:
+          $ref: '#/components/schemas/PgaPlayer'
+        pga_tournament:
+          $ref: '#/components/schemas/PgaTournament'
+      required:
+        - id
+        - active
+        - status
+        - is_round_complete
+        - current_round
+        - current_hole
+        - starting_hole
+        - tee_time
+        - score_total
+        - score_thru
+        - current_position
+        - withdrawn
+        - pga_player
+        - pga_tournament
+    PoolUser:
+      description: Defines a pool user
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          example: 'drewk-2023-016'
+          description: ID in the format of {user_id}-{pool_tournament_id}
+        score:
+          type: number
+          example: -21
+        user:
+          $ref: '#/components/schemas/User'
+        picks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PgaTournamentPlayer'
+      required:
+        - id
+        - score
+        - user
+        - picks
+    User:
+      description: Defines a user (i.e. contestant who competes in pools)
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          example: drewk
+        name:
+          type: string
+          example: 'Drew K'
+        nickname:
+          type: string
+          example: 'Jumbo'
+      required:
+        - id
+        - name
+        - nickname
+    TournamentDate:
+      description: Defines a tournament date
+      type: object
+      additionalProperties: false
+      properties:
+        year:
+          type: string
+          example: '2023'
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+      required:
+        - year
+        - start
+        - end
