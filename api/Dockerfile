@@ -12,28 +12,28 @@ RUN apk update \
 FROM base as prod-deps
 WORKDIR /app
 
-COPY api/package.json api/yarn.lock /app/
+COPY package.json yarn.lock /app/
 
-RUN yarn install --cwd api --frozen-lockfile --ignore-optional --production
+RUN yarn --frozen-lockfile --ignore-optional --production
 
 
 # --- START: dev-deps stage ---
 FROM base as dev-deps
 WORKDIR /app
 
-COPY api/package.json api/yarn.lock /app/
+COPY package.json yarn.lock /app/
 
-RUN yarn install --cwd api --frozen-lockfile --ignore-optional
+RUN yarn --frozen-lockfile --ignore-optional
 
 
 # --- START: build stage ---
 FROM dev-deps as build
 WORKDIR /app
 
-COPY api/nest-cli.json api/tsconfig.build.json api/tsconfig.json seeds /app/
-COPY api/src /app/src/
+COPY nest-cli.json tsconfig.build.json tsconfig.json seeds /app/
+COPY src /app/src/
 
-RUN yarn --cwd api build
+RUN yarn build
 
 
 # --- START: prod stage
@@ -45,6 +45,3 @@ USER node
 
 COPY --chown=node:node --from=prod-deps /app/node_modules /app/node_modules
 COPY --chown=node:node --from=build /app/dist /app/dist
-
-EXPOSE 3000
-CMD [ "node", "dist/main.js" ]
