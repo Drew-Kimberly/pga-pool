@@ -1,0 +1,35 @@
+import { DataSourceOptions } from 'typeorm';
+import { PostgresConnectionCredentialsOptions } from 'typeorm/driver/postgres/PostgresConnectionCredentialsOptions';
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
+
+import { IDatabaseConfig, InjectDatabaseConfig } from './database-config';
+
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+
+export type CredentialConnectionOptions =
+  | { replication: PostgresConnectionOptions['replication'] }
+  | Partial<PostgresConnectionCredentialsOptions>;
+
+export class TypeOrmOptionsFactory {
+  constructor(
+    @InjectDatabaseConfig()
+    private readonly databaseConfig: IDatabaseConfig
+  ) {}
+
+  createTypeOrmOptions(entities: DataSourceOptions['entities']): TypeOrmModuleOptions {
+    return {
+      type: 'postgres',
+      synchronize: false,
+      cache: false,
+      logging: this.databaseConfig.ENABLE_SQL_DEBUG_LOG,
+      autoLoadEntities: true,
+      entities,
+      host: this.databaseConfig.POSTGRES_HOST,
+      port: this.databaseConfig.POSTGRES_PORT,
+      username: this.databaseConfig.POSTGRES_USER,
+      password: this.databaseConfig.POSTGRES_PASSWORD,
+      database: this.databaseConfig.POSTGRES_DB,
+      ssl: this.databaseConfig.POSTGRES_ENABLE_SSL,
+    };
+  }
+}
