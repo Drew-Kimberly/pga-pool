@@ -17,6 +17,7 @@ jobs:
       changed-files: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
       client-changed: ${{ steps.client-changed.outputs.any_modified }}
       api-changed: ${{ steps.api-changed.outputs.any_modified }}
+      api-oas-changed: ${{ steps.api-oas-changed.outputs.any_modified }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -43,6 +44,13 @@ jobs:
           files: |
             api/**
             .github/**
+      - name: Check if `api/openapi.yaml` has changed
+        uses: tj-actions/changed-files@v35.4.0
+        id: api-oas-changed
+        with:
+          files: |
+            api/openapi.yaml
+            api/sdk/**
   
   client-install-dependencies:
     name: (client) Install Dependencies
@@ -161,3 +169,48 @@ jobs:
           context: ./api
           file: ./api/Dockerfile
           push: false
+
+  api-generate-sdk:
+    name: (api) Generate SDK
+    needs:
+      - get-changed-files
+      - api-lint-and-validate
+      - api-test
+      - api-build
+    if: |
+      always() && 
+      !failure() &&
+      needs.get-changed-files.outputs.api-oas-changed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup Node with Yarn Dependencies
+        uses: ./.github/actions/setup-node-with-dependencies/
+        with:
+          cwd: api
+      - name: Setup NodeJS for Publishing
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Generate SDK
+        working-directory: api
+        run: yarn sdk:generate
+      - name: Compile SDK
+        working-directory: api/sdk
+        run: yarn install && yarn compile
+      - name: Create new SDK version
+        id: sdk-version
+        working-directory: api/sdk
+        run: echo "version=0.0.1-$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_OUTPUT
+      - name: Publish to NPM
+        shell: bash
+        working-directory: api/sdk
+        run: $GITHUB_WORKSPACE/.github/scripts/publish-npm.sh ${{ steps.sdk-version.outputs.version }} ${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

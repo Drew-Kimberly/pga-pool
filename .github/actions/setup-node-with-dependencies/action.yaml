@@ -20,13 +20,17 @@ runs:
       uses: actions/setup-node@v3
       with:
         node-version: '18.13.0'
+    - name: Get yarn.lock path
+      id: yarn-lockfile-path
+      shell: bash
+      run: echo "path=${{ inputs.cwd }}/yarn.lock" >> $GITHUB_OUTPUT
     - name: Dependency Cache
       id: dependency-cache
       uses: actions/cache@v3
       with:
         path: '${{ inputs.cwd }}/node_modules'
         # Hard-coded NodeJS version must manually be kept in-sync with setup-node.node-version as setup-node action does not output the version.
-        key: yarn-18.13.0-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+        key: yarn-18.13.0-${{ runner.os }}-${{ hashFiles(steps.yarn-lockfile-path.outputs.path) }}
     - name: Install Dependencies
       if: ${{ inputs.force-install == 'true' || steps.dependency-cache.outputs.cache-hit != 'true' }}
       shell: bash
