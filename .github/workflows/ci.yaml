@@ -17,7 +17,6 @@ jobs:
       changed-files: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
       client-changed: ${{ steps.client-changed.outputs.any_modified }}
       api-changed: ${{ steps.api-changed.outputs.any_modified }}
-      ingestion-changed: ${{ steps.ingestion-changed.outputs.any_modified }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -43,16 +42,6 @@ jobs:
         with:
           files: |
             api/**
-            Dockerfile.api
-            seeds/**
-            .github/**
-            .dockerignore
-      - name: Check if `ingestion` has changed
-        uses: tj-actions/changed-files@v35.4.0
-        id: ingestion-changed
-        with:
-          files: |
-            ingestion/**
             .github/**
   
   client-install-dependencies:
@@ -169,6 +158,6 @@ jobs:
       - name: Docker build
         uses: docker/build-push-action@v3.2.0
         with:
-          context: .
-          file: ./Dockerfile.api
+          context: ./api
+          file: ./api/Dockerfile
           push: false
