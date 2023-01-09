@@ -1,3 +1,5 @@
+import path from 'path';
+
 import { DataSourceOptions } from 'typeorm';
 import { PostgresConnectionCredentialsOptions } from 'typeorm/driver/postgres/PostgresConnectionCredentialsOptions';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
@@ -24,6 +26,9 @@ export class TypeOrmOptionsFactory {
       logging: this.databaseConfig.ENABLE_SQL_DEBUG_LOG,
       autoLoadEntities: true,
       entities,
+      migrationsRun: this.databaseConfig.POSTGRES_ENABLE_SCHEMA_MIGRATION,
+      migrations: [path.resolve(__dirname, 'migrations', '*{.ts,.js}')],
+      migrationsTableName: 'typeorm_migrations',
       host: this.databaseConfig.POSTGRES_HOST,
       port: this.databaseConfig.POSTGRES_PORT,
       username: this.databaseConfig.POSTGRES_USER,
