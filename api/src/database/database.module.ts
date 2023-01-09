@@ -4,6 +4,7 @@ import { DATABASE_CONFIG, databaseConfigProvider, IDatabaseConfig } from './data
 import { TypeOrmOptionsFactory } from './typeorm-options-factory.service';
 
 import { DynamicModule, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({})
@@ -13,6 +14,7 @@ export class DatabaseModule {
       module: DatabaseModule,
       global: true,
       imports: [
+        ConfigModule.forRoot(),
         TypeOrmModule.forRootAsync({
           inject: [DATABASE_CONFIG],
           useFactory: (dbConfig: IDatabaseConfig) =>

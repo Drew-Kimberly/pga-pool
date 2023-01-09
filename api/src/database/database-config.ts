@@ -9,6 +9,7 @@ export interface IDatabaseConfig {
   POSTGRES_USER: string;
   POSTGRES_PASSWORD: string;
   POSTGRES_DB: string;
+  POSTGRES_ENABLE_SCHEMA_MIGRATION: boolean;
   POSTGRES_ENABLE_SSL: boolean;
   ENABLE_SQL_DEBUG_LOG?: boolean;
 }
@@ -28,7 +29,8 @@ export const databaseConfigProvider: FactoryProvider<IDatabaseConfig> = {
       POSTGRES_USER: get<string>('POSTGRES_USER'),
       POSTGRES_PASSWORD: get<string>('POSTGRES_PASSWORD'),
       POSTGRES_PORT: Number(get<string>('POSTGRES_PORT')),
-      POSTGRES_ENABLE_SSL: config.get('POSTGRES_ENABLE_SSL') === 'false',
+      POSTGRES_ENABLE_SCHEMA_MIGRATION: get<string>('POSTGRES_ENABLE_SCHEMA_MIGRATION') === 'true',
+      POSTGRES_ENABLE_SSL: config.get('POSTGRES_ENABLE_SSL') !== 'false',
       ENABLE_SQL_DEBUG_LOG: config.get<string>('ENABLE_SQL_DEBUG_LOG') === 'true',
     };
   },
