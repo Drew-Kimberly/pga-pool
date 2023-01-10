@@ -24,7 +24,6 @@ export class TypeOrmOptionsFactory {
       synchronize: false,
       cache: false,
       logging: this.databaseConfig.ENABLE_SQL_DEBUG_LOG,
-      autoLoadEntities: true,
       entities,
       migrationsRun: this.databaseConfig.POSTGRES_ENABLE_SCHEMA_MIGRATION,
       migrations: [path.resolve(__dirname, 'migrations', '*{.ts,.js}')],

@@ -1,4 +1,4 @@
-import { createConfigGetter } from 'src/config';
+import { createConfigGetter } from '../config';
 
 import { FactoryProvider, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';

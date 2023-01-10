@@ -1,4 +1,4 @@
-import { SeedDataModule } from 'src/seed-data/lib/seed-data.module';
+import { SeedDataModule } from '../../seed-data/lib/seed-data.module';
 
 import { UserService } from './user.service';
 
