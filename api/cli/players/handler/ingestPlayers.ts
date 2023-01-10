@@ -5,6 +5,8 @@ import { PgaPoolCliModule } from '../../cli.module';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
+const BATCH_SIZE = 25;
+
 export async function ingestPlayers(fromYear: string) {
   const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule);
   const pgaTourApi = ctx.get(PgaTourApiService);
@@ -21,11 +23,17 @@ export async function ingestPlayers(fromYear: string) {
     `Ingesting ${filteredTourPlayers.length} of ${tourPlayers.length} players filtered on played since year ${fromYear}`
   );
 
-  for (const player of filteredTourPlayers) {
-    await pgaPlayerService.upsert({
-      id: player.pid,
-      name: `${player.nameF} ${player.nameL}`,
-    });
+  // @note - idempotent operation here so not worried about a DB tx
+  for (let i = 0; i < filteredTourPlayers.length; i += BATCH_SIZE) {
+    const batch = filteredTourPlayers.slice(i, i + BATCH_SIZE);
+    await Promise.all(
+      batch.map((player) =>
+        pgaPlayerService.upsert({
+          id: player.pid,
+          name: `${player.nameF} ${player.nameL}`,
+        })
+      )
+    );
   }
 
   await ctx.close();
