@@ -1,7 +1,8 @@
 import path from 'path';
 
-import { PgaPlayer } from 'src/pga-player/lib/pga-player.entity';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
+
+import { PgaPlayer } from '../../../pga-player/lib/pga-player.entity';
 
 export = {
   type: 'postgres',
