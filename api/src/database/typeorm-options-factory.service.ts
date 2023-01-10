@@ -1,4 +1,5 @@
 import path from 'path';
+import { TlsOptions } from 'tls';
 
 import { DataSourceOptions } from 'typeorm';
 import { PostgresConnectionCredentialsOptions } from 'typeorm/driver/postgres/PostgresConnectionCredentialsOptions';
@@ -33,7 +34,11 @@ export class TypeOrmOptionsFactory {
       username: this.databaseConfig.POSTGRES_USER,
       password: this.databaseConfig.POSTGRES_PASSWORD,
       database: this.databaseConfig.POSTGRES_DB,
-      ssl: this.databaseConfig.POSTGRES_ENABLE_SSL,
+      ssl: this.databaseConfig.POSTGRES_ENABLE_SSL
+        ? ({
+            checkServerIdentity: () => undefined,
+          } as TlsOptions)
+        : false,
     };
   }
 }
