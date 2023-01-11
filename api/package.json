@@ -17,7 +17,8 @@
     "typeorm": "ts-node -r tsconfig-paths/register tools/typeorm.ts",
     "pgapool": "ts-node cli/index.ts",
     "db:migrations:generate": "yarn typeorm migration:generate --pretty",
-    "sdk:generate": "yarn openapi-generator-cli generate -i openapi.yaml -g typescript-axios -o sdk/src -p modelPropertyNaming=original --remove-operation-id-prefix -p useSingleRequestParameter=true"
+    "sdk:generate": "yarn openapi-generator-cli generate -i openapi.yaml -g typescript-axios -o sdk/src -p modelPropertyNaming=original --remove-operation-id-prefix -p useSingleRequestParameter=true",
+    "seeds:sort-player-aliases": "ts-node -r tsconfig-paths/register tools/sortPlayerAliases.ts"
   },
   "dependencies": {
     "@nestjs/axios": "1.0.1",
