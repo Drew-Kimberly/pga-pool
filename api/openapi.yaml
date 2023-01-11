@@ -76,7 +76,8 @@ components:
       properties:
         id:
           type: string
-          example: '016'
+          example: '016-2023'
+          description: ID in the format of "{tournamentId}-{year}"
         name:
           type: string
           example: 'Sentry Tournament of Champions'
