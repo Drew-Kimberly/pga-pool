@@ -1,6 +1,6 @@
 import { DataSourceOptions } from 'typeorm';
 
-import { DATABASE_CONFIG, databaseConfigProvider, IDatabaseConfig } from './database-config';
+import { DATABASE_CONFIG, databaseConfigProvider, IDatabaseConfig } from './database.config';
 import { TypeOrmOptionsFactory } from './typeorm-options-factory.service';
 
 import { DynamicModule, Module } from '@nestjs/common';
