@@ -5,7 +5,7 @@ import { DataSourceOptions } from 'typeorm';
 import { PostgresConnectionCredentialsOptions } from 'typeorm/driver/postgres/PostgresConnectionCredentialsOptions';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
-import { IDatabaseConfig, InjectDatabaseConfig } from './database-config';
+import { IDatabaseConfig, InjectDatabaseConfig } from './database.config';
 
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
