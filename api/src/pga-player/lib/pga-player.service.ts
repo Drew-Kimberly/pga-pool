@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 
 import { PgaPlayer } from './pga-player.entity';
 import { UpsertPgaPlayer } from './pga-player.interface';
@@ -13,8 +13,10 @@ export class PgaPlayerService {
     private readonly pgaPlayerRepo: Repository<PgaPlayer>
   ) {}
 
-  list(): Promise<PgaPlayer[]> {
-    return this.pgaPlayerRepo.find();
+  list(opts: { filter?: { name?: string } } = {}): Promise<PgaPlayer[]> {
+    return this.pgaPlayerRepo.find({
+      where: opts.filter ? { name: Like(`%${opts.filter.name}%` ?? '') } : {},
+    });
   }
 
   get(pgaPlayerId: string | number): Promise<PgaPlayer | null> {

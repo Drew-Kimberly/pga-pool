@@ -24,8 +24,12 @@ export class SeedDataService implements OnModuleInit {
     return this.data[key] as T;
   }
 
+  getSeedDirPath() {
+    return path.resolve(__dirname, '../../..', 'seeds');
+  }
+
   private loadSeedData() {
-    const seedDirPath = path.resolve(__dirname, '../../..', 'seeds');
+    const seedDirPath = this.getSeedDirPath();
 
     let seedFiles: string[];
     try {
@@ -44,7 +48,7 @@ export class SeedDataService implements OnModuleInit {
     for (const seedFile of seedFiles) {
       let seedData: object;
       try {
-        seedData = fs.readFileSync(`${seedDirPath}/${seedFile}`);
+        seedData = JSON.parse(fs.readFileSync(`${seedDirPath}/${seedFile}`).toString());
       } catch (e) {
         this.logger.error(`Failed reading seed data from file: ${seedFile}`);
         throw e;
