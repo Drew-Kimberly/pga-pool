@@ -1,0 +1,415 @@
+{
+    "1": {
+        "27644": {
+            "name": "Brian Harman"
+        },
+        "32839": {
+            "name": "Hideki Matsuyama"
+        },
+        "33141": {
+            "name": "Keegan Bradley"
+        },
+        "34046": {
+            "name": "Jordan Spieth"
+        },
+        "34098": {
+            "name": "Russell Henley"
+        },
+        "35532": {
+            "name": "Tom Hoge"
+        },
+        "39971": {
+            "name": "Sungjae Im"
+        },
+        "39997": {
+            "name": "Corey Conners"
+        },
+        "55182": {
+            "name": "Tom Kim"
+        },
+        "55789": {
+            "name": "Taylor Montgomery"
+        }
+    },
+    "2": {
+        "23108": {
+            "name": "Matt Kuchar"
+        },
+        "24502": {
+            "name": "Adam Scott"
+        },
+        "31323": {
+            "name": "Gary Woodland"
+        },
+        "31646": {
+            "name": "Emiliano Grillo"
+        },
+        "32791": {
+            "name": "K.H. Lee"
+        },
+        "34099": {
+            "name": "Harris English"
+        },
+        "34256": {
+            "name": "Andrew Putnam"
+        },
+        "37455": {
+            "name": "Si Woo Kim"
+        },
+        "39324": {
+            "name": "J.J. Spaun"
+        },
+        "39546": {
+            "name": "Keith Mitchell"
+        },
+        "45157": {
+            "name": "Cam Davis"
+        },
+        "45522": {
+            "name": "Christiaan Bezuidenhout"
+        },
+        "46340": {
+            "name": "Alex Smalley"
+        },
+        "46442": {
+            "name": "Maverick McNealy"
+        },
+        "47993": {
+            "name": "Denny McCarthy"
+        },
+        "48117": {
+            "name": "Kurt Kitayama"
+        }
+    },
+    "3": {
+        "19803": {
+            "name": "Ryan Armour"
+        },
+        "23320": {
+            "name": "Ryan Palmer"
+        },
+        "25900": {
+            "name": "Lucas Glover"
+        },
+        "27214": {
+            "name": "Kevin Streelman"
+        },
+        "29221": {
+            "name": "Webb Simpson"
+        },
+        "29518": {
+            "name": "Brendan Steele"
+        },
+        "30926": {
+            "name": "Chris Kirk"
+        },
+        "30927": {
+            "name": "Brendon Todd"
+        },
+        "32448": {
+            "name": "James Hahn"
+        },
+        "32640": {
+            "name": "Troy Merritt"
+        },
+        "32757": {
+            "name": "Patton Kizzire"
+        },
+        "33122": {
+            "name": "Russell Knox"
+        },
+        "35506": {
+            "name": "Mackenzie Hughes"
+        },
+        "36326": {
+            "name": "David Lipsky"
+        },
+        "36799": {
+            "name": "Stephan Jaeger"
+        },
+        "36801": {
+            "name": "Mark Hubbard"
+        },
+        "37275": {
+            "name": "Sam Ryder"
+        },
+        "40115": {
+            "name": "Adam Svensson"
+        },
+        "46414": {
+            "name": "Aaron Rai"
+        },
+        "46441": {
+            "name": "Robby Shelton"
+        },
+        "47988": {
+            "name": "Nick Hardy"
+        },
+        "48632": {
+            "name": "Yuto Katsuragawa"
+        },
+        "49771": {
+            "name": "J.T. Poston"
+        },
+        "50188": {
+            "name": "S.H. Kim"
+        },
+        "50493": {
+            "name": "Justin Suh"
+        },
+        "51890": {
+            "name": "Greyson Sigg"
+        },
+        "52374": {
+            "name": "Brandon Wu"
+        },
+        "54591": {
+            "name": "Ben Griffin"
+        },
+        "55708": {
+            "name": "Hayden Buckley"
+        },
+        "56762": {
+            "name": "Will Gordon"
+        },
+        "58168": {
+            "name": "Davis Thompson"
+        }
+    },
+    "4": {
+        "8075": {
+            "name": "Jerry Kelly"
+        },
+        "20229": {
+            "name": "Stewart Cink"
+        },
+        "22371": {
+            "name": "Aaron Baddeley"
+        },
+        "22986": {
+            "name": "Søren Kjeldsen"
+        },
+        "23621": {
+            "name": "Rory Sabbatini"
+        },
+        "24024": {
+            "name": "Zach Johnson"
+        },
+        "24449": {
+            "name": "Parker McLachlin"
+        },
+        "25493": {
+            "name": "Nick Taylor"
+        },
+        "25632": {
+            "name": "Jimmy Walker"
+        },
+        "25818": {
+            "name": "Scott Piercy"
+        },
+        "26476": {
+            "name": "Chez Reavie"
+        },
+        "26596": {
+            "name": "Ryan Moore"
+        },
+        "27554": {
+            "name": "Scott Harrington"
+        },
+        "28420": {
+            "name": "Ryan Brehm"
+        },
+        "28593": {
+            "name": "Jesse Mueller"
+        },
+        "28775": {
+            "name": "Nate Lashley"
+        },
+        "29535": {
+            "name": "Brice Garnett"
+        },
+        "29926": {
+            "name": "Danny Lee"
+        },
+        "30110": {
+            "name": "Kyle Stanley"
+        },
+        "31557": {
+            "name": "Jim Herman"
+        },
+        "31560": {
+            "name": "Brian Stuard"
+        },
+        "31577": {
+            "name": "Tano Goya"
+        },
+        "32150": {
+            "name": "Michael Thompson"
+        },
+        "32333": {
+            "name": "Kevin Tway"
+        },
+        "32662": {
+            "name": "Michael Gligic"
+        },
+        "33408": {
+            "name": "Tyson Alexander"
+        },
+        "33413": {
+            "name": "Ben Martin"
+        },
+        "33597": {
+            "name": "Harry Higgs"
+        },
+        "33948": {
+            "name": "Byeong Hun An"
+        },
+        "34174": {
+            "name": "John Huh"
+        },
+        "34255": {
+            "name": "Joseph Bramlett"
+        },
+        "34374": {
+            "name": "Erik Barnes"
+        },
+        "34409": {
+            "name": "David Lingmerth"
+        },
+        "34431": {
+            "name": "Robert Streb"
+        },
+        "34466": {
+            "name": "Peter Malnati"
+        },
+        "34563": {
+            "name": "Chesson Hadley"
+        },
+        "34610": {
+            "name": "Matthias Schwab"
+        },
+        "35449": {
+            "name": "Adam Long"
+        },
+        "35778": {
+            "name": "Kazuki Higa"
+        },
+        "35879": {
+            "name": "Kelly Kraft"
+        },
+        "35901": {
+            "name": "Paul Haley II"
+        },
+        "36724": {
+            "name": "Augusto Núñez"
+        },
+        "37338": {
+            "name": "Zecheng Dou"
+        },
+        "39067": {
+            "name": "MJ Daffue"
+        },
+        "39335": {
+            "name": "Kevin Roy"
+        },
+        "39975": {
+            "name": "Michael Kim"
+        },
+        "40058": {
+            "name": "Zac Blair"
+        },
+        "45242": {
+            "name": "Kevin Yu"
+        },
+        "45609": {
+            "name": "Tyler Duncan"
+        },
+        "46435": {
+            "name": "Austin Cook"
+        },
+        "47079": {
+            "name": "Harrison Endycott"
+        },
+        "47128": {
+            "name": "Richy Werenski"
+        },
+        "47347": {
+            "name": "Adam Schenk"
+        },
+        "47591": {
+            "name": "Eric Cole"
+        },
+        "47983": {
+            "name": "Chad Ramey"
+        },
+        "47987": {
+            "name": "Cole Hammer"
+        },
+        "48119": {
+            "name": "Ben Taylor"
+        },
+        "48867": {
+            "name": "Matti Schmid"
+        },
+        "49228": {
+            "name": "Keita Nakajima"
+        },
+        "49298": {
+            "name": "Kramer Hickok"
+        },
+        "49303": {
+            "name": "Anders Albertson"
+        },
+        "49453": {
+            "name": "Trevor Cone"
+        },
+        "50095": {
+            "name": "Austin Smotherman"
+        },
+        "51070": {
+            "name": "Vincent Norrman"
+        },
+        "51349": {
+            "name": "Nico Echavarria"
+        },
+        "51414": {
+            "name": "Brent Grant"
+        },
+        "51491": {
+            "name": "Brandon Matthews"
+        },
+        "51950": {
+            "name": "Max McGreevy"
+        },
+        "51997": {
+            "name": "Andrew Novak"
+        },
+        "52411": {
+            "name": "Kyle Westmoreland"
+        },
+        "52513": {
+            "name": "Carson Young"
+        },
+        "53165": {
+            "name": "Doc Redman"
+        },
+        "55454": {
+            "name": "Carl Yuan"
+        },
+        "55623": {
+            "name": "Kaito Onishi"
+        },
+        "55893": {
+            "name": "Sam Stevens"
+        },
+        "57362": {
+            "name": "Austin Eckroat"
+        },
+        "57975": {
+            "name": "Harry Hall"
+        },
+        "58967": {
+            "name": "Trevor Werbylo"
+        }
+    }
+}

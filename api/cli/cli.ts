@@ -3,6 +3,7 @@ import figlet from 'figlet';
 
 import { pgaTournamentLeaderboardCommand } from './pga-tournament-leaderboard';
 import { playersCommand } from './players';
+import { seedsCommand } from './seeds';
 import { tournamentsCommand } from './tournaments';
 
 export interface PgaPoolCli extends Command {
@@ -15,6 +16,7 @@ export function createCli(): PgaPoolCli {
   cli
     .description('A CLI exposing development/operational tasks for PGA Pool API')
     .addHelpText('before', figlet.textSync('PGA Pool', { horizontalLayout: 'fitted' }))
+    .addCommand(seedsCommand)
     .addCommand(playersCommand)
     .addCommand(tournamentsCommand)
     .addCommand(pgaTournamentLeaderboardCommand);
