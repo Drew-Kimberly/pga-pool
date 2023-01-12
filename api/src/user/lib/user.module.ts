@@ -1,11 +1,11 @@
-import { SeedDataModule } from '../../seed-data/lib/seed-data.module';
-
+import { User } from './user.entity';
 import { UserService } from './user.service';
 
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [SeedDataModule],
+  imports: [TypeOrmModule.forFeature([User])],
   providers: [UserService],
   exports: [UserService],
 })

@@ -12,18 +12,11 @@ servers:
   - url: 'http://localhost:3000'
     description: Local Dev URL
 paths:
-  /pool/{year}/tournaments:
-    parameters:
-      - name: year
-        in: path
-        required: true
-        schema:
-          type: string
-          example: '2023'
+  /pool/tournaments:
     get:
       summary: List pool tournaments
-      description: Returns all pool tournaments for the given year
-      operationId: getPoolTournamentsForYear
+      description: Returns all pool tournaments
+      operationId: getPoolTournaments
       responses:
         '200':
           $ref: '#/components/responses/PoolTournamentsResponse'
@@ -53,8 +46,7 @@ components:
       properties:
         id:
           type: string
-          example: '2023-016'
-          description: ID in the format of {year}-{pga_tournament_id}
+          format: uuid
         active:
           type: boolean
           description: Whether the pool tournament is currently live
@@ -82,11 +74,10 @@ components:
           type: string
           example: 'Sentry Tournament of Champions'
         date:
-          $ref: '#components/schemas/TournamentDate'
+          $ref: '#/components/schemas/TournamentDate'
       required:
         - id
         - name
-        - year
         - date
     PgaPlayer:
       description: Defines a PGA player (i.e. golfer)
@@ -94,8 +85,8 @@ components:
       additionalProperties: false
       properties:
         id:
-          type: string
-          example: '46046'
+          type: number
+          example: 46046
         name:
           type: string
           example: 'Tiger Woods'
@@ -114,11 +105,13 @@ components:
           type: boolean
         status:
           type: string
+          enum: ['active', 'wd']
           example: 'active'
         is_round_complete:
           type: boolean
         current_round:
           type: number
+          nullable: true
           example: 2
         current_hole:
           type: number
@@ -128,15 +121,18 @@ components:
           example: 1
         tee_time:
           type: string
-          format: date-time
+          nullable: true
+          example: '7:00am'
         score_total:
           type: number
           example: -3
         score_thru:
           type: number
+          nullable: true
           example: 9
         current_position:
           type: string
+          nullable: true
           example: 'T3'
         withdrawn:
           type: boolean
@@ -166,8 +162,7 @@ components:
       properties:
         id:
           type: string
-          example: 'drewk-2023-016'
-          description: ID in the format of {user_id}-{pool_tournament_id}
+          format: uuid
         score:
           type: number
           example: -21
@@ -206,14 +201,14 @@ components:
       additionalProperties: false
       properties:
         year:
-          type: string
-          example: '2023'
+          type: number
+          example: 2023
         start:
           type: string
-          format: date-time
+          format: date
         end:
           type: string
-          format: date-time
+          format: date
       required:
         - year
         - start
