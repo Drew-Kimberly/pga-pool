@@ -3,6 +3,7 @@ import { lastValueFrom } from 'rxjs';
 import {
   PgaApiPlayer,
   PgaApiPlayersResponse,
+  PgaApiTournamentLeaderboardResponse,
   PgaApiTournamentScheduleResponse,
 } from './pga-tour-api.interface';
 import { UserTrackingIdFactory } from './user-tracking-id-factory.service';
@@ -28,10 +29,13 @@ export class PgaTourApiService {
     return lastValueFrom(response$).then((res) => res.data);
   }
 
-  async getTournamentLeaderboard(year: string | number, tournamentId: string) {
+  async getTournamentLeaderboard(
+    year: string | number,
+    tournamentId: string
+  ): Promise<PgaApiTournamentLeaderboardResponse> {
     const url = `https://lbdata.pgatour.com/${year}/r/${tournamentId}/leaderboard.json`;
     const params = await this.userTrackingIdFactory.create();
-    const response$ = this.httpClient.get(url, { params });
+    const response$ = this.httpClient.get<PgaApiTournamentLeaderboardResponse>(url, { params });
     return lastValueFrom(response$).then((res) => res.data);
   }
 }

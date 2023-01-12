@@ -1,34 +1,28 @@
-import { SeedDataService } from '../../seed-data/lib/seed-data.service';
+import { Repository } from 'typeorm';
 
-import { User } from './user.interface';
+import { User } from './user.entity';
 
 import { Injectable, Logger, LoggerService, Optional } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly seedData: SeedDataService,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
     @Optional()
     private readonly logger: LoggerService = new Logger(UserService.name)
   ) {}
 
-  listUsers(): User[] {
-    return Object.entries(this.getSeedUsers()).map(([id, user]) => ({
-      ...user,
-      id,
-    }));
+  list(): Promise<User[]> {
+    return this.userRepo.find();
   }
 
-  getUser(id: string): User | undefined {
-    return this.getSeedUsers()[id];
+  get(id: string): Promise<User | null> {
+    return this.userRepo.findOneBy({ id });
   }
 
-  private getSeedUsers(): Record<string, User> | never {
-    const users = this.seedData.getSeedData<Record<string, User>>('users');
-    if (!users) {
-      throw new Error('No seed user data found!');
-    }
-
-    return users;
+  upsert(user: User): Promise<User> {
+    return this.userRepo.save(user);
   }
 }

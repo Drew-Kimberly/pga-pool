@@ -1,12 +1,10 @@
+import { RegisteredDatabaseModule } from './database/registered-database.module';
 import { HealthApiModule } from './health/api/health.api.module';
-import { PgaPlayer } from './pga-player/lib/pga-player.entity';
-import { PgaTournament } from './pga-tournament/lib/pga-tournament.entity';
-import { UserModule } from './user/lib/user.module';
-import { DatabaseModule } from './database';
+import { PoolTournmentApiModule } from './pool-tournament/api/pool-tournament.api.module';
 
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [DatabaseModule.register([PgaPlayer, PgaTournament]), HealthApiModule, UserModule],
+  imports: [RegisteredDatabaseModule, HealthApiModule, PoolTournmentApiModule],
 })
 export class AppModule {}

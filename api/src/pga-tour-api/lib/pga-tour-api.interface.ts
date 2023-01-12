@@ -55,3 +55,30 @@ export interface PgaApiTournamentScheduleResponse {
   };
   years: PgaApiTournamentScheduleYear[];
 }
+
+export interface PgaApiTournamentLeaderboardRow {
+  isActive: boolean;
+  status: 'active' | 'wd';
+  roundComplete: boolean;
+  playerId: string;
+  groupId: string;
+  tournamentRoundId: string;
+  playerRoundId: string;
+  currentHoleId: string;
+  startingHoleId: string;
+  positionCurrent: string;
+  total: string;
+  thru: string;
+  teeTime: string | null;
+  /** @note score of current round. */
+  round: string;
+}
+
+export interface PgaApiTournamentLeaderboardResponse {
+  format: Exclude<PgaApiTourTournament['format'], ''>;
+  totalRounds: number;
+  year: string;
+  /** @example "2023-01-09T03:54:26.314Z" */
+  generated_time: string;
+  rows: PgaApiTournamentLeaderboardRow[];
+}

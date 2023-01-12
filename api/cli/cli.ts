@@ -5,6 +5,7 @@ import { pgaTournamentLeaderboardCommand } from './pga-tournament-leaderboard';
 import { playersCommand } from './players';
 import { seedsCommand } from './seeds';
 import { tournamentsCommand } from './tournaments';
+import { usersCommand } from './users';
 
 export interface PgaPoolCli extends Command {
   run: (args: string[]) => Promise<void>;
@@ -19,7 +20,8 @@ export function createCli(): PgaPoolCli {
     .addCommand(seedsCommand)
     .addCommand(playersCommand)
     .addCommand(tournamentsCommand)
-    .addCommand(pgaTournamentLeaderboardCommand);
+    .addCommand(pgaTournamentLeaderboardCommand)
+    .addCommand(usersCommand);
 
   cli.run = async function (args: string[]) {
     if (args.length <= 2) {
