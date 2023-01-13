@@ -17,6 +17,8 @@
     "typeorm": "ts-node -r tsconfig-paths/register tools/typeorm.ts",
     "pgapool": "ts-node cli/index.ts",
     "db:migrations:generate": "yarn typeorm migration:generate --pretty",
+    "db:migrations:run": "yarn typeorm migration:run",
+    "db:migrations:revert": "yarn typeorm migration:revert",
     "sdk:generate": "yarn openapi-generator-cli generate -i openapi.yaml -g typescript-axios -o sdk/src -p modelPropertyNaming=original --remove-operation-id-prefix -p useSingleRequestParameter=true"
   },
   "dependencies": {

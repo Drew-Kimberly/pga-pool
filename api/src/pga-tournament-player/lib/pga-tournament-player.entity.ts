@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { PgaPlayer } from '../../pga-player/lib/pga-player.entity';
 import { PgaTournament } from '../../pga-tournament/lib/pga-tournament.entity';
@@ -7,7 +7,8 @@ import { PlayerStatus } from './pga-tournament-player.interface';
 
 @Entity('pga_tournament_player')
 export class PgaTournamentPlayer {
-  @PrimaryGeneratedColumn('uuid')
+  /** @note "{playerId}-{tournamentId} format" */
+  @PrimaryColumn({ generated: false })
   id: string;
 
   @Column({ type: 'boolean' })
