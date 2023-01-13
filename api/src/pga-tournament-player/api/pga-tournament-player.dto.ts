@@ -3,6 +3,7 @@ import { PgaTournamentDto } from '../../pga-tournament/api/pga-tournament.dto';
 import { EmptyValue, PlayerStatus } from '../lib/pga-tournament-player.interface';
 
 export class PgaTournamentPlayerDto {
+  /** @note "{playerId}-{tournamentId} format" */
   id: string;
   active: boolean;
   status: PlayerStatus;

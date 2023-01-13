@@ -100,7 +100,8 @@ components:
       properties:
         id:
           type: string
-          format: uuid
+          example: '24449-006-2023'
+          description: 'ID in the format of {pgaPlayerId}-{pgaTournamentId}'
         active:
           type: boolean
         status:

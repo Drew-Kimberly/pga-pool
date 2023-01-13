@@ -1,15 +1,12 @@
-import { PgaPlayerModule } from '../../pga-player/lib/pga-player.module';
-import { PgaTourApiModule } from '../../pga-tour-api/lib/pga-tour-api.module';
-import { PgaTournamentModule } from '../../pga-tournament/lib/pga-tournament.module';
-import { SeedDataModule } from '../../seed-data/lib/seed-data.module';
-
+import { PoolTournament } from './pool-tournament.entity';
 import { PoolTournamentService } from './pool-tournament.service';
 
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [SeedDataModule, PgaTourApiModule, PgaPlayerModule, PgaTournamentModule],
+  imports: [TypeOrmModule.forFeature([PoolTournament])],
   providers: [PoolTournamentService],
   exports: [PoolTournamentService],
 })
-export class PoolTournmentModule {}
+export class PoolTournamentModule {}
