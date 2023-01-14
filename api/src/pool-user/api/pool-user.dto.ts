@@ -3,7 +3,7 @@ import { UserDto } from '../../user/api/user.dto';
 
 export class PoolUserDto {
   id: string;
-  score: number;
+  score: number | null;
   user: UserDto;
   picks: PgaTournamentPlayerDto[];
 }

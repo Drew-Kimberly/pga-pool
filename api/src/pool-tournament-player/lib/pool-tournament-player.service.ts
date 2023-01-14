@@ -13,11 +13,12 @@ export class PoolTournamentPlayerService {
     private readonly poolTournamentPlayerRepo: Repository<PoolTournamentPlayer>
   ) {}
 
-  list(filter: PoolTournamentPlayerFilter): Promise<PoolTournamentPlayer[]> {
+  list(filter: PoolTournamentPlayerFilter = {}): Promise<PoolTournamentPlayer[]> {
     const findOptions: FindOptionsWhere<PoolTournamentPlayer> = {
       ...(filter.tier ? { tier: filter.tier } : {}),
-      ...(filter.tournamentId
-        ? { pga_tournament_player: { pga_tournament: { id: filter.tournamentId } } }
+      ...(filter.poolTournamentId ? { pool_tournament: { id: filter.poolTournamentId } } : {}),
+      ...(filter.pgaTournamentId
+        ? { pga_tournament_player: { pga_tournament: { id: filter.pgaTournamentId } } }
         : {}),
       ...(filter.playerId
         ? { pga_tournament_player: { pga_player: { id: filter.playerId } } }
@@ -42,7 +43,10 @@ export class PoolTournamentPlayerService {
     return this.poolTournamentPlayerRepo.findOneBy({ id: poolTournamentPlayerId });
   }
 
-  upsert(poolTournamentPlayer: PoolTournamentPlayer): Promise<PoolTournamentPlayer> {
-    return this.poolTournamentPlayerRepo.save(poolTournamentPlayer);
+  upsert(
+    poolTournamentPlayer: PoolTournamentPlayer,
+    repo: Repository<PoolTournamentPlayer> = this.poolTournamentPlayerRepo
+  ): Promise<PoolTournamentPlayer> {
+    return repo.save(poolTournamentPlayer);
   }
 }
