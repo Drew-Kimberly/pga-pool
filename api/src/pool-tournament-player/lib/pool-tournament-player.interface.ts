@@ -1,5 +1,6 @@
 export interface PoolTournamentPlayerFilter {
-  tournamentId?: string;
+  pgaTournamentId?: string;
+  poolTournamentId?: string;
   playerId?: number;
   year?: number;
   tier?: number;

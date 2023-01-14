@@ -57,8 +57,9 @@ export async function generatePoolTournament(
     }
   }
 
-  const seedFile = `${seedDataService.getSeedDirPath()}/tournament_${year}-${tournamentId}_players.json`;
-  fs.writeFileSync(seedFile, JSON.stringify(seedData, null, 4));
+  const seedDir = `${seedDataService.getSeedDirPath()}/${tournamentId}-${year}`;
+  fs.mkdirSync(seedDir, { recursive: true });
+  fs.writeFileSync(`${seedDir}/field.json`, JSON.stringify(seedData, null, 4));
 
   missingPlayers.forEach(([name, tier]) => logger.error(name + ' ' + tier));
 

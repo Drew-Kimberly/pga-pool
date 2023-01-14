@@ -24,7 +24,7 @@ export class PgaTournamentPlayer {
   current_round: number | null;
 
   @Column({ type: 'int', nullable: true })
-  current_hole: number;
+  current_hole: number | null;
 
   @Column({ type: 'int', default: 1 })
   starting_hole: number;
@@ -33,13 +33,13 @@ export class PgaTournamentPlayer {
   tee_time: string | null;
 
   @Column({ type: 'int', nullable: true })
-  score_total: number;
+  score_total: number | null;
 
   @Column({ type: 'int', nullable: true })
-  score_thru: number;
+  score_thru: number | null;
 
-  @Column({ type: 'int', nullable: true })
-  current_position: number;
+  @Column({ type: 'varchar', length: 16, nullable: true })
+  current_position: string | null;
 
   @JoinColumn({ name: 'pga_player' })
   @ManyToOne(() => PgaPlayer, { eager: true })

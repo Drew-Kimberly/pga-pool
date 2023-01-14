@@ -34,7 +34,10 @@ export class PgaTournamentPlayerService {
     return this.tourneyPlayerRepo.findOneBy({ id: pgaTournamentPlayerId });
   }
 
-  upsert(pgaTournamentPlayer: PgaTournamentPlayer): Promise<PgaTournamentPlayer> {
-    return this.tourneyPlayerRepo.save(pgaTournamentPlayer);
+  upsert(
+    pgaTournamentPlayer: PgaTournamentPlayer,
+    repo: Repository<PgaTournamentPlayer> = this.tourneyPlayerRepo
+  ): Promise<PgaTournamentPlayer> {
+    return repo.save(pgaTournamentPlayer);
   }
 }

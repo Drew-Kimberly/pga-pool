@@ -29,37 +29,49 @@ export class SeedDataService implements OnModuleInit {
   }
 
   private loadSeedData() {
-    const seedDirPath = this.getSeedDirPath();
+    this.loadFromDir(this.getSeedDirPath(), this.data);
+  }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private loadFromDir(dirPath: string, data: Record<string, any>) {
     let seedFiles: string[];
     try {
-      seedFiles = fs.readdirSync(seedDirPath);
+      seedFiles = fs.readdirSync(dirPath);
     } catch (e) {
-      this.logger.error(`Failed reading seed data files from directory: ${seedDirPath}`);
+      this.logger.error(`Failed reading seed data files from directory: ${dirPath}`);
       throw e;
     }
 
     if (seedFiles.length === 0) {
-      throw new Error(`No seed data files found in directory: ${seedDirPath}`);
+      throw new Error(`No seed data files found in directory: ${dirPath}`);
     }
 
-    this.logger.log(`Found ${seedFiles.length} seed data files in directory: ${seedDirPath}`);
-
     for (const seedFile of seedFiles) {
+      const fullPath = `${dirPath}/${seedFile}`;
+      if (fs.lstatSync(fullPath).isDirectory()) {
+        data[seedFile] = {};
+        this.loadFromDir(fullPath, data[seedFile]);
+        continue;
+      }
+
+      if (!seedFile.endsWith('.json')) {
+        continue;
+      }
+
       let seedData: object;
       try {
-        seedData = JSON.parse(fs.readFileSync(`${seedDirPath}/${seedFile}`).toString());
+        seedData = JSON.parse(fs.readFileSync(fullPath).toString());
       } catch (e) {
-        this.logger.error(`Failed reading seed data from file: ${seedFile}`);
+        this.logger.error(`Failed reading seed data from file: ${fullPath}`);
         throw e;
       }
 
       if (!this.isObject(seedData)) {
-        throw new Error(`Unexpected seed data value found at ${seedFile}: ${seedData}`);
+        throw new Error(`Unexpected seed data value found at ${fullPath}: ${seedData}`);
       }
 
       const seedName = this.getSeedName(seedFile);
-      this.data[seedName] = seedData;
+      data[seedName] = seedData;
 
       this.logger.log(`Successfully loaded "${seedName}" seed data`);
     }
