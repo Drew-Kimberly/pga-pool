@@ -6,7 +6,6 @@ updates:
   directory: /
   schedule:
     interval: daily
-    time: "05:00" # 5AM UTC
 
 - package-ecosystem: npm
   directory: /client
@@ -14,5 +13,17 @@ updates:
     - npm
   schedule:
     interval: daily
-    time: "05:00" # 5AM UTC
+  open-pull-requests-limit: 5
+
+- package-ecosystem: docker
+  directory: /api
+  schedule:
+    interval: daily
+
+- package-ecosystem: npm
+  directory: /api
+  registries:
+    - npm
+  schedule:
+    interval: daily
   open-pull-requests-limit: 5
