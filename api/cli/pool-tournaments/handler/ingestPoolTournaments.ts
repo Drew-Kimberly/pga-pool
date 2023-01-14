@@ -74,12 +74,19 @@ export async function ingestPoolTournaments(year?: string, pgaTournamentId?: str
       );
 
       // Create the tournament field
-      const existingPgaTourneyPlayers = await pgaTournamentPlayerService.list({
-        tournamentId: pgaTournament.id,
-      });
-      const existingPoolTourneyPlayers = await poolTournamentPlayerService.list({
-        pgaTournamentId: pgaTournament.id,
-      });
+      const existingPgaTourneyPlayers = await pgaTournamentPlayerService.list(
+        {
+          tournamentId: pgaTournament.id,
+        },
+        txManager.getRepository(PgaTournamentPlayer)
+      );
+      const existingPoolTourneyPlayers = await poolTournamentPlayerService.list(
+        {
+          pgaTournamentId: pgaTournament.id,
+        },
+        txManager.getRepository(PoolTournamentPlayer)
+      );
+
       for (const [playerId, { tier }] of Object.entries(seedTournament.players)) {
         const existingPgaTourneyPlayer = existingPgaTourneyPlayers.find((p) => p.id === playerId);
         const pgaTourneyPlayer = await pgaTournamentPlayerService.upsert(
@@ -122,10 +129,16 @@ export async function ingestPoolTournaments(year?: string, pgaTournamentId?: str
       }
 
       // Ingest pool users / picks
-      const existingPoolUsers = await poolUserService.list({ poolTournamentId: poolTournament.id });
-      const poolTourneyPlayers = await poolTournamentPlayerService.list({
-        poolTournamentId: poolTournament.id,
-      });
+      const existingPoolUsers = await poolUserService.list(
+        { poolTournamentId: poolTournament.id },
+        txManager.getRepository(PoolUser)
+      );
+      const poolTourneyPlayers = await poolTournamentPlayerService.list(
+        {
+          poolTournamentId: poolTournament.id,
+        },
+        txManager.getRepository(PoolTournamentPlayer)
+      );
       for (const [userId, picks] of Object.entries(seedTournament.picks)) {
         const existingPoolUser = existingPoolUsers.find((u) => u.user.id === userId);
         const poolUser = await poolUserService.upsert(
@@ -139,7 +152,10 @@ export async function ingestPoolTournaments(year?: string, pgaTournamentId?: str
           txManager.getRepository(PoolUser)
         );
 
-        const existingPicks = await poolUserPickService.list({ poolUserId: poolUser.id });
+        const existingPicks = await poolUserPickService.list(
+          { poolUserId: poolUser.id },
+          txManager.getRepository(PoolUserPick)
+        );
         for (const pick of picks) {
           const existingPick = existingPicks.find(
             (p) => p.pool_tournament_player.pga_tournament_player.pga_player.id === pick
