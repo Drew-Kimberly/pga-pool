@@ -16,6 +16,7 @@
     "test": "jest --passWithNoTests",
     "typeorm": "ts-node -r tsconfig-paths/register tools/typeorm.ts",
     "pgapool": "ts-node cli/index.ts",
+    "cron:tournament-score-updater": "ts-node src/cron/jobs/tournament-score-updater.ts",
     "db:migrations:generate": "yarn typeorm migration:generate --pretty",
     "db:migrations:run": "yarn typeorm migration:run",
     "db:migrations:revert": "yarn typeorm migration:revert",
