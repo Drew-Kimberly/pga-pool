@@ -42,8 +42,11 @@ export class PoolUserPickService {
     });
   }
 
-  get(poolUserPickId: string): Promise<PoolUserPick | null> {
-    return this.poolUserPickRepo.findOneBy({ id: poolUserPickId });
+  get(
+    poolUserPickId: string,
+    repo: Repository<PoolUserPick> = this.poolUserPickRepo
+  ): Promise<PoolUserPick | null> {
+    return repo.findOneBy({ id: poolUserPickId });
   }
 
   upsert(
