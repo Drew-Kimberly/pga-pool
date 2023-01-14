@@ -13,14 +13,17 @@ export class PoolTournamentService {
     private readonly poolTournamentRepo: Repository<PoolTournament>
   ) {}
 
-  list(filter: PoolTournamentFilter = {}): Promise<PoolTournament[]> {
+  list(
+    filter: PoolTournamentFilter = {},
+    repo: Repository<PoolTournament> = this.poolTournamentRepo
+  ): Promise<PoolTournament[]> {
     const findOptions: FindOptionsWhere<PoolTournament> = {
       ...(filter.pgaTournamentId ? { pga_tournament: { id: filter.pgaTournamentId } } : {}),
       ...(filter.year ? { pga_tournament: { year: filter.year } } : {}),
       ...(typeof filter.active === 'boolean' ? { active: filter.active } : {}),
     };
 
-    return this.poolTournamentRepo.find({
+    return repo.find({
       where: findOptions,
       relations: [
         'pga_tournament',
@@ -37,8 +40,19 @@ export class PoolTournamentService {
     });
   }
 
-  get(poolTournamentId: string): Promise<PoolTournament | null> {
-    return this.poolTournamentRepo.findOneBy({ id: poolTournamentId });
+  get(
+    poolTournamentId: string,
+    repo: Repository<PoolTournament> = this.poolTournamentRepo
+  ): Promise<PoolTournament | null> {
+    return repo.findOne({
+      where: { id: poolTournamentId },
+      relations: [
+        'pool_users',
+        'pool_users.picks',
+        'pool_users.picks.pool_tournament_player',
+        'pool_users.picks.pool_tournament_player.pga_tournament_player',
+      ],
+    });
   }
 
   upsert(

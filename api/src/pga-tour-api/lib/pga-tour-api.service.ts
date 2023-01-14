@@ -35,7 +35,10 @@ export class PgaTourApiService {
   ): Promise<PgaApiTournamentLeaderboardResponse> {
     const url = `https://lbdata.pgatour.com/${year}/r/${tournamentId}/leaderboard.json`;
     const params = await this.userTrackingIdFactory.create();
-    const response$ = this.httpClient.get<PgaApiTournamentLeaderboardResponse>(url, { params });
+    const response$ = this.httpClient.get<PgaApiTournamentLeaderboardResponse>(url, {
+      params,
+      headers: { 'Accept-Encoding': 'gzip,deflate,compress' },
+    });
     return lastValueFrom(response$).then((res) => res.data);
   }
 }

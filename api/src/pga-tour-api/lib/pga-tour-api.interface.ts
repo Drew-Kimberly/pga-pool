@@ -58,7 +58,7 @@ export interface PgaApiTournamentScheduleResponse {
 
 export interface PgaApiTournamentLeaderboardRow {
   isActive: boolean;
-  status: 'active' | 'wd';
+  status: 'active' | 'wd' | 'cut';
   roundComplete: boolean;
   playerId: string;
   groupId: string;
@@ -66,11 +66,25 @@ export interface PgaApiTournamentLeaderboardRow {
   playerRoundId: string;
   currentHoleId: string;
   startingHoleId: string;
+  /**
+   * @example "T3"
+   * @note can be empty "--" value
+   */
   positionCurrent: string;
+  /**
+   * @note can be empty "--" value
+   * @example "+1"
+   * @example "-2"
+   * @example "E"
+   */
   total: string;
+  /** @note can be empty "--" value */
   thru: string;
   teeTime: string | null;
-  /** @note score of current round. */
+  /**
+   * @note score of current round.
+   * @note can be empty "--" value
+   */
   round: string;
 }
 

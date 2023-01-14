@@ -1,6 +1,7 @@
 export enum PlayerStatus {
   Active = 'active',
   Withdrawn = 'wd',
+  Cut = 'cut',
 }
 
 export interface PgaTournamentPlayerFilter {
