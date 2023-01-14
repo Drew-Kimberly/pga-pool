@@ -13,7 +13,10 @@ export class PoolUserPickService {
     private readonly poolUserPickRepo: Repository<PoolUserPick>
   ) {}
 
-  list(filter: PoolUserPickFilter = {}): Promise<PoolUserPick[]> {
+  list(
+    filter: PoolUserPickFilter = {},
+    repo: Repository<PoolUserPick> = this.poolUserPickRepo
+  ): Promise<PoolUserPick[]> {
     const findOptions: FindOptionsWhere<PoolUserPick> = {
       ...(filter.poolUserId ? { pool_user: { id: filter.poolUserId } } : {}),
       ...(filter.poolTournamentId
@@ -21,7 +24,7 @@ export class PoolUserPickService {
         : {}),
     };
 
-    return this.poolUserPickRepo.find({
+    return repo.find({
       where: findOptions,
       relations: [
         'pool_user',

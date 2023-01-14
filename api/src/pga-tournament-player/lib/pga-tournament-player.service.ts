@@ -13,14 +13,17 @@ export class PgaTournamentPlayerService {
     private readonly tourneyPlayerRepo: Repository<PgaTournamentPlayer>
   ) {}
 
-  list(filter: PgaTournamentPlayerFilter): Promise<PgaTournamentPlayer[]> {
+  list(
+    filter: PgaTournamentPlayerFilter,
+    repo: Repository<PgaTournamentPlayer> = this.tourneyPlayerRepo
+  ): Promise<PgaTournamentPlayer[]> {
     const findOptions: FindOptionsWhere<PgaTournamentPlayer> = {
       ...(filter.tournamentId ? { pga_tournament: { id: filter.tournamentId } } : {}),
       ...(filter.playerId ? { pga_player: { id: filter.playerId } } : {}),
       ...(filter.year ? { pga_tournament: { year: filter.year } } : {}),
     };
 
-    return this.tourneyPlayerRepo.find({
+    return repo.find({
       where: findOptions,
       relations: ['pga_tournament', 'pga_player'],
       order: {
