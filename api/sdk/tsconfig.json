@@ -6,7 +6,7 @@
     "declarationDir": "dist/types",
     "moduleResolution": "node",
     "outDir": "dist",
-    "sourceMap": true
+    "sourceMap": false
   },
   "include": ["src"],
   "exclude": ["node_modules"]
