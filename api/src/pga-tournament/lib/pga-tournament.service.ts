@@ -1,4 +1,4 @@
-import { LessThan, MoreThan, Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import { PgaTournament } from './pga-tournament.entity';
 
@@ -23,8 +23,8 @@ export class PgaTournamentService {
   getCurrent(): Promise<PgaTournament | null> {
     const now = new Date(Date.now()).toDateString();
     return this.pgaTournamentRepo.findOneBy({
-      start_date: LessThan(now),
-      end_date: MoreThan(now),
+      start_date: LessThanOrEqual(now),
+      end_date: MoreThanOrEqual(now),
     });
   }
 
