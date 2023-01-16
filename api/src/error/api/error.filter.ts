@@ -31,7 +31,7 @@ export class ErrorFilter extends BaseExceptionFilter implements ExceptionFilter 
     const response = this.mapErrorToResponse(e);
 
     if (response) {
-      return host.switchToHttp().getResponse<Response>().json(response).status(response.status);
+      return host.switchToHttp().getResponse<Response>().status(response.status).json(response);
     } else {
       return super.catch(this.mapErrorToResponse(e), host);
     }
