@@ -1,4 +1,5 @@
 /* eslint-disable no-unreachable */
+import { AxiosError } from 'axios';
 import {
   Accordion,
   AccordionPanel,
@@ -9,6 +10,7 @@ import {
   Spinner,
   Text,
 } from 'grommet';
+import { CircleInformation } from 'grommet-icons';
 import React from 'react';
 
 import { pgaPoolApi } from '../../api/pga-pool';
@@ -17,6 +19,8 @@ import { useInterval } from '../../hooks';
 import { PoolTournament } from '@drewkimberly/pga-pool-api';
 
 const POLL_INTERVAL = 60 * 1000; // 1 min
+
+const isNoTournamentError = (e: Error) => e instanceof AxiosError && e.response?.status === 404;
 
 export function TournamentLeaderboard() {
   const [tournament, setTournament] = React.useState<PoolTournament | undefined>(undefined);
@@ -30,11 +34,13 @@ export function TournamentLeaderboard() {
       setInitialFetchError(undefined);
 
       try {
-        const tourneys = await pgaPoolApi.poolTournaments.getPoolTournaments();
-        setTournament(tourneys.data.data[0]);
+        const tourneys = await pgaPoolApi.poolTournaments.getCurrent();
+        setTournament(tourneys.data);
       } catch (e) {
-        console.error(e);
-        setInitialFetchError(e);
+        if (!isNoTournamentError(e)) {
+          console.error(e);
+          setInitialFetchError(e);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -45,14 +51,14 @@ export function TournamentLeaderboard() {
 
   useInterval(async () => {
     try {
-      const tourneys = await pgaPoolApi.poolTournaments.getPoolTournaments();
+      const tourneys = await pgaPoolApi.poolTournaments.getCurrent();
       setPollErrorCount(0);
-      if (tourneys.data.data[0]) {
-        setTournament(tourneys.data.data[0]);
-      }
+      setTournament(tourneys.data);
     } catch (e) {
-      console.error(e);
-      setPollErrorCount((prev) => prev + 1);
+      if (!isNoTournamentError(e)) {
+        console.error(e);
+        setPollErrorCount((prev) => prev + 1);
+      }
     }
   }, POLL_INTERVAL);
 
@@ -63,9 +69,16 @@ export function TournamentLeaderboard() {
           <Spinner size="medium" />
         </Box>
       )}
-      {initialFetchError && <div>{`Error: ${initialFetchError}`}</div>}
-      {!isLoading && !tournament && <div>{`No tournament found`}</div>}
-      {!isLoading && !initialFetchError && (
+      {!isLoading && initialFetchError && <div>{`Error: ${initialFetchError}`}</div>}
+      {!isLoading && !initialFetchError && !tournament && (
+        <Box height="medium" round="small" align="center" justify="center">
+          <CircleInformation size="large" />
+          <Text size="large" textAlign="center" margin="small">
+            No PGA Tournament event is currently active! <br /> Please check back later
+          </Text>
+        </Box>
+      )}
+      {!isLoading && !initialFetchError && tournament && (
         <>
           <PageHeader title={tournament?.pga_tournament.name} size={'small'} />
 
