@@ -2,6 +2,7 @@ import { PgaPlayerDto } from '../../pga-player/api/pga-player.dto';
 import { PgaPlayer } from '../../pga-player/lib/pga-player.entity';
 import { PgaTournamentDto } from '../../pga-tournament/api/pga-tournament.dto';
 import { PgaTournament } from '../../pga-tournament/lib/pga-tournament.entity';
+import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
 import { PlayerStatus } from '../../pga-tournament-player/lib/pga-tournament-player.interface';
 import { PoolUserDto } from '../../pool-user/api/pool-user.dto';
 import { PoolUser } from '../../pool-user/lib/pool-user.entity';
@@ -14,12 +15,23 @@ import { PoolTournamentService } from '../lib/pool-tournament.service';
 
 import { PoolTournamentDto } from './pool-tournament.dto';
 
-import { Controller, Get, Logger, LoggerService, Optional } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpException,
+  Logger,
+  LoggerService,
+  NotFoundException,
+  Optional,
+  Param,
+} from '@nestjs/common';
 
+export const CURRENT_TOURNAMENT = 'current';
 @Controller('pool/tournaments')
 export class PoolTournamentController {
   constructor(
     private readonly poolTournamentService: PoolTournamentService,
+    private readonly pgaTournamentService: PgaTournamentService,
     @Optional()
     private readonly logger: LoggerService = new Logger(PoolTournamentController.name)
   ) {}
@@ -32,11 +44,44 @@ export class PoolTournamentController {
     try {
       poolTournaments = await this.poolTournamentService.list();
     } catch (e) {
-      this.logger.error(`Error listing pool tournaments: ${e}`, e.stack);
+      this.logErrorSkipping4xx(e, `Error listing pool tournaments: ${e}`);
       throw e;
     }
 
     return { data: poolTournaments.map(this.toPoolTournamentDto.bind(this)) };
+  }
+
+  @Get('/:poolTournamentId')
+  async getTournament(@Param('poolTournamentId') poolTournamentId: string) {
+    this.logger.log(`Getting pool tournament (ID: ${poolTournamentId})`);
+
+    let poolTournament: PoolTournament | null;
+
+    try {
+      if (poolTournamentId === CURRENT_TOURNAMENT) {
+        const currentPgaTourney = await this.pgaTournamentService.getCurrent();
+        if (!currentPgaTourney) {
+          throw new NotFoundException('There is currently no in-progress PGA tournament');
+        }
+
+        poolTournament = (
+          await this.poolTournamentService.list({
+            pgaTournamentId: currentPgaTourney.id,
+          })
+        )[0];
+      } else {
+        poolTournament = await this.poolTournamentService.get(poolTournamentId);
+      }
+    } catch (e) {
+      this.logErrorSkipping4xx(e, `Error fetching pool tournament (ID: ${poolTournamentId}): ${e}`);
+      throw e;
+    }
+
+    if (!poolTournament) {
+      throw new NotFoundException(`Pool Tournament (ID: ${poolTournamentId}) not found`);
+    }
+
+    return this.toPoolTournamentDto(poolTournament);
   }
 
   private toPoolTournamentDto(tourney: PoolTournament): PoolTournamentDto {
@@ -104,5 +149,13 @@ export class PoolTournamentController {
       name: user.name,
       nickname: user.nickname,
     };
+  }
+
+  private logErrorSkipping4xx(e: Error, errorMsg: string | object) {
+    if (e instanceof HttpException && e.getStatus().toString().startsWith('4')) {
+      return;
+    }
+
+    this.logger.error(errorMsg, e.stack);
   }
 }

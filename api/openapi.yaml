@@ -16,10 +16,43 @@ paths:
     get:
       summary: List pool tournaments
       description: Returns all pool tournaments
-      operationId: getPoolTournaments
+      operationId: list
       responses:
         '200':
           $ref: '#/components/responses/PoolTournamentsResponse'
+      tags:
+        - PoolTournament
+  /pool/tournaments/current:
+    get:
+      summary: Fetches the current in-progress pool tournament
+      description: Fetches the current in-progress pool tournament. Responds with 404 if no tournaments are current.
+      operationId: getCurrent
+      responses:
+        '200':
+          $ref: '#/components/responses/PoolTournamentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+        - PoolTournament
+  /pool/tournaments/{poolTournamentId}:
+    parameters:
+      - schema:
+          type: string
+          example: d32d905a-ed33-46a3-a093-d8f536af9a8a
+          format: uuid
+        name: poolTournamentId
+        in: path
+        required: true
+        description: Pool Tournament ID
+    get:
+      summary: Fetches a pool tournament by ID
+      description: Fetches a pool tournament by ID
+      operationId: get
+      responses:
+        '200':
+          $ref: '#/components/responses/PoolTournamentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
       tags:
         - PoolTournament
 components:
@@ -38,6 +71,35 @@ components:
                   $ref: '#/components/schemas/PoolTournament'
             required:
               - data
+    PoolTournamentResponse:
+      description: Response containing pool tournament data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PoolTournament'
+    NotFound:
+      description: Error response corresponding to 404 status code
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+                description: The HTTP status code
+                example: 404
+              message:
+                type: string
+                description: The error response code
+                example: Not Found
+              detail:
+                type: string
+                nullable: true
+                description: Additional detail about the error
+            required:
+              - status
+              - message
+              - details
   schemas:
     PoolTournament:
       description: Defines a pool tournament
