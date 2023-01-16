@@ -25,6 +25,8 @@ jobs:
       - name: Get list of all changes
         uses: tj-actions/changed-files@v35.4.0
         id: changed-files
+        with:
+          since_last_remote_commit: 'true'
       - name: List all changed files
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
@@ -34,6 +36,7 @@ jobs:
         uses: tj-actions/changed-files@v35.4.0
         id: client-changed
         with:
+          since_last_remote_commit: 'true'
           files: |
             client/**
             .github/**
@@ -41,6 +44,7 @@ jobs:
         uses: tj-actions/changed-files@v35.4.0
         id: api-changed
         with:
+          since_last_remote_commit: 'true'
           files: |
             api/**
             .github/**
@@ -48,6 +52,7 @@ jobs:
         uses: tj-actions/changed-files@v35.4.0
         id: api-oas-changed
         with:
+          since_last_remote_commit: 'true'
           files: |
             api/openapi.yaml
             api/sdk/**
