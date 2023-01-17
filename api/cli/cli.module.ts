@@ -1,4 +1,5 @@
 import { RegisteredDatabaseModule } from '../src/database/registered-database.module';
+import { MetabetApiModule } from '../src/metabet-api/lib/metabet-api.module';
 import { PgaPlayerModule } from '../src/pga-player/lib/pga-player.module';
 import { PgaTourApiModule } from '../src/pga-tour-api/lib/pga-tour-api.module';
 import { PgaTournamentModule } from '../src/pga-tournament/lib/pga-tournament.module';
@@ -16,6 +17,7 @@ import { Module } from '@nestjs/common';
   imports: [
     RegisteredDatabaseModule,
     SeedDataModule,
+    MetabetApiModule,
     PgaTourApiModule,
     PgaPlayerModule,
     PgaTournamentModule,

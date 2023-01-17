@@ -10,6 +10,7 @@ import { UserTrackingIdFactory } from './user-tracking-id-factory.service';
 
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+
 @Injectable()
 export class PgaTourApiService {
   constructor(
