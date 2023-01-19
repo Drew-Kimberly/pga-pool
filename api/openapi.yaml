@@ -15,7 +15,16 @@ tags:
   - name: PgaTournament
   - name: PoolTournament
 paths:
-  /pga-tournament/:pgaTournamentId/field:
+  /pga-tournament/{pgaTournamentId}/field:
+    parameters:
+      - schema:
+          type: string
+          example: '002-2023'
+          description: The PGA Tournament ID
+        name: pgaTournamentId
+        in: path
+        required: true
+        description: Pool Tournament ID
     get:
       summary: Fetches the player field for a given PGA Tournament
       description: Fetches the tiered player field for a given PGA Tournament
