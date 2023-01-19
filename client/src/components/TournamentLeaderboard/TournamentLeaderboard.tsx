@@ -1,5 +1,4 @@
 /* eslint-disable no-unreachable */
-import { AxiosError } from 'axios';
 import {
   Accordion,
   AccordionPanel,
@@ -20,8 +19,6 @@ import { PoolTournament } from '@drewkimberly/pga-pool-api';
 
 const POLL_INTERVAL = 60 * 1000; // 1 min
 
-const isNoTournamentError = (e: Error) => e instanceof AxiosError && e.response?.status === 404;
-
 export function TournamentLeaderboard() {
   const [tournament, setTournament] = React.useState<PoolTournament | undefined>(undefined);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -37,7 +34,7 @@ export function TournamentLeaderboard() {
         const tourneys = await pgaPoolApi.poolTournaments.getCurrent();
         setTournament(tourneys.data);
       } catch (e) {
-        if (!isNoTournamentError(e)) {
+        if (!pgaPoolApi.is404Error(e)) {
           console.error(e);
           setInitialFetchError(e);
         }
@@ -55,7 +52,7 @@ export function TournamentLeaderboard() {
       setPollErrorCount(0);
       setTournament(tourneys.data);
     } catch (e) {
-      if (!isNoTournamentError(e)) {
+      if (!pgaPoolApi.is404Error(e)) {
         console.error(e);
         setPollErrorCount((prev) => prev + 1);
       }
