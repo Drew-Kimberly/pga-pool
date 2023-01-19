@@ -9,4 +9,4 @@ import { Module } from '@nestjs/common';
   imports: [PoolTournamentModule, PgaTournamentModule],
   controllers: [PoolTournamentController],
 })
-export class PoolTournmentApiModule {}
+export class PoolTournamentApiModule {}
