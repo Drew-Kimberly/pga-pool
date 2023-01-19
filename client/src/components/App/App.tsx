@@ -1,19 +1,21 @@
-import { Grommet, Page } from 'grommet';
-import React from 'react';
+import { Grommet, GrommetExtendedProps } from 'grommet';
+import { RouterProvider } from 'react-router-dom';
 
+import { ThemeContextProvider, useThemeContext } from '../../contexts/ThemeContext';
+import { router } from '../../router';
 import { theme } from '../../theme';
-import { AppBar } from '../AppBar';
-import { TournamentLeaderboard } from '../TournamentLeaderboard';
 
 export function App() {
-  const [dark, setDark] = React.useState(false);
+  const ThemedGrommet = (props: Omit<GrommetExtendedProps, 'themeMode'>) => {
+    const { darkMode } = useThemeContext();
+    return <Grommet themeMode={darkMode ? 'dark' : 'light'} {...props} />;
+  };
 
   return (
-    <Grommet theme={theme} full themeMode={dark ? 'dark' : 'light'}>
-      <Page>
-        <AppBar darkMode={dark} setDarkMode={setDark} />
-        <TournamentLeaderboard />
-      </Page>
-    </Grommet>
+    <ThemeContextProvider>
+      <ThemedGrommet theme={theme} full>
+        <RouterProvider router={router} />
+      </ThemedGrommet>
+    </ThemeContextProvider>
   );
 }
