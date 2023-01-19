@@ -1,3 +1,4 @@
+import { ControllerBase } from '../../common/api';
 import { PgaPlayerDto } from '../../pga-player/api/pga-player.dto';
 import { PgaPlayer } from '../../pga-player/lib/pga-player.entity';
 import { PgaTournamentDto } from '../../pga-tournament/api/pga-tournament.dto';
@@ -18,7 +19,6 @@ import { PoolTournamentDto } from './pool-tournament.dto';
 import {
   Controller,
   Get,
-  HttpException,
   Logger,
   LoggerService,
   NotFoundException,
@@ -27,14 +27,17 @@ import {
 } from '@nestjs/common';
 
 export const CURRENT_TOURNAMENT = 'current';
+
 @Controller('pool/tournaments')
-export class PoolTournamentController {
+export class PoolTournamentController extends ControllerBase {
   constructor(
     private readonly poolTournamentService: PoolTournamentService,
     private readonly pgaTournamentService: PgaTournamentService,
     @Optional()
-    private readonly logger: LoggerService = new Logger(PoolTournamentController.name)
-  ) {}
+    protected readonly logger: LoggerService = new Logger(PoolTournamentController.name)
+  ) {
+    super(logger);
+  }
 
   @Get()
   async listTournaments(): Promise<{ data: PoolTournamentDto[] }> {
@@ -149,13 +152,5 @@ export class PoolTournamentController {
       name: user.name,
       nickname: user.nickname,
     };
-  }
-
-  private logErrorSkipping4xx(e: Error, errorMsg: string | object) {
-    if (e instanceof HttpException && e.getStatus().toString().startsWith('4')) {
-      return;
-    }
-
-    this.logger.error(errorMsg, e.stack);
   }
 }

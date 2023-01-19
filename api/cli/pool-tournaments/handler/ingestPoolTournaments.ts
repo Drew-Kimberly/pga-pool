@@ -1,6 +1,7 @@
 import { PgaPlayer } from '../../../src/pga-player/lib/pga-player.entity';
 import { PgaTournament } from '../../../src/pga-tournament/lib/pga-tournament.entity';
 import { PgaTournamentService } from '../../../src/pga-tournament/lib/pga-tournament.service';
+import { PgaTournamentField } from '../../../src/pga-tournament-field/lib/pga-tournament-field.interface';
 import { PgaTournamentPlayer } from '../../../src/pga-tournament-player/lib/pga-tournament-player.entity';
 import { PlayerStatus } from '../../../src/pga-tournament-player/lib/pga-tournament-player.interface';
 import { PgaTournamentPlayerService } from '../../../src/pga-tournament-player/lib/pga-tournament-player.service';
@@ -201,7 +202,7 @@ function getSeedTournaments(
 
   return tournamentSeedIds.map((id) => {
     const data = seedDataService.getSeedData<{
-      field: Record<string, Record<string, { name?: string }>>;
+      field: PgaTournamentField;
       picks: { tournament_id: string; picks: Record<string, [number, number, number, number]> };
     }>(id);
 
@@ -221,8 +222,8 @@ function getSeedTournaments(
 
     const players: PoolTournamentSeed['players'] = {};
 
-    for (const tier of Object.keys(field)) {
-      Object.keys(field[tier]).forEach((playerId) => (players[playerId] = { tier }));
+    for (const tier of Object.keys(field.player_tiers)) {
+      Object.keys(field.player_tiers[tier]).forEach((playerId) => (players[playerId] = { tier }));
     }
 
     return {

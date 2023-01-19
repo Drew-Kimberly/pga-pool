@@ -64,6 +64,14 @@ module.exports = {
       }
     ]
   },
+  overrides: [
+    {
+      files: ['*.dto.ts'],
+      rules: {
+        camelcase: 'off'
+      }
+    }
+  ],
   globals: {
     NodeJS: true
   }
