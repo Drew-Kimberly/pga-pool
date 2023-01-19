@@ -43,27 +43,19 @@
                 "name": "Tom Kim",
                 "odds": "+2250"
             },
-            "55789": {
-                "name": "Taylor Montgomery",
-                "odds": "+3400"
-            },
             "57366": {
                 "name": "Cameron Young",
                 "odds": "+2150"
             }
         },
         "2": {
-            "22405": {
-                "name": "Justin Rose",
-                "odds": "+9750"
+            "55789": {
+                "name": "Taylor Montgomery",
+                "odds": "+3400"
             },
             "28089": {
                 "name": "Jason Day",
                 "odds": "+6380"
-            },
-            "30926": {
-                "name": "Chris Kirk",
-                "odds": "+9660"
             },
             "32102": {
                 "name": "Rickie Fowler",
@@ -81,10 +73,6 @@
                 "name": "Joel Dahmen",
                 "odds": "+4760"
             },
-            "34099": {
-                "name": "Harris English",
-                "odds": "+9160"
-            },
             "34256": {
                 "name": "Andrew Putnam",
                 "odds": "+5850"
@@ -93,17 +81,9 @@
                 "name": "Tom Hoge",
                 "odds": "+3510"
             },
-            "36699": {
-                "name": "Patrick Rodgers",
-                "odds": "+9510"
-            },
             "37455": {
                 "name": "Si Woo Kim",
                 "odds": "+4060"
-            },
-            "39546": {
-                "name": "Keith Mitchell",
-                "odds": "+8660"
             },
             "40250": {
                 "name": "Taylor Pendrith",
@@ -140,12 +120,32 @@
             "56762": {
                 "name": "Will Gordon",
                 "odds": "+9660"
+            },
+            "33653": {
+                "name": "Thomas Detry",
+                "odds": "+10500"
             }
         },
         "3": {
-            "12716": {
-                "name": "Charley Hoffman",
-                "odds": "+19080"
+            "39546": {
+                "name": "Keith Mitchell",
+                "odds": "+8660"
+            },
+            "36699": {
+                "name": "Patrick Rodgers",
+                "odds": "+9510"
+            },
+            "30926": {
+                "name": "Chris Kirk",
+                "odds": "+9660"
+            },
+            "34099": {
+                "name": "Harris English",
+                "odds": "+9160"
+            },
+            "22405": {
+                "name": "Justin Rose",
+                "odds": "+9750"
             },
             "25493": {
                 "name": "Nick Taylor",
@@ -163,10 +163,6 @@
                 "name": "Martin Laird",
                 "odds": "+18000"
             },
-            "28775": {
-                "name": "Nate Lashley",
-                "odds": "+13330"
-            },
             "29518": {
                 "name": "Brendan Steele",
                 "odds": "+12250"
@@ -179,10 +175,6 @@
                 "name": "Emiliano Grillo",
                 "odds": "+10330"
             },
-            "33653": {
-                "name": "Thomas Detry",
-                "odds": "+10500"
-            },
             "33948": {
                 "name": "Byeong Hun An",
                 "odds": "+12660"
@@ -190,10 +182,6 @@
             "33974": {
                 "name": "Dean Burmester",
                 "odds": "+12410"
-            },
-            "35461": {
-                "name": "Beau Hossler",
-                "odds": "+16080"
             },
             "36326": {
                 "name": "David Lipsky",
@@ -207,9 +195,9 @@
                 "name": "Matthew NeSmith",
                 "odds": "+15750"
             },
-            "37275": {
-                "name": "Sam Ryder",
-                "odds": "+18580"
+            "32150": {
+                "name": "Michael Thompson",
+                "odds": "+23830"
             },
             "45522": {
                 "name": "Christiaan Bezuidenhout",
@@ -243,27 +231,43 @@
                 "name": "Justin Suh",
                 "odds": "+17000"
             },
-            "51890": {
-                "name": "Greyson Sigg",
-                "odds": "+16830"
-            },
             "54591": {
                 "name": "Ben Griffin",
                 "odds": "+12910"
             },
+            "58168": {
+                "name": "Davis Thompson",
+                "odds": "+21660"
+            },
             "54628": {
                 "name": "Lee Hodges",
                 "odds": "+14000"
-            },
-            "55454": {
-                "name": "Carl Yuan",
-                "odds": "+16830"
             }
         },
         "4": {
             "19803": {
                 "name": "Ryan Armour",
                 "odds": "+33500"
+            },
+            "28775": {
+                "name": "Nate Lashley",
+                "odds": "+13330"
+            },
+            "51890": {
+                "name": "Greyson Sigg",
+                "odds": "+16830"
+            },
+            "55454": {
+                "name": "Carl Yuan",
+                "odds": "+16830"
+            },
+            "37275": {
+                "name": "Sam Ryder",
+                "odds": "+18580"
+            },
+            "12716": {
+                "name": "Charley Hoffman",
+                "odds": "+19080"
             },
             "19846": {
                 "name": "Brian Gay",
@@ -296,6 +300,10 @@
             "24925": {
                 "name": "Jonathan Byrd",
                 "odds": "+75000"
+            },
+            "35461": {
+                "name": "Beau Hossler",
+                "odds": "+16080"
             },
             "25632": {
                 "name": "Jimmy Walker",
@@ -360,10 +368,6 @@
             "32139": {
                 "name": "Danny Willett",
                 "odds": "+24160"
-            },
-            "32150": {
-                "name": "Michael Thompson",
-                "odds": "+23830"
             },
             "32333": {
                 "name": "Kevin Tway",
@@ -600,10 +604,6 @@
             "57975": {
                 "name": "Harry Hall",
                 "odds": "+24330"
-            },
-            "58168": {
-                "name": "Davis Thompson",
-                "odds": "+21660"
             },
             "58967": {
                 "name": "Trevor Werbylo",
