@@ -15,7 +15,7 @@ tags:
   - name: PgaTournament
   - name: PoolTournament
 paths:
-  /pga-tournament/:pgaTournamentId/field:
+  /pga-tournaments/:pgaTournamentId/field:
     get:
       summary: Fetches the player field for a given PGA Tournament
       description: Fetches the tiered player field for a given PGA Tournament
