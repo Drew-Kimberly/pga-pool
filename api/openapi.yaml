@@ -15,7 +15,7 @@ tags:
   - name: PgaTournament
   - name: PoolTournament
 paths:
-  /pga-tournaments/:pgaTournamentId/field:
+  /pga-tournaments/{pgaTournamentId}/field:
     parameters:
       - schema:
           type: string
@@ -24,7 +24,6 @@ paths:
         name: pgaTournamentId
         in: path
         required: true
-        description: Pool Tournament ID
     get:
       summary: Fetches the player field for a given PGA Tournament
       description: Fetches the tiered player field for a given PGA Tournament
@@ -254,9 +253,8 @@ components:
       type: object
       additionalProperties: false
       properties:
-        pga_tournament_id:
-          type: string
-          example: '002-2023'
+        pga_tournament:
+          $ref: '#/components/schemas/PgaTournament'
         created_at:
           type: string
           format: date-time
@@ -282,7 +280,7 @@ components:
                 - name
                 - odds
       required:
-        - pga_tournament_id
+        - pga_tournament
         - created_at  
         - player_tiers
     PoolUser:

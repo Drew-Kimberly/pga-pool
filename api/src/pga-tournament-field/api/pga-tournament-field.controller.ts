@@ -1,4 +1,7 @@
 import { ControllerBase } from '../../common/api';
+import { PgaTournamentDto } from '../../pga-tournament/api/pga-tournament.dto';
+import { PgaTournament } from '../../pga-tournament/lib/pga-tournament.entity';
+import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
 import { PgaTournamentField } from '../lib/pga-tournament-field.interface';
 import { PgaTournamentFieldService } from '../lib/pga-tournament-field.service';
 
@@ -18,6 +21,7 @@ import {
 export class PgaTournamentFieldController extends ControllerBase {
   constructor(
     private readonly pgaTourneyFieldService: PgaTournamentFieldService,
+    private readonly pgaTourneyService: PgaTournamentService,
     @Optional()
     protected readonly logger: LoggerService = new Logger(PgaTournamentFieldController.name)
   ) {
@@ -30,9 +34,9 @@ export class PgaTournamentFieldController extends ControllerBase {
   ): Promise<PgaTournamentFieldDto> {
     this.logger.log(`Getting field for PGA Tournament ${pgaTournamentId}`);
 
-    let field: PgaTournamentField | undefined;
+    let tournament: PgaTournament | null;
     try {
-      field = await this.pgaTourneyFieldService.get(pgaTournamentId);
+      tournament = await this.pgaTourneyService.get(pgaTournamentId);
     } catch (e) {
       this.logErrorSkipping4xx(
         e,
@@ -41,16 +45,34 @@ export class PgaTournamentFieldController extends ControllerBase {
       throw e;
     }
 
-    if (!field) {
-      throw new NotFoundException(`PGA Tournament field (ID: ${pgaTournamentId}) not found`);
+    if (!tournament) {
+      throw new NotFoundException(`PGA Tournament (ID: ${pgaTournamentId}) not found`);
     }
 
-    return this.toPgaTournamentFieldDto(field);
+    let field: PgaTournamentField | undefined;
+    try {
+      field = await this.pgaTourneyFieldService.get(tournament.id);
+    } catch (e) {
+      this.logErrorSkipping4xx(
+        e,
+        `Error fetching PGA Tournament field (ID: ${tournament.id}): ${e}`
+      );
+      throw e;
+    }
+
+    if (!field) {
+      throw new NotFoundException(`PGA Tournament field (ID: ${tournament.id}) not found`);
+    }
+
+    return this.toPgaTournamentFieldDto(tournament, field);
   }
 
-  private toPgaTournamentFieldDto(field: PgaTournamentField): PgaTournamentFieldDto {
+  private toPgaTournamentFieldDto(
+    tournament: PgaTournament,
+    field: PgaTournamentField
+  ): PgaTournamentFieldDto {
     const dto = new PgaTournamentFieldDto(
-      field.pga_tournament_id,
+      this.toPgaTournamentDto(tournament),
       new Date(field.created_at * 1000).toISOString()
     );
 
@@ -69,5 +91,17 @@ export class PgaTournamentFieldController extends ControllerBase {
     });
 
     return dto;
+  }
+
+  private toPgaTournamentDto(tourney: PgaTournament): PgaTournamentDto {
+    return {
+      id: tourney.id,
+      name: tourney.full_name,
+      date: {
+        start: tourney.start_date,
+        end: tourney.end_date,
+        year: tourney.year,
+      },
+    };
   }
 }
