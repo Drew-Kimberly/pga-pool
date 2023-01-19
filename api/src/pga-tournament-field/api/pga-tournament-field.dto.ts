@@ -1,6 +1,8 @@
+import { PgaTournamentDto } from '../../pga-tournament/api/pga-tournament.dto';
+
 export class PgaTournamentFieldDto {
   constructor(
-    public pga_tournament_id: string,
+    public pga_tournament: PgaTournamentDto,
     /**
      * @note timestamp in ISO-8601 format
      */
