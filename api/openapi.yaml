@@ -337,7 +337,11 @@ components:
         end:
           type: string
           format: date
+        timezone:
+          type: string
+          example: 'America/Los_Angeles'
       required:
         - year
         - start
         - end
+        - timezone

@@ -22,6 +22,10 @@ export class PgaTournament {
   @Column({ type: 'int' })
   year: number;
 
+  /** @example "America/Los_Angeles" */
+  @Column({ type: 'varchar', length: 64, default: 'America/New_York' })
+  time_zone: string;
+
   @Column({ type: 'int' })
   week_number: number;
 

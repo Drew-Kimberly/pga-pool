@@ -17,6 +17,8 @@ export interface PgaApiTourTournament {
     short: string;
   };
   year: string;
+  /** @example "America/Los_Angeles" */
+  timeZone: string;
   date: {
     weekNumber: string;
     /** @example  2023-01-09 */

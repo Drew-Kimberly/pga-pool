@@ -5,5 +5,9 @@ export class PgaTournamentDto {
     year: number;
     start: string;
     end: string;
+    /**
+     * @example "America/Los_Angeles"
+     */
+    timezone: string;
   };
 }
