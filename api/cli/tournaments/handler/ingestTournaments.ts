@@ -45,6 +45,7 @@ export async function ingestTournaments() {
           full_name: tourney.trnName.long,
           short_name: tourney.trnName.short,
           year: Number(tourney.year),
+          time_zone: tourney.timeZone,
           week_number: Number(tourney.date.weekNumber),
           start_date: tourney.date.start,
           end_date: tourney.date.end,

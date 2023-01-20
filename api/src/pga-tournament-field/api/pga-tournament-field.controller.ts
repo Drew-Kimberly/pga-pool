@@ -101,6 +101,7 @@ export class PgaTournamentFieldController extends ControllerBase {
         start: tourney.start_date,
         end: tourney.end_date,
         year: tourney.year,
+        timezone: tourney.time_zone,
       },
     };
   }
