@@ -24,7 +24,9 @@ export interface PoolUserPanelProps extends ParentComponentProps {
 function _PoolUserPanel({ user }: Omit<PoolUserPanelProps, 'children'>) {
   const size = useContext(ResponsiveContext);
   const roundStatus = getRoundStatus(user.picks);
-  const playersActive = user.picks.filter((p) => !p.is_round_complete).length;
+  const playersActive = user.picks.filter(
+    (p) => !p.is_round_complete && p.score_thru !== null
+  ).length;
 
   return (
     <Box direction="row" height="100%">
