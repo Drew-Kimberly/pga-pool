@@ -1,19 +1,13 @@
 /* eslint-disable no-unreachable */
-import {
-  Accordion,
-  AccordionPanel,
-  Box,
-  Notification,
-  PageContent,
-  PageHeader,
-  Spinner,
-  Text,
-} from 'grommet';
+import { Accordion, Box, Notification, PageContent, Spinner, Text } from 'grommet';
 import { CircleInformation } from 'grommet-icons';
 import React from 'react';
 
 import { pgaPoolApi } from '../../api/pga-pool';
 import { useInterval } from '../../hooks';
+import { TournamentHeader } from '../TournamentHeader';
+
+import { PoolUserPanel } from './PoolUserPanel';
 
 import { PoolTournament } from '@drewkimberly/pga-pool-api';
 
@@ -59,6 +53,8 @@ export function TournamentLeaderboard() {
     }
   }, POLL_INTERVAL);
 
+  const round = tournament?.pool_users[0]?.picks[0].current_round ?? undefined;
+
   return (
     <PageContent>
       {isLoading && (
@@ -77,15 +73,15 @@ export function TournamentLeaderboard() {
       )}
       {!isLoading && !initialFetchError && tournament && (
         <>
-          <PageHeader title={tournament?.pga_tournament.name} size={'small'} />
+          <TournamentHeader tournament={tournament.pga_tournament} round={round} />
 
           {pollErrorCount >= 2 && (
             <Notification status="critical" message="Error refreshing tournamnet scores" />
           )}
 
-          <Accordion>
+          <Accordion margin={{ bottom: 'medium', top: 'medium' }}>
             {tournament?.pool_users.map((user) => (
-              <AccordionPanel key={user.id} label={`${user.user.nickname} ${user.score}`}>
+              <PoolUserPanel key={user.id} user={user} tournamentRound={round ?? undefined}>
                 {user.picks.map((pick) => (
                   <Box key={pick.id} pad="small">
                     <Text>
@@ -93,7 +89,7 @@ export function TournamentLeaderboard() {
                     </Text>
                   </Box>
                 ))}
-              </AccordionPanel>
+              </PoolUserPanel>
             ))}
           </Accordion>
         </>

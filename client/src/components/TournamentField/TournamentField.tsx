@@ -1,17 +1,9 @@
-import {
-  Box,
-  Grid,
-  Heading,
-  PageContent,
-  PageHeader,
-  ResponsiveContext,
-  Spinner,
-  Text,
-} from 'grommet';
+import { Box, Grid, Heading, PageContent, ResponsiveContext, Spinner, Text } from 'grommet';
 import { CircleQuestion } from 'grommet-icons';
 import React, { useContext } from 'react';
 
 import { pgaPoolApi } from '../../api/pga-pool';
+import { TournamentHeader } from '../TournamentHeader';
 
 import { PgaTournamentField } from '@drewkimberly/pga-pool-api';
 
@@ -71,7 +63,7 @@ export function TournamentField(props: TournamentFieldProps) {
       )}
       {!isLoading && !fetchError && field && (
         <>
-          <PageHeader title={field.pga_tournament.name} size={'small'} />
+          <TournamentHeader tournament={field.pga_tournament} />
 
           {Object.entries(field.player_tiers).map(([tier, players]) => (
             <>
