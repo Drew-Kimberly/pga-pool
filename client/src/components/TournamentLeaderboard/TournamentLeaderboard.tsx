@@ -1,10 +1,11 @@
 /* eslint-disable no-unreachable */
-import { Accordion, Box, Notification, PageContent, Spinner, Text } from 'grommet';
+import { Accordion, Box, Notification, PageContent, Text } from 'grommet';
 import { CircleInformation } from 'grommet-icons';
 import React from 'react';
 
 import { pgaPoolApi } from '../../api/pga-pool';
 import { useInterval } from '../../hooks';
+import { Spinner } from '../Spinner';
 import { TournamentHeader } from '../TournamentHeader';
 
 import { PoolUserPanel } from './PoolUserPanel';
@@ -57,11 +58,7 @@ export function TournamentLeaderboard() {
 
   return (
     <PageContent>
-      {isLoading && (
-        <Box align="center" pad="xlarge" justify="center">
-          <Spinner size="medium" />
-        </Box>
-      )}
+      {isLoading && <Spinner />}
       {!isLoading && initialFetchError && <div>{`Error: ${initialFetchError}`}</div>}
       {!isLoading && !initialFetchError && !tournament && (
         <Box height="medium" round="small" align="center" justify="center">

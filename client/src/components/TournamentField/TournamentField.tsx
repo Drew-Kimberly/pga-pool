@@ -1,8 +1,9 @@
-import { Box, Grid, Heading, PageContent, ResponsiveContext, Spinner, Text } from 'grommet';
+import { Box, Grid, Heading, PageContent, ResponsiveContext, Text } from 'grommet';
 import { CircleQuestion } from 'grommet-icons';
 import React, { useContext } from 'react';
 
 import { pgaPoolApi } from '../../api/pga-pool';
+import { Spinner } from '../Spinner';
 import { TournamentHeader } from '../TournamentHeader';
 
 import { PgaTournamentField } from '@drewkimberly/pga-pool-api';
@@ -47,11 +48,7 @@ export function TournamentField(props: TournamentFieldProps) {
 
   return (
     <PageContent>
-      {isLoading && (
-        <Box align="center" pad="xlarge" justify="center">
-          <Spinner size="medium" />
-        </Box>
-      )}
+      {isLoading && <Spinner />}
       {!isLoading && fetchError && <div>{`Error: ${fetchError}`}</div>}
       {!isLoading && !fetchError && !field && (
         <Box height="medium" round="small" align="center" justify="center">
