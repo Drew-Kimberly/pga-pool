@@ -6,27 +6,23 @@ import { ParentComponentProps } from '../../types';
 import { toScoreString } from '../utils';
 
 import { getRoundStatus } from './getRoundStatus';
+import { StartDuration } from './StartDuration';
 
-import { PoolUser } from '@drewkimberly/pga-pool-api';
+import { PgaTournament, PoolUser } from '@drewkimberly/pga-pool-api';
 
 export interface PoolUserPanelProps extends ParentComponentProps {
   user: PoolUser;
+  pgaTournament: PgaTournament;
   tournamentRound?: number;
 }
 
 /**
- * - Round Status:
- *     - N players active (with % complete)
- *     - No players active
- *     - Round Complete
+ * @TODO
  * - Score trends
  */
-function _PoolUserPanel({ user }: Omit<PoolUserPanelProps, 'children'>) {
+function _PoolUserPanel({ user, pgaTournament }: Omit<PoolUserPanelProps, 'children'>) {
   const size = useContext(ResponsiveContext);
-  const roundStatus = getRoundStatus(user.picks);
-  const playersActive = user.picks.filter(
-    (p) => !p.is_round_complete && p.score_thru !== null
-  ).length;
+  const roundStatus = getRoundStatus(user.picks, pgaTournament);
 
   return (
     <Box direction="row" height="100%">
@@ -35,18 +31,24 @@ function _PoolUserPanel({ user }: Omit<PoolUserPanelProps, 'children'>) {
           {user.user.nickname}
         </Text>
       </Box>
-      {roundStatus === 'not_started' && (
+      {roundStatus.status === 'not_started' && (
         <Box direction="row" fill="horizontal" align="center" pad={{ left: 'small' }}>
-          <Text size="small">Not Started</Text>
+          {roundStatus.teetimes[0] ? (
+            <Text size="small">
+              Starts in <StartDuration size="small" time={roundStatus.teetimes[0]} />
+            </Text>
+          ) : (
+            <Text size="small">Not Started</Text>
+          )}
         </Box>
       )}
-      {roundStatus === 'complete' && (
+      {roundStatus.status === 'complete' && (
         <Box direction="row" fill="horizontal" align="center" pad={{ left: 'small' }}>
           <Text size="small">Round Complete</Text>
           <FormCheckmark color="#32de84" />
         </Box>
       )}
-      {typeof roundStatus === 'number' && (
+      {roundStatus.status === 'in_progress' && (
         <Box fill="horizontal">
           <Box pad={{ left: 'small', top: 'small', bottom: 'xsmall' }} direction="row">
             <Text size="small">{size === 'small' ? 'Progress:' : 'Round Progress:'}</Text>
@@ -62,14 +64,14 @@ function _PoolUserPanel({ user }: Omit<PoolUserPanelProps, 'children'>) {
                   margin="xsmall"
                   overflow="hidden"
                 >
-                  <Text size="small">{`${roundStatus}% complete`}</Text>
+                  <Text size="small">{`${roundStatus.percentComplete}% complete`}</Text>
                 </Box>
               }
             >
               <Meter
                 type="bar"
                 background="light-2"
-                values={[{ value: roundStatus as number }]}
+                values={[{ value: roundStatus.percentComplete }]}
                 size="xxsmall"
                 thickness="xsmall"
                 alignSelf="center"
@@ -83,7 +85,7 @@ function _PoolUserPanel({ user }: Omit<PoolUserPanelProps, 'children'>) {
               size="small"
               margin={{ left: 'small' }}
               style={{ minWidth: 'fit-content' }}
-            >{`${playersActive} of ${user.picks.length}`}</Text>
+            >{`${roundStatus.playersActive.length} of ${user.picks.length}`}</Text>
           </Box>
         </Box>
       )}
@@ -94,6 +96,6 @@ function _PoolUserPanel({ user }: Omit<PoolUserPanelProps, 'children'>) {
   );
 }
 
-export function PoolUserPanel({ user, children }: PoolUserPanelProps) {
-  return <AccordionPanel header={<_PoolUserPanel user={user} />}>{children}</AccordionPanel>;
+export function PoolUserPanel({ children, ...rest }: PoolUserPanelProps) {
+  return <AccordionPanel header={<_PoolUserPanel {...rest} />}>{children}</AccordionPanel>;
 }

@@ -81,7 +81,12 @@ export function TournamentLeaderboard() {
 
           <Accordion margin={{ bottom: 'medium', top: 'medium' }}>
             {tournament?.pool_users.map((user) => (
-              <PoolUserPanel key={user.id} user={user} tournamentRound={round ?? undefined}>
+              <PoolUserPanel
+                key={user.id}
+                user={user}
+                pgaTournament={tournament.pga_tournament}
+                tournamentRound={round ?? undefined}
+              >
                 {user.picks.map((pick) => (
                   <Box key={pick.id} pad="small">
                     <Text>
