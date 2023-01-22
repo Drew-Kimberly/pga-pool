@@ -8,6 +8,7 @@ import { useInterval } from '../../hooks';
 import { Spinner } from '../Spinner';
 import { TournamentHeader } from '../TournamentHeader';
 
+import { PgaPlayerName } from './PgaPlayerName';
 import { PoolUserPanel } from './PoolUserPanel';
 
 import { PoolTournament } from '@drewkimberly/pga-pool-api';
@@ -85,10 +86,9 @@ export function TournamentLeaderboard() {
                 tournamentRound={round ?? undefined}
               >
                 {user.picks.map((pick) => (
-                  <Box key={pick.id} pad="small">
-                    <Text>
-                      {`${pick.pga_player.name}`} <Text weight={'bold'}>{pick.score_total}</Text>
-                    </Text>
+                  <Box key={pick.id} pad="small" direction="row">
+                    <PgaPlayerName player={pick} />
+                    <Text weight={'bold'}>{pick.score_total}</Text>
                   </Box>
                 ))}
               </PoolUserPanel>
