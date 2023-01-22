@@ -198,7 +198,7 @@ components:
           type: boolean
         status:
           type: string
-          enum: ['active', 'wd']
+          enum: ['active', 'wd', 'cut']
           example: 'active'
         is_round_complete:
           type: boolean
