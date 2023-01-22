@@ -33,13 +33,7 @@ function _PoolUserPanel({ user, pgaTournament }: Omit<PoolUserPanelProps, 'child
       </Box>
       {roundStatus.status === 'not_started' && (
         <Box direction="row" fill="horizontal" align="center" pad={{ left: 'small' }}>
-          {roundStatus.teetimes[0] ? (
-            <Text size="small">
-              Starts in <StartDuration size="small" time={roundStatus.teetimes[0]} />
-            </Text>
-          ) : (
-            <Text size="small">Not Started</Text>
-          )}
+          <StartDuration time={roundStatus.teetimes[0]} size="small" />
         </Box>
       )}
       {roundStatus.status === 'complete' && (
