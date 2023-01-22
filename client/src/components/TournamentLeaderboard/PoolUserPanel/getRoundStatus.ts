@@ -1,6 +1,10 @@
 import { DateTime } from 'luxon';
 
-import { PgaTournament, PgaTournamentPlayer } from '@drewkimberly/pga-pool-api';
+import {
+  PgaTournament,
+  PgaTournamentPlayer,
+  PgaTournamentPlayerStatusEnum as PlayerStatus,
+} from '@drewkimberly/pga-pool-api';
 
 export type RoundStatus<T extends 'not_started' | 'in_progress' | 'complete'> =
   T extends 'not_started'
@@ -19,17 +23,21 @@ export function getRoundStatus(
   picks: PgaTournamentPlayer[],
   tournament: PgaTournament
 ): RoundStatus<'not_started' | 'in_progress' | 'complete'> {
-  let holesCompleted = 0;
+  let totalHolesCompleted = 0;
+  let activePlayersHolesCompleted = 0;
   const teetimes: DateTime[] = [];
 
   for (const pick of picks) {
-    holesCompleted += pick.is_round_complete ? HOLES_PER_ROUND : pick.score_thru ?? 0;
+    const completedHoles = pick.is_round_complete ? HOLES_PER_ROUND : pick.score_thru ?? 0;
+    totalHolesCompleted += completedHoles;
+    activePlayersHolesCompleted += pick.status === PlayerStatus.Active ? completedHoles : 0;
+
     if (pick.tee_time) {
       teetimes.push(teeTimeToDate(pick.tee_time, tournament.date.timezone));
     }
   }
 
-  if (holesCompleted === 0) {
+  if (activePlayersHolesCompleted === 0) {
     teetimes.sort((t1, t2) => t1.toUnixInteger() - t2.toUnixInteger());
     return {
       status: 'not_started',
@@ -37,13 +45,13 @@ export function getRoundStatus(
     };
   }
 
-  if (holesCompleted === picks.length * HOLES_PER_ROUND) {
+  if (totalHolesCompleted === picks.length * HOLES_PER_ROUND) {
     return { status: 'complete' };
   }
 
   return {
     status: 'in_progress',
-    percentComplete: Math.round((holesCompleted / (picks.length * HOLES_PER_ROUND)) * 100),
+    percentComplete: Math.round((totalHolesCompleted / (picks.length * HOLES_PER_ROUND)) * 100),
     playersActive: picks.filter((p) => !p.is_round_complete && p.tee_time === null),
   };
 }

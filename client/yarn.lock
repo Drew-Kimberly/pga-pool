@@ -1194,10 +1194,10 @@
   resolved "https://registry.yarnpkg.com/@csstools/selector-specificity/-/selector-specificity-2.0.2.tgz#1bfafe4b7ed0f3e4105837e056e0a89b108ebe36"
   integrity sha512-IkpVW/ehM1hWKln4fCA3NzJU8KwD+kIOvPZA4cqxoJHtE21CCzjyp+Kxbu0i5I4tBNOlXPL9mjwnWlL0VEG4Fg==
 
-"@drewkimberly/pga-pool-api@0.0.1-f8c12bb":
-  version "0.0.1-f8c12bb"
-  resolved "https://registry.yarnpkg.com/@drewkimberly/pga-pool-api/-/pga-pool-api-0.0.1-f8c12bb.tgz#b8fa588cbe5445c36420c033293b82a10eb55855"
-  integrity sha512-yfNM0xkTRb4xluVDjjQpa3sc8cLCFmFsv93R6MZWYkJYF5RWBzwML5OyAncP2i9m8uKL+LzWhgylbXeT7JBtKA==
+"@drewkimberly/pga-pool-api@0.0.1-68cbdd4":
+  version "0.0.1-68cbdd4"
+  resolved "https://registry.yarnpkg.com/@drewkimberly/pga-pool-api/-/pga-pool-api-0.0.1-68cbdd4.tgz#1cb85408d5a0c74f54062b0eb637d3439310b81a"
+  integrity sha512-dGcmqN9wj0R/ObJAT6BxruB4h8oweWWbPILGtt8qtEjgqyBeuAje6mVvZ1e3ZIIE82qYaUigQCgFLmTi5VpIew==
 
 "@emotion/is-prop-valid@^1.1.0":
   version "1.2.0"

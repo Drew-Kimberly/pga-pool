@@ -6,7 +6,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@drewkimberly/pga-pool-api": "0.0.1-f8c12bb",
+    "@drewkimberly/pga-pool-api": "0.0.1-68cbdd4",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "13.4.0",
     "@testing-library/user-event": "14.4.3",
