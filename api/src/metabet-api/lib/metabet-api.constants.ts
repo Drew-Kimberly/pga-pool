@@ -10,4 +10,5 @@ export const playerMap: Record<string, string> = {
   'Matthias Schmid': 'Matti Schmid',
   'Nicolas Echavarria': 'Nico Echavarria',
   'Sung-Hoon Kang': 'Sung Kang',
+  'S.Y. Noh': 'Seung-Yul Noh',
 };
