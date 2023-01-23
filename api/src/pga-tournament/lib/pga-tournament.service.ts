@@ -22,9 +22,12 @@ export class PgaTournamentService {
 
   getCurrent(): Promise<PgaTournament | null> {
     const now = new Date(Date.now()).toDateString();
+    // Extend the end window 24 hours so pool players can view the results after a tournament completes.
+    const extendedEndDte = new Date(Date.now() - 1000 * 60 * 60 * 24).toDateString();
+
     return this.pgaTournamentRepo.findOneBy({
       start_date: LessThanOrEqual(now),
-      end_date: MoreThanOrEqual(now),
+      end_date: MoreThanOrEqual(extendedEndDte),
     });
   }
 
