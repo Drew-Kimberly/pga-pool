@@ -1,10 +1,11 @@
 import { PageHeader, Text } from 'grommet';
+import { DateTime } from 'luxon';
 
 import { PgaTournament } from '@drewkimberly/pga-pool-api';
 
-function toFriendlyDate(date: string): string {
-  const d = new Date(date).toDateString().split(' ');
-  return `${d[1]} ${d[2]}, ${d[3]}`;
+function toFriendlyDate(date: string, tz: string): string {
+  const t = DateTime.fromFormat(`${date} ${tz}`, 'y-MM-dd z');
+  return t.toLocal().toFormat('MMM d, y');
 }
 
 export interface TournamentHeaderProps {
@@ -20,8 +21,9 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
     <>
       <PageHeader title={headerText} size={'small'} />
       <Text size="medium" style={{ fontStyle: 'italic' }}>{`${toFriendlyDate(
-        tournament.date.start
-      )} - ${toFriendlyDate(tournament.date.end)}`}</Text>
+        tournament.date.start,
+        tournament.date.timezone
+      )} - ${toFriendlyDate(tournament.date.end, tournament.date.timezone)}`}</Text>
     </>
   );
 }
