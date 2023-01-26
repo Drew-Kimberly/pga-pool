@@ -1,11 +1,13 @@
 import { AccordionPanel, Box, Meter, ResponsiveContext, Text, Tip } from 'grommet';
 import { FormCheckmark } from 'grommet-icons';
-import { useContext } from 'react';
+import React from 'react';
 
+import { usePersistedState } from '../../../hooks';
 import { ParentComponentProps } from '../../types';
 import { toScoreString } from '../utils';
 
 import { getRoundStatus } from './getRoundStatus';
+import { ScoreTrendLine } from './ScoreTrendLine';
 import { StartDuration } from './StartDuration';
 
 import { PgaTournament, PoolUser } from '@drewkimberly/pga-pool-api';
@@ -20,9 +22,28 @@ export interface PoolUserPanelProps extends ParentComponentProps {
  * @TODO
  * - Score trends
  */
-function _PoolUserPanel({ user, pgaTournament }: Omit<PoolUserPanelProps, 'children'>) {
-  const size = useContext(ResponsiveContext);
+function _PoolUserPanel({
+  user,
+  pgaTournament,
+  tournamentRound,
+}: Omit<PoolUserPanelProps, 'children'>) {
   const roundStatus = getRoundStatus(user.picks, pgaTournament);
+  const [recentScores, setRecentScores] = usePersistedState<[number, number][]>(
+    [[user.score, roundStatus.status === 'in_progress' ? roundStatus.holesComplete : 0]],
+    `${user.user.id}-${pgaTournament.id}-${tournamentRound}-recent-scores`
+  );
+  const size = React.useContext(ResponsiveContext);
+
+  React.useEffect(() => {
+    if (
+      roundStatus.status === 'in_progress' &&
+      recentScores[recentScores.length - 1][1] !== roundStatus.holesComplete
+    ) {
+      setRecentScores([...recentScores, [user.score, roundStatus.holesComplete]]);
+    } else if (roundStatus.status !== 'in_progress') {
+      setRecentScores([]);
+    }
+  }, [user, roundStatus, recentScores]);
 
   return (
     <Box direction="row" height="100%">
@@ -83,9 +104,27 @@ function _PoolUserPanel({ user, pgaTournament }: Omit<PoolUserPanelProps, 'child
           </Box>
         </Box>
       )}
-      <Box pad="small" alignSelf="center" fill="horizontal">
-        <Text weight="bold" size="xlarge" alignSelf="end">{`${toScoreString(user.score)}`}</Text>
-      </Box>
+      {size !== 'small' && roundStatus.status === 'in_progress' && recentScores.length > 2 ? (
+        <Box direction="row" fill="horizontal" pad="small" alignSelf="center" alignContent="center">
+          <Box fill="horizontal" align="end">
+            <ScoreTrendLine scores={recentScores.map((tuple) => tuple[0])} />
+          </Box>
+          <Box
+            fill="horizontal"
+            align="center"
+            pad={{ right: 'small' }}
+            style={{ maxWidth: '75px' }}
+          >
+            <Text weight="bold" size="xlarge" alignSelf="end">{`${toScoreString(
+              user.score
+            )}`}</Text>
+          </Box>
+        </Box>
+      ) : (
+        <Box pad="small" alignSelf="center" fill="horizontal">
+          <Text weight="bold" size="xlarge" alignSelf="end">{`${toScoreString(user.score)}`}</Text>
+        </Box>
+      )}
     </Box>
   );
 }
