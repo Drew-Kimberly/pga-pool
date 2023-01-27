@@ -1,6 +1,7 @@
 import { FindOptionsWhere, Repository } from 'typeorm';
 
 import { NullStringValue } from '../../pga-tour-api/lib/pga-tour-api.constants';
+import { PgaApiProjectedPlayerPoints } from '../../pga-tour-api/lib/pga-tour-api.interface';
 import { PgaTourApiService } from '../../pga-tour-api/lib/pga-tour-api.service';
 import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
 
@@ -71,6 +72,7 @@ export class PgaTournamentPlayerService {
       pgaTournament.year,
       pgaTournament.tournament_id
     );
+    const projectedFedexPoints = await this.tryGetProjectedFedexCupPoints(pgaTournament.id);
 
     for (let i = 0; i < players.length; i += updateBatchSize) {
       const batch = players.slice(i, i + updateBatchSize);
@@ -96,6 +98,9 @@ export class PgaTournamentPlayerService {
             starting_hole: player.starting_hole,
             status: PlayerStatus.Cut,
             tee_time: null,
+            projected_fedex_cup_points: this.coerceFedexCupPoints(
+              projectedFedexPoints[player.pga_player.id]?.projectedEventPoints
+            ),
           });
         }
 
@@ -119,6 +124,9 @@ export class PgaTournamentPlayerService {
             starting_hole: Number(leaderboardEntry.startingHoleId),
             status: leaderboardEntry.status as PlayerStatus,
             tee_time: leaderboardEntry.teeTime,
+            projected_fedex_cup_points: this.coerceFedexCupPoints(
+              projectedFedexPoints[player.pga_player.id]?.projectedEventPoints
+            ),
           },
           repo
         );
@@ -126,6 +134,29 @@ export class PgaTournamentPlayerService {
 
       await Promise.all(updates);
     }
+  }
+
+  private async tryGetProjectedFedexCupPoints(pgaTournamentId: string) {
+    let points: PgaApiProjectedPlayerPoints[];
+    try {
+      points = await this.pgaTourApi.getProjectedFedexCupPoints().then((r) => r.points);
+    } catch (e) {
+      this.logger.error(
+        `Error fetching projected FedEx Cup points from PGA Tour API: ${e}`,
+        e.stack
+      );
+      return {};
+    }
+
+    const playerPointMap: Record<number, PgaApiProjectedPlayerPoints> = {};
+
+    for (const playerPoints of points) {
+      if (playerPoints.tournamentId === this.toProjectedPointTournamentId(pgaTournamentId)) {
+        playerPointMap[Number(playerPoints.playerId)] = playerPoints;
+      }
+    }
+
+    return playerPointMap;
   }
 
   private coerceNumericString(val: string): number | null {
@@ -142,5 +173,14 @@ export class PgaTournamentPlayerService {
     }
 
     return this.coerceNumericString(score);
+  }
+
+  private toProjectedPointTournamentId(tournamentId: string): string {
+    const [tourneyId, year] = tournamentId.split('-');
+    return `R${year}${tourneyId}`;
+  }
+
+  private coerceFedexCupPoints(points: string): number {
+    return !isNaN(Number(points)) ? Number(points) : 0;
   }
 }

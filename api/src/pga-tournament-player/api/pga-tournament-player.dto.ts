@@ -16,6 +16,7 @@ export class PgaTournamentPlayerDto {
   score_total: number | null;
   score_thru: number | null;
   current_position: string | null;
+  projected_fedex_cup_points: number;
   withdrawn: boolean;
   pga_player: PgaPlayerDto;
   pga_tournament: PgaTournamentDto;

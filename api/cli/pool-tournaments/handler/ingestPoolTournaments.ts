@@ -105,6 +105,7 @@ export async function ingestPoolTournaments(year?: string, pgaTournamentId?: str
             starting_hole: existingPgaTourneyPlayer?.starting_hole ?? 1,
             status: existingPgaTourneyPlayer?.status ?? PlayerStatus.Active,
             tee_time: existingPgaTourneyPlayer?.tee_time ?? null,
+            projected_fedex_cup_points: existingPgaTourneyPlayer?.projected_fedex_cup_points ?? 0,
           },
           txManager.getRepository(PgaTournamentPlayer)
         );
@@ -147,6 +148,7 @@ export async function ingestPoolTournaments(year?: string, pgaTournamentId?: str
             id: existingPoolUser?.id as string,
             pool_tournament: { id: poolTournament.id } as PoolTournament,
             score: existingPoolUser?.score ?? null,
+            projected_fedex_cup_points: existingPoolUser?.projected_fedex_cup_points ?? 0,
             picks: existingPoolUser?.picks ?? [],
             user: { id: userId } as User,
           },

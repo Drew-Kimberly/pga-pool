@@ -100,6 +100,8 @@ export class PoolTournamentController extends ControllerBase {
     return {
       id: poolUser.id,
       score: poolUser.score,
+      projected_fedex_cup_points:
+        typeof poolUser.score === 'number' ? poolUser.projected_fedex_cup_points : null,
       user: this.toUserDto(poolUser.user),
       picks: poolUser.picks.map(this.toPoolUserPickDto.bind(this)),
     };
@@ -120,6 +122,7 @@ export class PoolTournamentController extends ControllerBase {
       pga_tournament: this.toPgaTournamentDto(player.pga_tournament),
       score_thru: player.score_thru,
       score_total: player.score_total,
+      projected_fedex_cup_points: player.projected_fedex_cup_points,
       starting_hole: player.starting_hole,
       status: player.status,
       tee_time: player.tee_time,
