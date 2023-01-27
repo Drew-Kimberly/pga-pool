@@ -115,11 +115,7 @@ export class PgaTournamentPlayerService {
                 : leaderboardEntry.positionCurrent,
             current_round: this.coerceNumericString(leaderboardEntry.playerRoundId),
             is_round_complete: leaderboardEntry.roundComplete,
-            score_thru: leaderboardEntry.thru?.endsWith('*')
-              ? this.coerceNumericString(
-                  leaderboardEntry.thru.substring(0, leaderboardEntry.thru.length - 1)
-                )
-              : this.coerceNumericString(leaderboardEntry.thru),
+            score_thru: this.coerceThruValue(leaderboardEntry.thru),
             score_total: this.coerceScoreString(leaderboardEntry.total),
             starting_hole: Number(leaderboardEntry.startingHoleId),
             status: leaderboardEntry.status as PlayerStatus,
@@ -173,6 +169,20 @@ export class PgaTournamentPlayerService {
     }
 
     return this.coerceNumericString(score);
+  }
+
+  private coerceThruValue(thru: string): number | null {
+    if (!thru) {
+      return null;
+    }
+
+    if (thru === '--*') {
+      return 0;
+    }
+
+    return thru.endsWith('*')
+      ? this.coerceNumericString(thru.substring(0, thru.length - 1))
+      : this.coerceNumericString(thru);
   }
 
   private toProjectedPointTournamentId(tournamentId: string): string {
