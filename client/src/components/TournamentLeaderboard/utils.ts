@@ -15,3 +15,13 @@ export function toScoreString(score: number | string | null | undefined): string
 
   return `${numScore}`;
 }
+
+export function toFedexCupPointsString(points: number | null | undefined): string {
+  const numPoints = Number(points);
+
+  if (isNaN(numPoints)) {
+    return '--';
+  }
+
+  return `${Math.round(numPoints * 10) / 10}`;
+}

@@ -1,15 +1,18 @@
 /* eslint-disable no-unreachable */
-import { Accordion, Box, Notification, PageContent, Text } from 'grommet';
+import { Accordion, Box, Notification, PageContent, ResponsiveContext, Text } from 'grommet';
 import { CircleInformation } from 'grommet-icons';
 import React from 'react';
 
 import { pgaPoolApi } from '../../api/pga-pool';
-import { useInterval } from '../../hooks';
+import { useInterval, usePersistedState } from '../../hooks';
 import { Spinner } from '../Spinner';
+import { Toggle } from '../Toggle';
 import { TournamentHeader } from '../TournamentHeader';
 
 import { PgaPlayerName } from './PgaPlayerName';
 import { PoolUserPanel } from './PoolUserPanel';
+import { RankType } from './types';
+import { toFedexCupPointsString, toScoreString } from './utils';
 
 import { PoolTournament } from '@drewkimberly/pga-pool-api';
 
@@ -17,9 +20,11 @@ const POLL_INTERVAL = 60 * 1000; // 1 min
 
 export function TournamentLeaderboard() {
   const [tournament, setTournament] = React.useState<PoolTournament | undefined>(undefined);
+  const [rankType, setRankType] = usePersistedState<RankType>('score', `rank-type-selection`);
   const [isLoading, setIsLoading] = React.useState(true);
   const [initialFetchError, setInitialFetchError] = React.useState<Error | undefined>(undefined);
   const [pollErrorCount, setPollErrorCount] = React.useState(0);
+  const size = React.useContext(ResponsiveContext);
 
   React.useEffect(() => {
     async function fetchPoolTournaments() {
@@ -55,6 +60,18 @@ export function TournamentLeaderboard() {
     }
   }, POLL_INTERVAL);
 
+  React.useMemo(() => {
+    tournament?.pool_users.sort((a, b) => {
+      if (rankType === 'score') {
+        return a.score - b.score;
+      } else if (rankType === 'fedex_cup_points') {
+        return (b.projected_fedex_cup_points ?? 0) - (a.projected_fedex_cup_points ?? 0);
+      } else {
+        throw new Error(`Unsupported leaderboard rank type: ${rankType}`);
+      }
+    });
+  }, [rankType, tournament]);
+
   const round = tournament?.pool_users[0]?.picks[0].current_round ?? undefined;
 
   return (
@@ -77,6 +94,22 @@ export function TournamentLeaderboard() {
             <Notification status="critical" message="Error refreshing tournamnet scores" />
           )}
 
+          <Box
+            fill="horizontal"
+            align={size === 'small' ? 'start' : 'end'}
+            pad={size === 'small' ? { top: 'large', bottom: 'medium' } : undefined}
+          >
+            <Toggle
+              label={
+                <Text size="small">
+                  {size !== 'small' ? 'FedEx Cup Points (projected)' : 'FedEx Points'}
+                </Text>
+              }
+              checked={rankType === 'fedex_cup_points'}
+              onChange={(event) => setRankType(event.target.checked ? 'fedex_cup_points' : 'score')}
+            />
+          </Box>
+
           <Accordion margin={{ bottom: 'medium', top: 'medium' }}>
             {tournament?.pool_users.map((user) => (
               <PoolUserPanel
@@ -84,11 +117,16 @@ export function TournamentLeaderboard() {
                 user={user}
                 pgaTournament={tournament.pga_tournament}
                 tournamentRound={round ?? undefined}
+                rankType={rankType}
               >
                 {user.picks.map((pick) => (
                   <Box key={pick.id} pad="small" direction="row">
                     <PgaPlayerName player={pick} />
-                    <Text weight={'bold'}>{pick.score_total}</Text>
+                    <Text weight={'bold'}>
+                      {rankType === 'score'
+                        ? toScoreString(pick.score_total)
+                        : toFedexCupPointsString(pick.projected_fedex_cup_points)}
+                    </Text>
                   </Box>
                 ))}
               </PoolUserPanel>
