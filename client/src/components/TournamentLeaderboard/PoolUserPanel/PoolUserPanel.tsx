@@ -3,7 +3,8 @@ import { FormCheckmark } from 'grommet-icons';
 import { useContext } from 'react';
 
 import { ParentComponentProps } from '../../types';
-import { toScoreString } from '../utils';
+import { RankType } from '../types';
+import { toFedexCupPointsString, toScoreString } from '../utils';
 
 import { getRoundStatus } from './getRoundStatus';
 import { StartDuration } from './StartDuration';
@@ -14,13 +15,14 @@ export interface PoolUserPanelProps extends ParentComponentProps {
   user: PoolUser;
   pgaTournament: PgaTournament;
   tournamentRound?: number;
+  rankType: RankType;
 }
 
 /**
  * @TODO
  * - Score trends
  */
-function _PoolUserPanel({ user, pgaTournament }: Omit<PoolUserPanelProps, 'children'>) {
+function _PoolUserPanel({ user, pgaTournament, rankType }: Omit<PoolUserPanelProps, 'children'>) {
   const size = useContext(ResponsiveContext);
   const roundStatus = getRoundStatus(user.picks, pgaTournament);
 
@@ -84,7 +86,11 @@ function _PoolUserPanel({ user, pgaTournament }: Omit<PoolUserPanelProps, 'child
         </Box>
       )}
       <Box pad="small" alignSelf="center" fill="horizontal">
-        <Text weight="bold" size="xlarge" alignSelf="end">{`${toScoreString(user.score)}`}</Text>
+        <Text weight="bold" size="xlarge" alignSelf="end">{`${
+          rankType === 'score'
+            ? toScoreString(user.score)
+            : toFedexCupPointsString(user.projected_fedex_cup_points)
+        }`}</Text>
       </Box>
     </Box>
   );
