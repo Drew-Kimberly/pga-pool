@@ -14,7 +14,12 @@ export type RoundStatus<T extends 'not_started' | 'in_progress' | 'complete'> =
         teetimes: DateTime[];
       }
     : T extends 'in_progress'
-    ? { status: T; percentComplete: number; playersActive: PgaTournamentPlayer[] }
+    ? {
+        status: T;
+        holesComplete: number;
+        percentComplete: number;
+        playersActive: PgaTournamentPlayer[];
+      }
     : { status: T };
 
 const HOLES_PER_ROUND = 18;
@@ -51,6 +56,7 @@ export function getRoundStatus(
 
   return {
     status: 'in_progress',
+    holesComplete: totalHolesCompleted,
     percentComplete: Math.round((totalHolesCompleted / (picks.length * HOLES_PER_ROUND)) * 100),
     playersActive: picks.filter((p) => !p.is_round_complete && p.tee_time === null),
   };
