@@ -1,5 +1,7 @@
 import { FindOptionsWhere, Repository } from 'typeorm';
 
+import { PoolUserPick } from '../../pool-user-pick/lib/pool-user-pick.entity';
+
 import { PoolUser } from './pool-user.entity';
 import { PoolUserFilter } from './pool-user.interface';
 
@@ -59,11 +61,8 @@ export class PoolUserService {
         return this.upsert(
           {
             ...user,
-            score: user.picks.reduce<number | null>((total, pick) => {
-              return total === null
-                ? pick.pool_tournament_player.pga_tournament_player.score_total
-                : total + (pick.pool_tournament_player.pga_tournament_player.score_total ?? 0);
-            }, null),
+            score: this.aggregateScore(user.picks),
+            projected_fedex_cup_points: this.aggregateProjectedFedexPoints(user.picks),
           },
           repo
         );
@@ -71,5 +70,19 @@ export class PoolUserService {
 
       await Promise.all(updates);
     }
+  }
+
+  private aggregateScore(picks: PoolUserPick[]): number | null {
+    return picks.reduce<number | null>((total, pick) => {
+      return total === null
+        ? pick.pool_tournament_player.pga_tournament_player.score_total
+        : total + (pick.pool_tournament_player.pga_tournament_player.score_total ?? 0);
+    }, null);
+  }
+
+  private aggregateProjectedFedexPoints(picks: PoolUserPick[]): number {
+    return picks.reduce<number>((total, pick) => {
+      return total + pick.pool_tournament_player.pga_tournament_player.projected_fedex_cup_points;
+    }, 0);
   }
 }

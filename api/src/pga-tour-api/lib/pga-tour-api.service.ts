@@ -3,6 +3,7 @@ import { lastValueFrom } from 'rxjs';
 import {
   PgaApiPlayer,
   PgaApiPlayersResponse,
+  PgaApiProjectedFedexCupPointsResponse,
   PgaApiTournamentLeaderboardResponse,
   PgaApiTournamentScheduleResponse,
 } from './pga-tour-api.interface';
@@ -40,6 +41,12 @@ export class PgaTourApiService {
       params,
       headers: { 'Accept-Encoding': 'gzip,deflate,compress' },
     });
+    return lastValueFrom(response$).then((res) => res.data);
+  }
+
+  async getProjectedFedexCupPoints(): Promise<PgaApiProjectedFedexCupPointsResponse> {
+    const url = `https://statdata.pgatour.com/r/current/projected_points/2671.json`;
+    const response$ = this.httpClient.get<PgaApiProjectedFedexCupPointsResponse>(url);
     return lastValueFrom(response$).then((res) => res.data);
   }
 }

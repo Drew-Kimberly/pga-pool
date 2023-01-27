@@ -227,6 +227,9 @@ components:
           type: string
           nullable: true
           example: 'T3'
+        projected_fedex_cup_points:
+          type: number
+          example: 130.57
         withdrawn:
           type: boolean
         pga_player:
@@ -294,6 +297,10 @@ components:
         score:
           type: number
           example: -21
+        projected_fedex_cup_points:
+          type: number
+          nullable: true
+          example: 730.57
         user:
           $ref: '#/components/schemas/User'
         picks:

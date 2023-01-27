@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
+import { CoerceNumericColumnTransformer } from '../../common/db';
 import { PgaPlayer } from '../../pga-player/lib/pga-player.entity';
 import { PgaTournament } from '../../pga-tournament/lib/pga-tournament.entity';
 
@@ -40,6 +41,15 @@ export class PgaTournamentPlayer {
 
   @Column({ type: 'varchar', length: 16, nullable: true })
   current_position: string | null;
+
+  @Column({
+    type: 'decimal',
+    precision: 8,
+    scale: 3,
+    default: 0,
+    transformer: new CoerceNumericColumnTransformer(),
+  })
+  projected_fedex_cup_points: number;
 
   @JoinColumn({ name: 'pga_player' })
   @ManyToOne(() => PgaPlayer, { eager: true })

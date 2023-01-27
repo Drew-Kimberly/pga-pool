@@ -98,3 +98,34 @@ export interface PgaApiTournamentLeaderboardResponse {
   generated_time: string;
   rows: PgaApiTournamentLeaderboardRow[];
 }
+
+export interface PgaApiProjectedPlayerPoints {
+  playerId: string;
+  firstName: string;
+  lastName: string;
+  /**
+   * @note empty when player is not participating in the current tournament
+   * @note R{year}{tourneyId} format
+   * @example "R2023004"
+   */
+  tournamentId: string | '';
+  tournamentName: string | '';
+  /**
+   * @example "T3"
+   */
+  playerPosition: string | 'CUT' | '';
+  /**
+   * @example "52.000"
+   */
+  projectedEventPoints: string;
+}
+
+export interface PgaApiProjectedFedexCupPointsResponse {
+  seasonYear: number;
+  /**
+   * @example "2023-01-26T19:16:21"
+   */
+  lastUpdated: string;
+
+  points: PgaApiProjectedPlayerPoints[];
+}
