@@ -1,7 +1,7 @@
 import { RegisteredDatabaseModule } from '../src/database/registered-database.module';
 import { MetabetApiModule } from '../src/metabet-api/lib/metabet-api.module';
 import { PgaPlayerModule } from '../src/pga-player/lib/pga-player.module';
-import { PgaTourApiModule } from '../src/pga-tour-api/lib/pga-tour-api.module';
+import { PgaTourApiModule } from '../src/pga-tour-api/lib/v2/pga-tour-api.module';
 import { PgaTournamentModule } from '../src/pga-tournament/lib/pga-tournament.module';
 import { PgaTournamentPlayerModule } from '../src/pga-tournament-player/lib/pga-tournament-player.module';
 import { PoolTournamentModule } from '../src/pool-tournament/lib/pool-tournament.module';

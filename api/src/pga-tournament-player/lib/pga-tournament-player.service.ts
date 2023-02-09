@@ -1,8 +1,11 @@
 import { FindOptionsWhere, Repository } from 'typeorm';
 
-import { NullStringValue } from '../../pga-tour-api/lib/pga-tour-api.constants';
-import { PgaApiProjectedPlayerPoints } from '../../pga-tour-api/lib/pga-tour-api.interface';
-import { PgaTourApiService } from '../../pga-tour-api/lib/pga-tour-api.service';
+import { NullStringValue } from '../../pga-tour-api/lib/v2/pga-tour-api.constants';
+import {
+  PgaApiProjectedPlayerPoints,
+  PgaApiTournamentLeaderboardRow,
+} from '../../pga-tour-api/lib/v2/pga-tour-api.interface';
+import { PgaTourApiService } from '../../pga-tour-api/lib/v2/pga-tour-api.service';
 import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
 
 import { PgaTournamentPlayer } from './pga-tournament-player.entity';
@@ -77,8 +80,8 @@ export class PgaTournamentPlayerService {
     for (let i = 0; i < players.length; i += updateBatchSize) {
       const batch = players.slice(i, i + updateBatchSize);
       const updates = batch.map((player) => {
-        const leaderboardEntry = pgaLeaderboard.rows.find(
-          (r) => r.playerId === player.pga_player.id.toString()
+        const leaderboardEntry = pgaLeaderboard.leaderboard.players.find(
+          (r) => r.id === player.pga_player.id.toString()
         );
 
         if (!leaderboardEntry) {
@@ -107,19 +110,16 @@ export class PgaTournamentPlayerService {
         return this.upsert(
           {
             ...player,
-            active: leaderboardEntry.isActive,
-            current_hole: this.coerceNumericString(leaderboardEntry.currentHoleId),
+            active: leaderboardEntry.playerState === 'ACTIVE',
+            current_hole: leaderboardEntry.thruSort >= 18 ? null : leaderboardEntry.thruSort + 1,
             current_position:
-              leaderboardEntry.positionCurrent === NullStringValue
-                ? null
-                : leaderboardEntry.positionCurrent,
-            current_round: this.coerceNumericString(leaderboardEntry.playerRoundId),
-            is_round_complete: leaderboardEntry.roundComplete,
-            score_thru: this.coerceThruValue(leaderboardEntry.thru),
-            score_total: this.coerceScoreString(leaderboardEntry.total),
-            starting_hole: Number(leaderboardEntry.startingHoleId),
-            status: leaderboardEntry.status as PlayerStatus,
-            tee_time: leaderboardEntry.teeTime,
+              leaderboardEntry.position === NullStringValue ? null : leaderboardEntry.position,
+            current_round: leaderboardEntry.currentRound,
+            is_round_complete: leaderboardEntry.thruSort >= 18,
+            score_thru: Math.min(18, leaderboardEntry.thruSort),
+            score_total: leaderboardEntry.totalSort,
+            status: this.coercePlayerStatus(leaderboardEntry.playerState),
+            tee_time: leaderboardEntry.teeTime === -1 ? null : leaderboardEntry.teeTime,
             projected_fedex_cup_points: this.coerceFedexCupPoints(
               projectedFedexPoints[player.pga_player.id]?.projectedEventPoints
             ),
@@ -157,6 +157,14 @@ export class PgaTournamentPlayerService {
 
   private coerceNumericString(val: string): number | null {
     return isNaN(Number(val)) ? null : Number(val);
+  }
+
+  private coercePlayerStatus(val: PgaApiTournamentLeaderboardRow['playerState']): PlayerStatus {
+    const map: Record<PgaApiTournamentLeaderboardRow['playerState'], PlayerStatus> = {
+      ACTIVE: PlayerStatus.Active,
+    };
+
+    return map[val];
   }
 
   private coerceScoreString(score: string): number | null {

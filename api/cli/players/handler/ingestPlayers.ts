@@ -1,5 +1,5 @@
 import { PgaPlayerService } from '../../../src/pga-player/lib/pga-player.service';
-import { PgaTourApiService } from '../../../src/pga-tour-api/lib/pga-tour-api.service';
+import { PgaTourApiService } from '../../../src/pga-tour-api/lib/v2/pga-tour-api.service';
 import { PgaPoolCliModule } from '../../cli.module';
 
 import { Logger } from '@nestjs/common';

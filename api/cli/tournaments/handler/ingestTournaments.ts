@@ -1,5 +1,5 @@
-import { PgaApiTourTournament } from '../../../src/pga-tour-api/lib/pga-tour-api.interface';
-import { PgaTourApiService } from '../../../src/pga-tour-api/lib/pga-tour-api.service';
+import { PgaApiTourTournament } from '../../../src/pga-tour-api/lib/v2/pga-tour-api.interface';
+import { PgaTourApiService } from '../../../src/pga-tour-api/lib/v2/pga-tour-api.service';
 import { PgaTournamentFormat } from '../../../src/pga-tournament/lib/pga-tournament.interface';
 import { PgaTournamentService } from '../../../src/pga-tournament/lib/pga-tournament.service';
 import { PgaPoolCliModule } from '../../cli.module';
