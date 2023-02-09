@@ -1,4 +1,4 @@
-import { PgaTourApiModule } from '../../pga-tour-api/lib/pga-tour-api.module';
+import { PgaTourApiModule } from '../../pga-tour-api/lib/v2/pga-tour-api.module';
 import { PgaTournamentModule } from '../../pga-tournament/lib/pga-tournament.module';
 
 import { PgaTournamentPlayer } from './pga-tournament-player.entity';

@@ -59,20 +59,13 @@ export interface PgaApiTournamentScheduleResponse {
 }
 
 export interface PgaApiTournamentLeaderboardRow {
-  isActive: boolean;
-  status: 'active' | 'wd' | 'cut';
-  roundComplete: boolean;
-  playerId: string;
-  groupId: string;
-  tournamentRoundId: string;
-  playerRoundId: string;
-  currentHoleId: string;
-  startingHoleId: string;
+  /** @note PGA Player ID */
+  id: string;
   /**
    * @example "T3"
    * @note can be empty "--" value
    */
-  positionCurrent: string;
+  position: string;
   /**
    * @note can be empty "--" value
    * @example "+1"
@@ -80,23 +73,45 @@ export interface PgaApiTournamentLeaderboardRow {
    * @example "E"
    */
   total: string;
-  /** @note can be empty "--" value */
+  totalSort: number;
+  /** @note can be empty "--" value or "F" for finished */
   thru: string;
-  teeTime: string | null;
+  /** @note value of 19 denotes finished */
+  thruSort: number;
   /**
-   * @note score of current round.
-   * @note can be empty "--" value
+   * @note the round score, I believe
    */
-  round: string;
+  score: string;
+  scoreSort: number;
+  /**
+   * @note teeTime is -1 when unavailable.
+   */
+  teeTime: string | -1;
+  courseId: string;
+  groupNumber: number;
+  currentRound: number;
+  /** @example "R1" */
+  roundHeader: string;
+  /** @example "R1 Completed" */
+  roundStatus: string;
+  playerState: 'ACTIVE';
+  totalStrokes: string;
 }
 
 export interface PgaApiTournamentLeaderboardResponse {
-  format: Exclude<PgaApiTourTournament['format'], ''>;
-  totalRounds: number;
-  year: string;
-  /** @example "2023-01-09T03:54:26.314Z" */
-  generated_time: string;
-  rows: PgaApiTournamentLeaderboardRow[];
+  /**
+   * @note formatted "R{year}{tournamentId}"
+   * @example "R2023003"
+   */
+  leaderboardId: string;
+  leaderboard: {
+    /** @example "America/Los_Angeles" */
+    timezone: string;
+    roundStatus: 'IN_PROGRESS';
+    tournamentStatus: 'IN_PROGRESS';
+    formatType: 'STROKE_PLAY';
+    players: PgaApiTournamentLeaderboardRow[];
+  };
 }
 
 export interface PgaApiProjectedPlayerPoints {

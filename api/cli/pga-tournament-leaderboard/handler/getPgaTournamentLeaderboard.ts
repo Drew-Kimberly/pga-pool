@@ -1,4 +1,4 @@
-import { PgaTourApiService } from '../../../src/pga-tour-api/lib/pga-tour-api.service';
+import { PgaTourApiService } from '../../../src/pga-tour-api/lib/v2/pga-tour-api.service';
 import { PgaTournamentService } from '../../../src/pga-tournament/lib/pga-tournament.service';
 import { PgaPoolCliModule } from '../../cli.module';
 import { outputJson } from '../../utils';
