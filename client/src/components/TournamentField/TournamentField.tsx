@@ -64,7 +64,7 @@ export function TournamentField(props: TournamentFieldProps) {
 
           {Object.entries(field.player_tiers).map(([tier, players]) => (
             <>
-              <Heading level="3">{`Tier ${tier}`}</Heading>
+              <Heading level="3">{`Tier ${tier === '0' ? '🐯' : tier}`}</Heading>
               <Grid
                 columns={{ count: size !== 'small' ? 3 : 2, size: 'auto' }}
                 margin={{ bottom: 'medium' }}
