@@ -81,7 +81,7 @@ export class PgaTournamentPlayerService {
       const batch = players.slice(i, i + updateBatchSize);
       const updates = batch.map((player) => {
         const leaderboardEntry = pgaLeaderboard.leaderboard.players.find(
-          (r) => r.id === player.pga_player.id.toString()
+          (r) => r.id === this.coercePgaPlayerId(player.pga_player.id.toString())
         );
 
         if (!leaderboardEntry) {
@@ -155,10 +155,6 @@ export class PgaTournamentPlayerService {
     return playerPointMap;
   }
 
-  private coerceNumericString(val: string): number | null {
-    return isNaN(Number(val)) ? null : Number(val);
-  }
-
   private coercePlayerStatus(val: PgaApiTournamentLeaderboardRow['playerState']): PlayerStatus {
     const map: Record<PgaApiTournamentLeaderboardRow['playerState'], PlayerStatus> = {
       ACTIVE: PlayerStatus.Active,
@@ -167,30 +163,12 @@ export class PgaTournamentPlayerService {
     return map[val];
   }
 
-  private coerceScoreString(score: string): number | null {
-    if (score.startsWith('+')) {
-      return Number(score.substring(1));
+  private coercePgaPlayerId(id: string) {
+    if (id.length === 4) {
+      return `0${id}`;
     }
 
-    if (score.toUpperCase() === 'E') {
-      return 0;
-    }
-
-    return this.coerceNumericString(score);
-  }
-
-  private coerceThruValue(thru: string): number | null {
-    if (!thru) {
-      return null;
-    }
-
-    if (thru === '--*') {
-      return 0;
-    }
-
-    return thru.endsWith('*')
-      ? this.coerceNumericString(thru.substring(0, thru.length - 1))
-      : this.coerceNumericString(thru);
+    return id;
   }
 
   private toProjectedPointTournamentId(tournamentId: string): string {
