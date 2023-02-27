@@ -14,3 +14,7 @@ export const playerMap: Record<string, string> = {
   'Matthys Daffue': 'MJ Daffue',
   'Benjamin Silverman': 'Ben Silverman',
 };
+
+export const tournamentMap: Record<string, string> = {
+  'arnold palmer': 'arnold palmer invitational',
+};

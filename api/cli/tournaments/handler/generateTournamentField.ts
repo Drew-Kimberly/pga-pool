@@ -1,5 +1,6 @@
 import fs from 'fs';
 
+import { tournamentMap } from '../../../src/metabet-api/lib/metabet-api.constants';
 import { MetabetApiService } from '../../../src/metabet-api/lib/metabet-api.service';
 import { PgaPlayerService } from '../../../src/pga-player/lib/pga-player.service';
 import { PgaTournamentService } from '../../../src/pga-tournament/lib/pga-tournament.service';
@@ -27,9 +28,14 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
 
   const tournamentOdds = (await metabetApiService.getOdds()).find(
     (o) =>
-      [pgaTournament.full_name.toLowerCase(), pgaTournament.short_name.toLowerCase()].includes(
-        o.tournamentName.toLowerCase()
-      ) && pgaTournament.year === o.year
+      [
+        pgaTournament.full_name.toLowerCase(),
+        pgaTournament.short_name.toLowerCase(),
+        tournamentMap[pgaTournament.full_name.toLowerCase()],
+        tournamentMap[pgaTournament.short_name.toLowerCase()],
+      ]
+        .filter(Boolean)
+        .includes(o.tournamentName.toLowerCase()) && pgaTournament.year === o.year
   );
 
   if (!tournamentOdds) {
