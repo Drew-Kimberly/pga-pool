@@ -16,5 +16,5 @@ export const playerMap: Record<string, string> = {
 };
 
 export const tournamentMap: Record<string, string> = {
-  'arnold palmer': 'arnold palmer invitational',
+  'arnold palmer': 'arnold palmer invitational pres. by mastercard',
 };
