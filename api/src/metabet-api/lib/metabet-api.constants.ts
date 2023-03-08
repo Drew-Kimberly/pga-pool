@@ -13,6 +13,8 @@ export const playerMap: Record<string, string> = {
   'S.Y. Noh': 'Seung-Yul Noh',
   'Matthys Daffue': 'MJ Daffue',
   'Benjamin Silverman': 'Ben Silverman',
+  'Harold Varner': 'Harold Varner III',
+  'Robert Macintyre': 'Robert MacIntyre',
 };
 
 export const tournamentMap: Record<string, string> = {
