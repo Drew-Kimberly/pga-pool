@@ -15,6 +15,7 @@ export const playerMap: Record<string, string> = {
   'Benjamin Silverman': 'Ben Silverman',
   'Harold Varner': 'Harold Varner III',
   'Robert Macintyre': 'Robert MacIntyre',
+  'Samuel Stevens': 'Sam Stevens',
 };
 
 export const tournamentMap: Record<string, string> = {
