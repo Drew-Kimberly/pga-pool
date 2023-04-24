@@ -1,6 +1,7 @@
 import fs from 'fs';
 
 import { tournamentMap } from '../../../src/metabet-api/lib/metabet-api.constants';
+import { OddsLocation, OddsProvider } from '../../../src/metabet-api/lib/metabet-api.interface';
 import { MetabetApiService } from '../../../src/metabet-api/lib/metabet-api.service';
 import { PgaPlayerService } from '../../../src/pga-player/lib/pga-player.service';
 import { PgaTournamentService } from '../../../src/pga-tournament/lib/pga-tournament.service';
@@ -26,7 +27,9 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
     throw new Error(`No PGA Tournament (ID: ${pgaTournamentId}) found!`);
   }
 
-  const tournamentOdds = (await metabetApiService.getOdds()).find(
+  const tournamentOdds = (
+    await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.DraftKings)
+  ).find(
     (o) =>
       [
         pgaTournament.full_name.toLowerCase(),
@@ -96,7 +99,9 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
     const entries = Object.entries(player);
     entries.sort((a, b) => (fromOddsString(a[1].odds) <= fromOddsString(b[1].odds) ? -1 : 1));
     for (let i = 0; i < 3; i++) {
-      logger.log(`${entries[i][1].name} ${entries[i][1].odds} Tier ${tier}`);
+      if (i in entries) {
+        logger.log(`${entries[i][1].name} ${entries[i][1].odds} Tier ${tier}`);
+      }
     }
   });
 
