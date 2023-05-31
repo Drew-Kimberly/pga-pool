@@ -21,4 +21,5 @@ export const playerMap: Record<string, string> = {
 
 export const tournamentMap: Record<string, string> = {
   'arnold palmer': 'arnold palmer invitational pres. by mastercard',
+  'the memorial': 'the memorial tournament pres. by workday',
 };
