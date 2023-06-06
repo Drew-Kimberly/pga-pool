@@ -10,7 +10,6 @@ export const playerMap: Record<string, string> = {
   'Matthias Schmid': 'Matti Schmid',
   'Nicolas Echavarria': 'Nico Echavarria',
   'Sung-Hoon Kang': 'Sung Kang',
-  'S.Y. Noh': 'Seung-Yul Noh',
   'Matthys Daffue': 'MJ Daffue',
   'Benjamin Silverman': 'Ben Silverman',
   'Harold Varner': 'Harold Varner III',
