@@ -5,7 +5,9 @@ import { outputJson } from '../../utils';
 import { NestFactory } from '@nestjs/core';
 
 export async function listUsers() {
-  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule);
+  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule, {
+    logger: ['log', 'warn', 'error'],
+  });
   const userService = ctx.get(UserService);
 
   const users = await userService.list();

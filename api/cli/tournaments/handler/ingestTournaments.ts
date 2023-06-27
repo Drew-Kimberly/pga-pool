@@ -10,7 +10,9 @@ import { NestFactory } from '@nestjs/core';
 const BATCH_SIZE = 25;
 
 export async function ingestTournaments() {
-  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule);
+  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule, {
+    logger: ['log', 'warn', 'error'],
+  });
   const pgaTourApi = ctx.get(PgaTourApiService);
   const pgaTournamentService = ctx.get(PgaTournamentService);
   const logger = new Logger(ingestTournaments.name);

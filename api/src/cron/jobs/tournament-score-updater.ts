@@ -12,7 +12,9 @@ import { NestFactory } from '@nestjs/core';
 import { getDataSourceToken } from '@nestjs/typeorm';
 
 (async () => {
-  const ctx = await NestFactory.createApplicationContext(PgaPoolCronModule);
+  const ctx = await NestFactory.createApplicationContext(PgaPoolCronModule, {
+    logger: ['log', 'warn', 'error'],
+  });
   const db = ctx.get(getDataSourceToken());
   const pgaTourneyService = ctx.get(PgaTournamentService);
   const pgaTourneyPlayerService = ctx.get(PgaTournamentPlayerService);

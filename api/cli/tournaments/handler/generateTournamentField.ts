@@ -14,7 +14,9 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 export async function generateTournamentField(pgaTournamentId: string, tierCutoffs: number[]) {
-  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule);
+  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule, {
+    logger: ['log', 'warn', 'error'],
+  });
   const pgaTourneyService = ctx.get(PgaTournamentService);
   const pgaPlayerService = ctx.get(PgaPlayerService);
   const metabetApiService = ctx.get(MetabetApiService);

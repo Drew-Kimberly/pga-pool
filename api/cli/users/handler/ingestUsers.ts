@@ -7,7 +7,9 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 export async function ingestUsers() {
-  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule);
+  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule, {
+    logger: ['log', 'warn', 'error'],
+  });
   const userService = ctx.get(UserService);
   const seedDataService = ctx.get(SeedDataService);
   const logger = new Logger(ingestUsers.name);

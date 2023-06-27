@@ -12,7 +12,9 @@ import { NestFactory } from '@nestjs/core';
 import { getDataSourceToken } from '@nestjs/typeorm';
 
 export async function updatePoolTournamentScores(pgaTournamentId: string) {
-  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule);
+  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule, {
+    logger: ['log', 'warn', 'error'],
+  });
   const db = ctx.get(getDataSourceToken());
   const pgaTourneyService = ctx.get(PgaTournamentService);
   const pgaTourneyPlayerService = ctx.get(PgaTournamentPlayerService);

@@ -73,7 +73,7 @@ export class SeedDataService implements OnModuleInit {
       const seedName = this.getSeedName(seedFile);
       data[seedName] = seedData;
 
-      this.logger.log(`Successfully loaded "${seedName}" seed data`);
+      this.logger.debug?.(`Successfully loaded "${seedName}" seed data`);
     }
   }
 
