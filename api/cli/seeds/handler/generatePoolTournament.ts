@@ -13,7 +13,9 @@ export async function generatePoolTournament(
   tournamentId: string,
   year: string
 ) {
-  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule);
+  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule, {
+    logger: ['log', 'warn', 'error'],
+  });
   const seedDataService = ctx.get(SeedDataService);
   const pgaPlayerService = ctx.get(PgaPlayerService);
   const logger = new Logger(generatePoolTournament.name);

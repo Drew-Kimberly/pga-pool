@@ -28,7 +28,9 @@ interface PoolTournamentSeed {
 }
 
 export async function ingestPoolTournaments(year?: string, pgaTournamentId?: string) {
-  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule);
+  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule, {
+    logger: ['log', 'warn', 'error'],
+  });
   const poolTournamentService = ctx.get(PoolTournamentService);
   const poolTournamentPlayerService = ctx.get(PoolTournamentPlayerService);
   const poolUserService = ctx.get(PoolUserService);

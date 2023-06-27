@@ -8,7 +8,9 @@ import { NestFactory } from '@nestjs/core';
 const BATCH_SIZE = 25;
 
 export async function ingestPlayers(fromYear: string) {
-  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule);
+  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule, {
+    logger: ['log', 'warn', 'error'],
+  });
   const pgaTourApi = ctx.get(PgaTourApiService);
   const pgaPlayerService = ctx.get(PgaPlayerService);
   const logger = new Logger(ingestPlayers.name);

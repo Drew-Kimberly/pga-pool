@@ -7,7 +7,9 @@ import { DEFAULT_TOURNAMENT_ID } from '../constants';
 import { NestFactory } from '@nestjs/core';
 
 export async function getPgaTournamentLeaderboard(tournamentId: string, year: string) {
-  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule);
+  const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule, {
+    logger: ['log', 'warn', 'error'],
+  });
   const pgaTourApi = ctx.get(PgaTourApiService);
   const pgaTournamentService = ctx.get(PgaTournamentService);
 
