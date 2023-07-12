@@ -96,6 +96,13 @@ export interface PgaApiTournamentLeaderboardRow {
   roundStatus: string;
   playerState: 'ACTIVE';
   totalStrokes: string;
+  /** @example "+5000" */
+  oddsToWin: string;
+  player: {
+    firstName: string;
+    lastName: string;
+    displayName: string;
+  };
 }
 
 export interface PgaApiTournamentLeaderboardResponse {
