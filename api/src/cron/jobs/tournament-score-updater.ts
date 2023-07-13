@@ -22,7 +22,7 @@ import { getDataSourceToken } from '@nestjs/typeorm';
   const poolUserService = ctx.get(PoolUserService);
   const logger = new Logger('tournament-score-updater-cron');
 
-  const pgaTournament = await pgaTourneyService.getCurrent();
+  const pgaTournament = await pgaTourneyService.getCurrent('541-2023');
   if (!pgaTournament) {
     logger.log('No PGA Tournament is currently underway');
     return await ctx.close();
