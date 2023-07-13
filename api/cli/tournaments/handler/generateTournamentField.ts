@@ -45,11 +45,9 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
     );
 
     // [pid, odds, playerName]
-    const tournamentOdds: [string, number, string][] = leaderboard.players.map((p) => [
-      p.id,
-      fromOddsString(p.oddsToWin),
-      p.player.displayName,
-    ]);
+    const tournamentOdds: [string, number, string][] = leaderboard.players
+      .filter((p) => !!p.oddsToWin)
+      .map((p) => [p.id, fromOddsString(p.oddsToWin), p.player.displayName]);
     tournamentOdds.sort((a, b) => (a[1] <= b[1] ? -1 : 1));
 
     const pgaPlayers = Object.fromEntries((await pgaPlayerService.list()).map((p) => [p.id, p]));

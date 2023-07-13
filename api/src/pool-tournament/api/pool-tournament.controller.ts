@@ -62,7 +62,7 @@ export class PoolTournamentController extends ControllerBase {
 
     try {
       if (poolTournamentId === CURRENT_TOURNAMENT) {
-        const currentPgaTourney = await this.pgaTournamentService.getCurrent();
+        const currentPgaTourney = await this.pgaTournamentService.getCurrent('541-2023');
         if (!currentPgaTourney) {
           throw new NotFoundException('There is currently no in-progress PGA tournament');
         }
