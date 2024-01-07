@@ -1,7 +1,7 @@
 import { Like, Repository } from 'typeorm';
 
 import { PgaPlayer } from './pga-player.entity';
-import { UpsertPgaPlayer } from './pga-player.interface';
+import { SavePgaPlayer } from './pga-player.interface';
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -23,11 +23,13 @@ export class PgaPlayerService {
     return this.pgaPlayerRepo.findOneBy({ id: this.parsePlayerId(pgaPlayerId) });
   }
 
-  upsert(pgaPlayer: UpsertPgaPlayer): Promise<PgaPlayer> {
-    return this.pgaPlayerRepo.save({
-      ...pgaPlayer,
-      id: pgaPlayer.id ? this.parsePlayerId(pgaPlayer.id) : undefined,
-    });
+  save(payload: SavePgaPlayer[]): Promise<PgaPlayer[]> {
+    return this.pgaPlayerRepo.save(
+      payload.map((p) => ({
+        ...p,
+        id: this.parsePlayerId(p.id),
+      }))
+    );
   }
 
   private parsePlayerId(id: number | string): number | never {

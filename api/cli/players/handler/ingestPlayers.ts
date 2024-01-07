@@ -5,9 +5,7 @@ import { PgaPoolCliModule } from '../../cli.module';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
-const BATCH_SIZE = 25;
-
-export async function ingestPlayers(fromYear: string) {
+export async function ingestPlayers(onlyActive: boolean) {
   const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule, {
     logger: ['log', 'warn', 'error'],
   });
@@ -15,28 +13,21 @@ export async function ingestPlayers(fromYear: string) {
   const pgaPlayerService = ctx.get(PgaPlayerService);
   const logger = new Logger(ingestPlayers.name);
 
-  const tourPlayers = await pgaTourApi.getPlayers();
+  const tourPlayers = await pgaTourApi.getPlayers(onlyActive);
 
-  const filteredTourPlayers = tourPlayers.filter((player) =>
-    player.yrs.some((y) => Number(y) >= Number(fromYear))
+  logger.log(`Ingesting ${tourPlayers.length} players`);
+
+  await pgaPlayerService.save(
+    tourPlayers.map((p) => ({
+      id: p.id,
+      active: p.isActive,
+      name: p.displayName,
+      short_name: p.shortName,
+      first_name: p.firstName,
+      last_name: p.lastName,
+      headshot_url: p.headshot ?? null,
+    }))
   );
-
-  logger.log(
-    `Ingesting ${filteredTourPlayers.length} of ${tourPlayers.length} players filtered on played since year ${fromYear}`
-  );
-
-  // @note - idempotent operation here so not worried about a DB tx
-  for (let i = 0; i < filteredTourPlayers.length; i += BATCH_SIZE) {
-    const batch = filteredTourPlayers.slice(i, i + BATCH_SIZE);
-    await Promise.all(
-      batch.map((player) =>
-        pgaPlayerService.upsert({
-          id: player.pid,
-          name: `${player.nameF} ${player.nameL}`,
-        })
-      )
-    );
-  }
 
   await ctx.close();
 }

@@ -1,12 +1,25 @@
+export type PgaTourCode = 'R';
+
 export interface PgaApiPlayer {
-  pid: string;
-  nameF: string;
-  nameL: string;
-  yrs: string[];
+  id: string;
+  isActive: boolean;
+  firstName: string;
+  lastName: string;
+  shortName: string;
+  displayName: string;
+  country: string;
+  countryFlag: string;
+  headshot: string;
+  alphaSort: string;
+}
+
+export interface PgaApiPlayerDirectory {
+  tourCode: PgaTourCode;
+  players: PgaApiPlayer[];
 }
 
 export interface PgaApiPlayersResponse {
-  plrs: PgaApiPlayer[];
+  playerDirectory: PgaApiPlayerDirectory;
 }
 
 export interface PgaApiTourTournament {
