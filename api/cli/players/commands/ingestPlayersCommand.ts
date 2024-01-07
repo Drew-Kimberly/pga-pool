@@ -8,12 +8,12 @@ const command = new Command('ingest')
   .addHelpText('before', figlet.textSync('PGA Pool', { horizontalLayout: 'fitted' }))
   .addOption(
     new Option(
-      '--from <year>',
-      'Specify the earliest year to ingest players from. Defaults to the current year'
-    ).default(new Date().getFullYear().toString())
+      '--inactive',
+      'Specify whether to ingest inactive players. Defaults to false.'
+    ).default(false)
   )
   .action((opts) => {
-    return ingestPlayers(opts.from);
+    return ingestPlayers(!opts.inactive);
   });
 
 export const ingestPlayersCommand = command;

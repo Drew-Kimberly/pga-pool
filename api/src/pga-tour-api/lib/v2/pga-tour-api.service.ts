@@ -1,3 +1,4 @@
+import { gql, GraphQLClient } from 'graphql-request';
 import { parse } from 'node-html-parser';
 import { lastValueFrom } from 'rxjs';
 
@@ -14,12 +15,43 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class PgaTourApiService {
-  constructor(private readonly httpClient: HttpService) {}
+  private gqlClient: GraphQLClient;
 
-  getPlayers(): Promise<PgaApiPlayer[]> {
-    const url = 'https://statdata.pgatour.com/players/player.json';
-    const response$ = this.httpClient.get<PgaApiPlayersResponse>(url);
-    return lastValueFrom(response$).then((res) => res.data.plrs);
+  constructor(private readonly httpClient: HttpService) {
+    this.gqlClient = new GraphQLClient('https://orchestrator.pgatour.com/graphql', {
+      headers: {
+        'X-Api-Key': 'da2-gsrx5bibzbb4njvhl7t37wqyl4',
+      },
+    });
+  }
+
+  async getPlayers(onlyActive: boolean): Promise<PgaApiPlayer[]> {
+    const query = gql`
+      query PlayerDirectory($tourCode: TourCode!, $active: Boolean) {
+        playerDirectory(tourCode: $tourCode, active: $active) {
+          tourCode
+          players {
+            id
+            isActive
+            firstName
+            lastName
+            shortName
+            displayName
+            alphaSort
+            country
+            countryFlag
+            headshot
+          }
+        }
+      }
+    `;
+
+    const response = await this.gqlClient.request<PgaApiPlayersResponse>(query, {
+      tourCode: 'R',
+      active: onlyActive,
+    });
+
+    return response.playerDirectory.players;
   }
 
   getTournamentSchedule(): Promise<PgaApiTournamentScheduleResponse> {

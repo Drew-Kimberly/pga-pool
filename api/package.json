@@ -30,6 +30,8 @@
     "@nestjs/platform-express": "9.2.1",
     "@nestjs/typeorm": "9.0.1",
     "cache-manager": "5.1.4",
+    "graphql": "16.8.1",
+    "graphql-request": "6.1.0",
     "jsonwebtoken": "9.0.0",
     "node-html-parser": "6.1.4",
     "pg": "8.8.0",
