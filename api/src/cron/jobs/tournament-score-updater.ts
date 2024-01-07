@@ -29,7 +29,7 @@ import { getDataSourceToken } from '@nestjs/typeorm';
   }
 
   logger.log(
-    `Updating scores for PGA Tournament ${pgaTournament.year} ${pgaTournament.short_name} (ID: ${pgaTournament.id})`
+    `Updating scores for PGA Tournament ${pgaTournament.year} ${pgaTournament.name} (ID: ${pgaTournament.id})`
   );
 
   await db.transaction('READ COMMITTED', async (txManager) => {

@@ -96,12 +96,12 @@ export class PgaTournamentFieldController extends ControllerBase {
   private toPgaTournamentDto(tourney: PgaTournament): PgaTournamentDto {
     return {
       id: tourney.id,
-      name: tourney.full_name,
+      name: tourney.name,
       date: {
-        start: tourney.start_date,
-        end: tourney.end_date,
+        start: tourney.start_date.toISOString(),
+        end: tourney.end_date.toISOString(),
         year: tourney.year,
-        timezone: tourney.time_zone,
+        timezone: tourney.timezone,
       },
     };
   }

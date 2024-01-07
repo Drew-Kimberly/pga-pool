@@ -9,19 +9,19 @@ export class PgaPlayer {
   @Index()
   name: string;
 
-  @Column({ type: 'citext', nullable: true })
+  @Column({ type: 'citext' })
   @Index()
   short_name: string;
 
   @Column({ type: 'boolean', default: false })
   active: boolean;
 
-  @Column({ type: 'citext', nullable: true })
+  @Column({ type: 'citext' })
   first_name: string;
 
-  @Column({ type: 'citext', nullable: true })
+  @Column({ type: 'citext' })
   last_name: string;
 
-  @Column({ type: 'varchar', length: 256, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   headshot_url: string | null;
 }

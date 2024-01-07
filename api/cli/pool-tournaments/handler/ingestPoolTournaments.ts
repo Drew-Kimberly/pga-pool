@@ -73,7 +73,7 @@ export async function ingestPoolTournaments(year?: string, pgaTournamentId?: str
       );
 
       logger.log(
-        `Ingested pool tournament ${poolTournament.id} associated to PGA tournament ${pgaTournament.short_name} ${pgaTournament.year} (${pgaTournament.id})`
+        `Ingested pool tournament ${poolTournament.id} associated to PGA tournament ${pgaTournament.name} ${pgaTournament.year} (${pgaTournament.id})`
       );
 
       // Create the tournament field
@@ -128,7 +128,7 @@ export async function ingestPoolTournaments(year?: string, pgaTournamentId?: str
         );
 
         logger.log(
-          `Ingested ${pgaTournament.short_name} ${pgaTournament.year} player ${pgaTourneyPlayer.pga_player.id} at Tier ${poolTourneyPlayer.tier}`
+          `Ingested ${pgaTournament.name} ${pgaTournament.year} player ${pgaTourneyPlayer.pga_player.id} at Tier ${poolTourneyPlayer.tier}`
         );
       }
 
@@ -178,9 +178,7 @@ export async function ingestPoolTournaments(year?: string, pgaTournamentId?: str
           );
         }
 
-        logger.log(
-          `Ingested ${userId} picks for ${pgaTournament.short_name} ${pgaTournament.year}`
-        );
+        logger.log(`Ingested ${userId} picks for ${pgaTournament.name} ${pgaTournament.year}`);
       }
     });
   }

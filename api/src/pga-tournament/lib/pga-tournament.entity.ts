@@ -1,46 +1,102 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-import { PgaTournamentFormat } from './pga-tournament.interface';
+import {
+  PgaTournamentFeatures,
+  PgaTournamentRoundStatus,
+  PgaTournamentScoringFormat,
+  PgaTournamentStatus,
+} from './pga-tournament.interface';
 
 @Entity('pga_tournament')
 export class PgaTournament {
   /**
-   * @note in format of "{tournamentId}-{year}"
+   * @note in format of "R${year}${tournamentId}"
    */
   @PrimaryColumn({ generated: false })
   id: string;
 
   @Column({ type: 'citext' })
-  full_name: string;
+  name: string;
 
-  @Column({ type: 'citext' })
-  short_name: string;
-
+  /**
+   * @note tournament ID without the year prefix
+   */
   @Column({ type: 'varchar', length: 32 })
   tournament_id: string;
 
   @Column({ type: 'int' })
   year: number;
 
-  /** @example "America/Los_Angeles" */
-  @Column({ type: 'varchar', length: 64, default: 'America/New_York' })
-  time_zone: string;
+  @Column({ type: 'varchar', length: 32 })
+  month: string;
+
+  @Column({ type: 'timestamptz' })
+  start_date: Date;
+
+  @Column({ type: 'timestamptz' })
+  end_date: Date;
+
+  @Column({ type: 'varchar', length: 64 })
+  timezone: string;
+
+  @Column({ type: 'varchar', length: 128 })
+  display_date: string;
+
+  @Column({ type: 'varchar', length: 64 })
+  display_date_short: string;
 
   @Column({ type: 'int' })
-  week_number: number;
+  purse: number;
 
-  @Column({ type: 'date' })
-  start_date: string;
+  @Column({ type: 'jsonb', default: [] })
+  features: PgaTournamentFeatures[];
 
-  @Column({ type: 'date' })
-  end_date: string;
+  @Column({ type: 'int', nullable: true })
+  fedex_cup_points: number | null;
 
-  @Column({ type: 'enum', enum: PgaTournamentFormat })
-  format: PgaTournamentFormat;
+  @Column({ type: 'boolean' })
+  fedex_cup_event: boolean;
 
-  @Column({ type: 'int' })
-  fedex_cup_purse: number;
+  @Column({ type: 'varchar', length: 64 })
+  scoring_format: PgaTournamentScoringFormat;
 
-  @Column({ type: 'int' })
-  fedex_cup_winner_points: number;
+  @Column({ type: 'varchar', length: 64 })
+  tournament_status: PgaTournamentStatus;
+
+  @Column({ type: 'varchar', length: 64 })
+  round_status: PgaTournamentRoundStatus;
+
+  /** @note null when tournament is upcoming */
+  @Column({ type: 'int', nullable: true })
+  current_round: number | null;
+
+  @Column({ type: 'citext' })
+  course_name: string;
+
+  @Column({ type: 'citext' })
+  country: string;
+
+  @Column({ type: 'varchar', length: 16 })
+  country_code: string;
+
+  @Column({ type: 'citext' })
+  state: string;
+
+  @Column({ type: 'varchar', length: 16 })
+  state_code: string;
+
+  @Column({ type: 'citext' })
+  city: string;
+
+  @Column({ type: 'citext', nullable: true })
+  previous_champion: string | null;
+
+  @Column({ type: 'int', nullable: true })
+  previous_champion_id: number | null;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  logo_url: string | null;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  course_url: string | null;
 }

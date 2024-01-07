@@ -22,7 +22,7 @@ export class UpdatePgaPlayer1704641983034 implements MigrationInterface {
         `);
     await queryRunner.query(`
             ALTER TABLE "pga_player"
-            ADD "headshot_url" character varying(256)
+            ADD "headshot_url" character varying(255)
         `);
     await queryRunner.query(`
             CREATE INDEX "IDX_a3acd826b678b0999c10f3643a" ON "pga_player" ("short_name")

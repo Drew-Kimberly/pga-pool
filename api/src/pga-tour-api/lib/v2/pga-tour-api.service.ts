@@ -2,12 +2,16 @@ import { gql, GraphQLClient } from 'graphql-request';
 import { parse } from 'node-html-parser';
 import { lastValueFrom } from 'rxjs';
 
+import { InjectPgaTourApiConfig, PgaTourApiConfig } from './pga-tour-api.config';
 import {
   PgaApiPlayer,
   PgaApiPlayersResponse,
   PgaApiProjectedFedexCupPointsResponse,
+  PgaApiTournament,
   PgaApiTournamentLeaderboardResponse,
+  PgaApiTournamentSchedule,
   PgaApiTournamentScheduleResponse,
+  PgaApiTournamentsResponse,
 } from './pga-tour-api.interface';
 
 import { HttpService } from '@nestjs/axios';
@@ -17,10 +21,14 @@ import { Injectable } from '@nestjs/common';
 export class PgaTourApiService {
   private gqlClient: GraphQLClient;
 
-  constructor(private readonly httpClient: HttpService) {
-    this.gqlClient = new GraphQLClient('https://orchestrator.pgatour.com/graphql', {
+  constructor(
+    private readonly httpClient: HttpService,
+    @InjectPgaTourApiConfig()
+    private readonly pgaTourApiConfig: PgaTourApiConfig
+  ) {
+    this.gqlClient = new GraphQLClient(this.pgaTourApiConfig.PGA_TOUR_API_GQL_URL, {
       headers: {
-        'X-Api-Key': 'da2-gsrx5bibzbb4njvhl7t37wqyl4',
+        'X-Api-Key': this.pgaTourApiConfig.PGA_TOUR_API_GQL_API_KEY,
       },
     });
   }
@@ -54,10 +62,122 @@ export class PgaTourApiService {
     return response.playerDirectory.players;
   }
 
-  getTournamentSchedule(): Promise<PgaApiTournamentScheduleResponse> {
-    const url = 'https://statdata-api-prod.pgatour.com/api/clientfile/schedule-v2?format=json';
-    const response$ = this.httpClient.get<PgaApiTournamentScheduleResponse>(url);
-    return lastValueFrom(response$).then((res) => res.data);
+  async getTournamentSchedule(year: number): Promise<PgaApiTournamentSchedule> {
+    const query = gql`
+      query Schedule($tourCode: String!, $year: String, $filter: TournamentCategory) {
+        schedule(tourCode: $tourCode, year: $year, filter: $filter) {
+          completed {
+            month
+            year
+            monthSort
+            ...ScheduleTournament
+          }
+          filters {
+            type
+            name
+          }
+          seasonYear
+          tour
+          upcoming {
+            month
+            year
+            monthSort
+            ...ScheduleTournament
+          }
+        }
+      }
+
+      fragment ScheduleTournament on ScheduleMonth {
+        tournaments {
+          tournamentName
+          id
+          beautyImage
+          champion
+          championEarnings
+          championId
+          city
+          country
+          countryCode
+          courseName
+          date
+          dateAccessibilityText
+          purse
+          startDate
+          state
+          stateCode
+          tournamentLogo
+          tourStandingHeading
+          tourStandingValue
+        }
+      }
+    `;
+
+    const response = await this.gqlClient.request<PgaApiTournamentScheduleResponse>(query, {
+      tourCode: 'R',
+      year,
+    });
+
+    return response.schedule;
+  }
+
+  async getTournaments(tournamentIds: string[]): Promise<PgaApiTournament[]> {
+    const query = gql`
+      query Tournaments($ids: [ID!]) {
+        tournaments(ids: $ids) {
+          id
+          tournamentName
+          tournamentLogo
+          tournamentLocation
+          tournamentStatus
+          roundStatusDisplay
+          roundDisplay
+          roundStatus
+          roundStatusColor
+          currentRound
+          timezone
+          seasonYear
+          displayDate
+          country
+          state
+          city
+          scoredLevel
+          infoPath
+          events {
+            id
+            eventName
+            leaderboardId
+          }
+          courses {
+            id
+            courseName
+            courseCode
+            hostCourse
+            scoringLevel
+          }
+          weather {
+            logo
+            logoDark
+            logoAccessibility
+            tempF
+            tempC
+            condition
+            windDirection
+            windSpeedMPH
+            windSpeedKPH
+            precipitation
+            humidity
+          }
+          formatType
+          features
+        }
+      }
+    `;
+
+    const response = await this.gqlClient.request<PgaApiTournamentsResponse>(query, {
+      ids: tournamentIds,
+    });
+
+    return response.tournaments;
   }
 
   async getTournamentLeaderboard(

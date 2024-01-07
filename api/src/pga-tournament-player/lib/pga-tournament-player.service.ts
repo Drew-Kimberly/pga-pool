@@ -86,7 +86,7 @@ export class PgaTournamentPlayerService {
 
         if (!leaderboardEntry) {
           this.logger.warn(
-            `No ${pgaTournament.year} ${pgaTournament.short_name} Leaderboard row found for PGA Player ${player.pga_player.name} (ID: ${player.pga_player.id}). Marking as cut...`
+            `No ${pgaTournament.year} ${pgaTournament.name} Leaderboard row found for PGA Player ${player.pga_player.name} (ID: ${player.pga_player.id}). Marking as cut...`
           );
 
           return this.upsert({

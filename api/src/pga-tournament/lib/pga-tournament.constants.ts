@@ -1,0 +1,1 @@
+export const PGA_TOURNAMENT_LENGTH_DAYS = 4;
