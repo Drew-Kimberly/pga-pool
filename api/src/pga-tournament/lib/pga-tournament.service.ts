@@ -1,6 +1,7 @@
-import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { PgaTournament } from './pga-tournament.entity';
+import { SavePgaTournament } from './pga-tournament.interface';
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -20,19 +21,20 @@ export class PgaTournamentService {
     return this.pgaTournamentRepo.findOneBy({ id: pgaTournamentId });
   }
 
-  getCurrent(pgaTournamentId?: string): Promise<PgaTournament | null> {
-    const now = new Date(Date.now()).toDateString();
-    // Extend the end window 24 hours so pool players can view the results after a tournament completes.
-    const extendedEndDte = new Date(Date.now() - 1000 * 60 * 60 * 24).toDateString();
+  async getCurrent(pgaTournamentId?: string): Promise<PgaTournament | null> {
+    return null;
+    // const now = new Date(Date.now()).toDateString();
+    // // Extend the end window 24 hours so pool players can view the results after a tournament completes.
+    // const extendedEndDte = new Date(Date.now() - 1000 * 60 * 60 * 24).toDateString();
 
-    return this.pgaTournamentRepo.findOneBy({
-      start_date: LessThanOrEqual(now),
-      end_date: MoreThanOrEqual(extendedEndDte),
-      ...(pgaTournamentId ? { id: pgaTournamentId } : {}),
-    });
+    // return this.pgaTournamentRepo.findOneBy({
+    //   start_date: LessThanOrEqual(now),
+    //   end_date: MoreThanOrEqual(extendedEndDte),
+    //   ...(pgaTournamentId ? { id: pgaTournamentId } : {}),
+    // });
   }
 
-  upsert(pgaTournament: PgaTournament): Promise<PgaTournament> {
-    return this.pgaTournamentRepo.save(pgaTournament);
+  save(payload: SavePgaTournament[]): Promise<PgaTournament[]> {
+    return this.pgaTournamentRepo.save(payload);
   }
 }

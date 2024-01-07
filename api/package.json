@@ -20,6 +20,7 @@
     "db:migrations:generate": "yarn typeorm migration:generate --pretty",
     "db:migrations:run": "yarn typeorm migration:run",
     "db:migrations:revert": "yarn typeorm migration:revert",
+    "db:drop": "yarn typeorm schema:drop",
     "sdk:generate": "yarn openapi-generator-cli generate -i openapi.yaml -g typescript-axios -o sdk/src -p modelPropertyNaming=original --remove-operation-id-prefix -p useSingleRequestParameter=true"
   },
   "dependencies": {

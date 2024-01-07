@@ -13,7 +13,7 @@ const command = new Command('ingest')
     ).default(false)
   )
   .action((opts) => {
-    return ingestPlayers(!opts.inactive);
+    return ingestPlayers(opts.inactive);
   });
 
 export const ingestPlayersCommand = command;

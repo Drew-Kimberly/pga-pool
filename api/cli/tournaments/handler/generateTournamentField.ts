@@ -4,7 +4,6 @@ import { tournamentMap } from '../../../src/metabet-api/lib/metabet-api.constant
 import { OddsLocation, OddsProvider } from '../../../src/metabet-api/lib/metabet-api.interface';
 import { MetabetApiService } from '../../../src/metabet-api/lib/metabet-api.service';
 import { PgaPlayerService } from '../../../src/pga-player/lib/pga-player.service';
-import { PgaTourApiService } from '../../../src/pga-tour-api/lib/v2/pga-tour-api.service';
 import { PgaTournamentService } from '../../../src/pga-tournament/lib/pga-tournament.service';
 import { PgaTournamentField } from '../../../src/pga-tournament-field/lib/pga-tournament-field.interface';
 import { SeedDataService } from '../../../src/seed-data/lib/seed-data.service';
@@ -20,7 +19,6 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
   });
   const pgaTourneyService = ctx.get(PgaTournamentService);
   const pgaPlayerService = ctx.get(PgaPlayerService);
-  const pgaTourApi = ctx.get(PgaTourApiService);
   const metabetApiService = ctx.get(MetabetApiService);
   const seedDataService = ctx.get(SeedDataService);
 
@@ -38,96 +36,91 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
     player_tiers: {},
   };
 
-  if (pgaTournamentId === '541-2023') {
-    const { leaderboard } = await pgaTourApi.getTournamentLeaderboard(
-      // @ts-expect-error known tuple format of tourney id
-      ...pgaTournamentId.split('-').reverse()
+  // if (pgaTournamentId === '541-2023') {
+  //   const { leaderboard } = await pgaTourApi.getTournamentLeaderboard(
+  //     // @ts-expect-error known tuple format of tourney id
+  //     ...pgaTournamentId.split('-').reverse()
+  //   );
+
+  //   // [pid, odds, playerName]
+  //   const tournamentOdds: [string, number, string][] = leaderboard.players
+  //     .filter((p) => !!p.oddsToWin)
+  //     .map((p) => [p.id, fromOddsString(p.oddsToWin), p.player.displayName]);
+  //   tournamentOdds.sort((a, b) => (a[1] <= b[1] ? -1 : 1));
+
+  //   const pgaPlayers = Object.fromEntries((await pgaPlayerService.list()).map((p) => [p.id, p]));
+
+  //   let oddsIdx = 0;
+  //   for (let tier = 1; tier <= tierCutoffs.length + 1; tier++) {
+  //     const cutoff = tierCutoffs[tier - 1] ?? Number.MAX_SAFE_INTEGER;
+  //     field.player_tiers[tier] = {};
+
+  //     while (tournamentOdds[oddsIdx] && tournamentOdds[oddsIdx][1] <= cutoff) {
+  //       const pgaPlayer = pgaPlayers[tournamentOdds[oddsIdx][0]];
+  //       if (!pgaPlayer) {
+  //         playersNotFound.push({
+  //           name: tournamentOdds[oddsIdx][2],
+  //           odds: tournamentOdds[oddsIdx][1],
+  //           tier,
+  //         });
+
+  //         oddsIdx++;
+  //         continue;
+  //       }
+
+  //       field.player_tiers[tier][pgaPlayer.id] = {
+  //         name: pgaPlayer.name,
+  //         odds: toOddsString(tournamentOdds[oddsIdx][1]),
+  //       };
+
+  //       oddsIdx++;
+  //     }
+  //   }
+  // } else {
+
+  const tournamentOdds = (
+    await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.Consensus)
+  ).find(
+    (o) =>
+      [pgaTournament.name.toLowerCase(), tournamentMap[pgaTournament.name.toLowerCase()]]
+        .filter(Boolean)
+        .includes(o.tournamentName.toLowerCase()) && pgaTournament.year === o.year
+  );
+
+  if (!tournamentOdds) {
+    throw new Error(
+      `No tournament odds found for ${pgaTournament.year} ${pgaTournament.name} (ID: ${pgaTournament.id})`
     );
+  }
 
-    // [pid, odds, playerName]
-    const tournamentOdds: [string, number, string][] = leaderboard.players
-      .filter((p) => !!p.oddsToWin)
-      .map((p) => [p.id, fromOddsString(p.oddsToWin), p.player.displayName]);
-    tournamentOdds.sort((a, b) => (a[1] <= b[1] ? -1 : 1));
+  tournamentOdds.players.sort((a, b) => (a.odds <= b.odds ? -1 : 1));
 
-    const pgaPlayers = Object.fromEntries((await pgaPlayerService.list()).map((p) => [p.id, p]));
+  const pgaPlayers = Object.fromEntries((await pgaPlayerService.list()).map((p) => [p.name, p]));
 
-    let oddsIdx = 0;
-    for (let tier = 1; tier <= tierCutoffs.length + 1; tier++) {
-      const cutoff = tierCutoffs[tier - 1] ?? Number.MAX_SAFE_INTEGER;
-      field.player_tiers[tier] = {};
+  let oddsIdx = 0;
+  for (let tier = 1; tier <= tierCutoffs.length + 1; tier++) {
+    const cutoff = tierCutoffs[tier - 1] ?? Number.MAX_SAFE_INTEGER;
+    field.player_tiers[tier] = {};
 
-      while (tournamentOdds[oddsIdx] && tournamentOdds[oddsIdx][1] <= cutoff) {
-        const pgaPlayer = pgaPlayers[tournamentOdds[oddsIdx][0]];
-        if (!pgaPlayer) {
-          playersNotFound.push({
-            name: tournamentOdds[oddsIdx][2],
-            odds: tournamentOdds[oddsIdx][1],
-            tier,
-          });
-
-          oddsIdx++;
-          continue;
-        }
-
-        field.player_tiers[tier][pgaPlayer.id] = {
-          name: pgaPlayer.name,
-          odds: toOddsString(tournamentOdds[oddsIdx][1]),
-        };
+    while (tournamentOdds.players[oddsIdx] && tournamentOdds.players[oddsIdx].odds <= cutoff) {
+      const pgaPlayer = pgaPlayers[tournamentOdds.players[oddsIdx].name];
+      if (!pgaPlayer) {
+        playersNotFound.push({
+          name: tournamentOdds.players[oddsIdx].name,
+          odds: tournamentOdds.players[oddsIdx].odds,
+          tier,
+        });
 
         oddsIdx++;
+        continue;
       }
-    }
-  } else {
-    const tournamentOdds = (
-      await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.Consensus)
-    ).find(
-      (o) =>
-        [
-          pgaTournament.full_name.toLowerCase(),
-          pgaTournament.short_name.toLowerCase(),
-          tournamentMap[pgaTournament.full_name.toLowerCase()],
-          tournamentMap[pgaTournament.short_name.toLowerCase()],
-        ]
-          .filter(Boolean)
-          .includes(o.tournamentName.toLowerCase()) && pgaTournament.year === o.year
-    );
 
-    if (!tournamentOdds) {
-      throw new Error(
-        `No tournament odds found for ${pgaTournament.year} ${pgaTournament.full_name} (ID: ${pgaTournament.id})`
-      );
-    }
+      field.player_tiers[tier][pgaPlayer.id] = {
+        name: pgaPlayer.name,
+        odds: toOddsString(tournamentOdds.players[oddsIdx].odds),
+      };
 
-    tournamentOdds.players.sort((a, b) => (a.odds <= b.odds ? -1 : 1));
-
-    const pgaPlayers = Object.fromEntries((await pgaPlayerService.list()).map((p) => [p.name, p]));
-
-    let oddsIdx = 0;
-    for (let tier = 1; tier <= tierCutoffs.length + 1; tier++) {
-      const cutoff = tierCutoffs[tier - 1] ?? Number.MAX_SAFE_INTEGER;
-      field.player_tiers[tier] = {};
-
-      while (tournamentOdds.players[oddsIdx] && tournamentOdds.players[oddsIdx].odds <= cutoff) {
-        const pgaPlayer = pgaPlayers[tournamentOdds.players[oddsIdx].name];
-        if (!pgaPlayer) {
-          playersNotFound.push({
-            name: tournamentOdds.players[oddsIdx].name,
-            odds: tournamentOdds.players[oddsIdx].odds,
-            tier,
-          });
-
-          oddsIdx++;
-          continue;
-        }
-
-        field.player_tiers[tier][pgaPlayer.id] = {
-          name: pgaPlayer.name,
-          odds: toOddsString(tournamentOdds.players[oddsIdx].odds),
-        };
-
-        oddsIdx++;
-      }
+      oddsIdx++;
     }
   }
 

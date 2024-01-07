@@ -22,53 +22,88 @@ export interface PgaApiPlayersResponse {
   playerDirectory: PgaApiPlayerDirectory;
 }
 
-export interface PgaApiTourTournament {
-  /** @note permNum + year can be used to identify tourney */
-  permNum: string;
-  trnName: {
-    long: string;
-    short: string;
-  };
-  year: string;
-  /** @example "America/Los_Angeles" */
-  timeZone: string;
-  date: {
-    weekNumber: string;
-    /** @example  2023-01-09 */
-    start: string;
-    /** @example  2023-01-15 */
-    end: string;
-  };
-  format: 'stroke' | 'match' | 'team match' | 'Team' | 'Stableford' | '';
-  FedExCup: 'Yes' | 'No';
-  /** @example "2,989" */
-  FedExCupPurse: string;
-  FedExCupWinnerPoints: string;
+export interface PgaApiTourScheduleTournament {
+  /** @example "R2024016" */
+  id: string;
+  tournamentName: string;
+  /** @note URL to the logo */
+  tournamentLogo: string;
+  /** @note URL to a nice image of the course */
+  beautyImage: string;
+  /**
+   * Epoch with millisecond precision.
+   *
+   * Points to the start of the day the tournament begins, NOT the time of the first tee-off.
+   *
+   * @example 1704326400000
+   */
+  startDate: number;
+  /** @example "Jan 4 - 7" */
+  date: string;
+  /** @example "January 4th through January 7th" */
+  dateAccessibilityText: string;
+  tourStandingHeading: 'FEDEXCUP' | string;
+  /** @example "700 pts" */
+  tourStandingValue: string;
+  /** @example "United States of America" */
+  country: string;
+  /** @example "USA" */
+  countryCode: string;
+  /** @example "Hawaii" */
+  state: string;
+  /** @example "HI" */
+  stateCode: string;
+  city: string;
+  courseName: string;
+  /** @example "Jon Rahm" */
+  champion: string;
+  /** PlayerID @example "46970" */
+  championId: string;
+  /** @example "$20,000,000" */
+  purse: string;
 }
 
-export interface PgaApiTourTournaments {
-  desc: 'PGA TOUR' | 'PGA TOUR Champions' | 'Korn Ferry Tour';
-  trns: PgaApiTourTournament[];
+export interface PgaApiTourScheduleTournaments {
+  /** @example "January" */
+  month: string;
+  monthSort: number;
+  /** @example "2024" */
+  year: string;
+  tournaments: PgaApiTourScheduleTournament[];
 }
 
-export interface PgaApiTournamentScheduleYear {
-  year: string;
-  tours: PgaApiTourTournaments[];
+export interface PgaApiTournamentSchedule {
+  completed: PgaApiTourScheduleTournaments[];
+  /** @example "2024" */
+  seasonYear: string;
+  upcoming: PgaApiTourScheduleTournaments[];
 }
 
 export interface PgaApiTournamentScheduleResponse {
-  currenYears: {
-    /** @example "2023" */
-    c: string;
-  };
-  thisWeek: {
-    weekNumber: string;
-    /** @example  2023-01-09 */
-    startDate: string;
-    /** @example  2023-01-15 */
-    endDate: string;
-  };
-  years: PgaApiTournamentScheduleYear[];
+  schedule: PgaApiTournamentSchedule;
+}
+
+export type TournamentStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+export type RoundStatus = 'UPCOMING' | 'IN_PROGRESS' | 'COMPLETE' | 'OFFICIAL';
+export type ScoringFormat = 'STROKE_PLAY' | 'TEAM_STROKE' | 'STABLEFORD';
+export type TournamentFeatures = 'FIELD' | 'ODDS' | 'LEADERBOARD' | 'TEE_TIMES' | 'STANDINGS';
+
+export interface PgaApiTournament {
+  /** @example "R2024016" */
+  id: string;
+  tournamentName: string;
+  tournamentStatus: TournamentStatus;
+  roundStatus: RoundStatus;
+  /** @note -1 when tournament is upcoming */
+  currentRound: number;
+  /** @example "Pacific/Honolulu" */
+  timezone: string;
+  formatType: ScoringFormat;
+  features: TournamentFeatures[];
+}
+
+export interface PgaApiTournamentsResponse {
+  tournaments: PgaApiTournament[];
 }
 
 export interface PgaApiTournamentLeaderboardRow {
