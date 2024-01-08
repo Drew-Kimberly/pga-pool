@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import { PgaTournament } from './pga-tournament.entity';
 import { SavePgaTournament } from './pga-tournament.interface';
@@ -22,16 +22,13 @@ export class PgaTournamentService {
   }
 
   async getCurrent(pgaTournamentId?: string): Promise<PgaTournament | null> {
-    return null;
-    // const now = new Date(Date.now()).toDateString();
-    // // Extend the end window 24 hours so pool players can view the results after a tournament completes.
-    // const extendedEndDte = new Date(Date.now() - 1000 * 60 * 60 * 24).toDateString();
+    const now = new Date(Date.now());
 
-    // return this.pgaTournamentRepo.findOneBy({
-    //   start_date: LessThanOrEqual(now),
-    //   end_date: MoreThanOrEqual(extendedEndDte),
-    //   ...(pgaTournamentId ? { id: pgaTournamentId } : {}),
-    // });
+    return this.pgaTournamentRepo.findOneBy({
+      start_date: LessThanOrEqual(now),
+      end_date: MoreThanOrEqual(now),
+      ...(pgaTournamentId ? { id: pgaTournamentId } : {}),
+    });
   }
 
   save(payload: SavePgaTournament[]): Promise<PgaTournament[]> {
