@@ -12,9 +12,22 @@ servers:
   - url: 'http://localhost:3000'
     description: Local Dev URL
 tags:
-  - name: PgaTournament
+  - name: PGA Tournaments
   - name: PoolTournament
 paths:
+  /pga-tournaments:
+    get:
+      summary: Lists PGA Tournaments
+      description: Lists PGA Tournaments
+      operationId: listPgaTournaments
+      parameters:
+        - $ref: '#/components/parameters/LimitOffsetPaginationParam'
+        - $ref: '#/components/parameters/PgaTournamentFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListPgaTournamentsResponse'
+      tags:
+        - PGA Tournaments
   /pga-tournaments/{pgaTournamentId}/field:
     parameters:
       - schema:
@@ -34,7 +47,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
       tags:
-        - PgaTournament
+        - PGA Tournaments
         - PoolTournament
   /pool/tournaments:
     get:
@@ -81,6 +94,23 @@ paths:
         - PoolTournament
 components:
   responses:
+    ListPgaTournamentsResponse:
+      description: Response containing paginated collection of PGA Tournaments
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              meta:
+                $ref: '#/components/schemas/LimitOffsetResponseMeta'
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PgaTournament'
+            required:
+              - meta
+              - data
     PgaTournamentFieldResponse:
       description: Response containing the PGA Tournament field, including tiers
       content:
@@ -130,6 +160,42 @@ components:
               - status
               - message
               - details
+  parameters:
+    PgaTournamentFilter:
+      name: filter
+      description: Filters a collection of PGA Tournaments.
+      required: false
+      in: query
+      schema:
+        type: object
+        additionalProperties: false
+        properties:
+          name:
+            type: string
+          date.year:
+            type: number
+          fedex_cup_event:
+            type: boolean
+          scoring_format:
+            type: string
+          tournament_status:
+            type: string
+    LimitOffsetPaginationParam:
+      name: page
+      required: false
+      in: query
+      schema:
+        type: object
+        additionalProperties: false
+        properties:
+          size:
+            description: The number of items included per page.
+            type: integer
+            example: 10
+          number:
+            description: The specific page number (1-based) of the collection results.
+            type: integer
+            example: 2
   schemas:
     PoolTournament:
       description: Defines a pool tournament
@@ -167,10 +233,83 @@ components:
           example: 'Sentry Tournament of Champions'
         date:
           $ref: '#/components/schemas/TournamentDate'
+        purse:
+          type: number
+        fedex_cup_points:
+          type: number
+          nullable: true
+        fedex_cup_event:
+          type: boolean
+        scoring_format:
+          type: string
+          enum:
+            - STROKE_PLAY
+            - TEAM_STROKE
+            - STABLEFORD
+        tournament_status:
+          type: string
+          enum:
+            - NOT_STARTED
+            - IN_PROGRESS
+            - COMPLETED
+        round_status:
+          type: string
+          enum:
+            - UPCOMING
+            - IN_PROGRESS
+            - COMPLETE
+            - OFFICIAL
+        current_round:
+          type: number
+          nullable: true
+        course_name:
+          type: string
+        country:
+          type: string
+        country_code:
+          type: string
+        state:
+          type: string
+        state_code:
+          type: string
+        city:
+          type: string
+        previous_champion:
+          type: object
+          required: [id, name]
+          properties:
+            id:
+              type: number
+              nullable: true
+            name:
+              type: string
+              nullable: true
+        logo_url:
+          type: string
+          nullable: true
+        course_image_url:
+          type: string
+          nullable: true
       required:
         - id
         - name
         - date
+        - purse
+        - fedex_cup_points
+        - fedex_cup_event
+        - scoring_format
+        - tournament_status
+        - round_status
+        - current_round
+        - course_name
+        - country
+        - country_code
+        - state
+        - state_code
+        - city
+        - previous_champion
+        - logo_url
+        - course_image_url
     PgaPlayer:
       description: Defines a PGA player (i.e. golfer)
       type: object
@@ -340,15 +479,48 @@ components:
           example: 2023
         start:
           type: string
-          format: date
+          format: date-time
         end:
           type: string
-          format: date
+          format: date-time
         timezone:
           type: string
           example: 'America/Los_Angeles'
+        display:
+          type: string
+        display_short:
+          type: string
       required:
         - year
         - start
         - end
         - timezone
+        - display
+        - display_short
+    LimitOffsetResponseMeta:
+      type: object
+      title: LimitOffsetResponseMeta
+      additionalProperties: false
+      required: [page]
+      properties:
+        page:
+          type: object
+          additionalProperties: false
+          required: [number, size]
+          properties:
+            requested_size:
+              type: integer
+              example: 100
+              description: Requested page size.
+            actual_size:
+              type: integer
+              example: 77
+              description: Specifies the actual size of the page returned.
+            number:
+              type: integer
+              example: 2
+              description: Specifies the current page number (1-based index).
+            total:
+              type: integer
+              example: 100
+              description: Total amount of items.

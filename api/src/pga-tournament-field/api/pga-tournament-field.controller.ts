@@ -72,7 +72,7 @@ export class PgaTournamentFieldController extends ControllerBase {
     field: PgaTournamentField
   ): PgaTournamentFieldDto {
     const dto = new PgaTournamentFieldDto(
-      this.toPgaTournamentDto(tournament),
+      PgaTournamentDto.fromEntity(tournament),
       new Date(field.created_at * 1000).toISOString()
     );
 
@@ -91,18 +91,5 @@ export class PgaTournamentFieldController extends ControllerBase {
     });
 
     return dto;
-  }
-
-  private toPgaTournamentDto(tourney: PgaTournament): PgaTournamentDto {
-    return {
-      id: tourney.id,
-      name: tourney.name,
-      date: {
-        start: tourney.start_date.toISOString(),
-        end: tourney.end_date.toISOString(),
-        year: tourney.year,
-        timezone: tourney.timezone,
-      },
-    };
   }
 }

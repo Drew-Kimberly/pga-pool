@@ -7,7 +7,6 @@ export const playerMap: Record<string, string> = {
   'Seonghyeon Kim': 'S.H. Kim',
   'Byeong-Hun An': 'Byeong Hun An',
   'Ze-cheng Dou': 'Zecheng Dou',
-  'Matt NeSmith': 'Matthew NeSmith',
   'Matthias Schmid': 'Matti Schmid',
   'Nicolas Echavarria': 'Nico Echavarria',
   'Sung-Hoon Kang': 'Sung Kang',

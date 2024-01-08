@@ -2,7 +2,6 @@ import { ControllerBase } from '../../common/api';
 import { PgaPlayerDto } from '../../pga-player/api/pga-player.dto';
 import { PgaPlayer } from '../../pga-player/lib/pga-player.entity';
 import { PgaTournamentDto } from '../../pga-tournament/api/pga-tournament.dto';
-import { PgaTournament } from '../../pga-tournament/lib/pga-tournament.entity';
 import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
 import { PlayerStatus } from '../../pga-tournament-player/lib/pga-tournament-player.interface';
 import { PoolUserDto } from '../../pool-user/api/pool-user.dto';
@@ -91,7 +90,7 @@ export class PoolTournamentController extends ControllerBase {
     return {
       id: tourney.id,
       active: tourney.active,
-      pga_tournament: this.toPgaTournamentDto(tourney.pga_tournament),
+      pga_tournament: PgaTournamentDto.fromEntity(tourney.pga_tournament),
       pool_users: tourney.pool_users.map(this.toPoolUserDto.bind(this)),
     };
   }
@@ -119,7 +118,7 @@ export class PoolTournamentController extends ControllerBase {
       current_round: player.current_round,
       is_round_complete: player.is_round_complete,
       pga_player: this.toPgaPlayerDto(player.pga_player),
-      pga_tournament: this.toPgaTournamentDto(player.pga_tournament),
+      pga_tournament: PgaTournamentDto.fromEntity(player.pga_tournament),
       score_thru: player.score_thru,
       score_total: player.score_total,
       projected_fedex_cup_points: player.projected_fedex_cup_points,
@@ -134,19 +133,6 @@ export class PoolTournamentController extends ControllerBase {
     return {
       id: player.id,
       name: player.name,
-    };
-  }
-
-  private toPgaTournamentDto(tourney: PgaTournament): PgaTournamentDto {
-    return {
-      id: tourney.id,
-      name: tourney.name,
-      date: {
-        start: tourney.start_date.toISOString(),
-        end: tourney.end_date.toISOString(),
-        year: tourney.year,
-        timezone: tourney.timezone,
-      },
     };
   }
 
