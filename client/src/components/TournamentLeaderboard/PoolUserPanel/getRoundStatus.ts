@@ -14,8 +14,8 @@ export type RoundStatus<T extends 'not_started' | 'in_progress' | 'complete'> =
         teetimes: DateTime[];
       }
     : T extends 'in_progress'
-    ? { status: T; percentComplete: number; playersActive: PgaTournamentPlayer[] }
-    : { status: T };
+      ? { status: T; percentComplete: number; playersActive: PgaTournamentPlayer[] }
+      : { status: T };
 
 const HOLES_PER_ROUND = 18;
 
