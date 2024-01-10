@@ -8,7 +8,8 @@ module.exports = {
   plugins: [
     '@typescript-eslint/eslint-plugin',
     "prettier",
-    "simple-import-sort"
+    "simple-import-sort",
+    "unused-imports"
   ],
   extends: [
     'plugin:@typescript-eslint/recommended',
@@ -21,18 +22,32 @@ module.exports = {
   },
   ignorePatterns: ['.eslintrc.js'],
   rules: {
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-meaningless-void-operator": "error",
     "no-use-before-define": "off",
     "no-useless-constructor": "off",
     "no-unused-vars": "off",
     "no-new": "off",
-    "@typescript-eslint/no-unused-vars": "warn",
+    "no-void": "off",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_"
+      }
+    ],
     "prettier/prettier": [
       "error",
       {
         "endOfLine": "auto",
         "printWidth": 100,
         "semi": true,
-        "singleQuote": true
+        "singleQuote": true,
+        "trailingComma": "es5"
       }
     ],
     "simple-import-sort/exports": "error",

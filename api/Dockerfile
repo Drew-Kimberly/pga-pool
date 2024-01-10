@@ -1,4 +1,4 @@
-ARG BASE_IMAGE="node:18.12.1-alpine"
+ARG BASE_IMAGE="node:20.10.0-alpine"
 
 # --- START: base stage ---
 FROM $BASE_IMAGE as base

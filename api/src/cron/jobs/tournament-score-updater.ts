@@ -11,7 +11,7 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { getDataSourceToken } from '@nestjs/typeorm';
 
-(async () => {
+void (async () => {
   const ctx = await NestFactory.createApplicationContext(PgaPoolCronModule, {
     logger: ['log', 'warn', 'error'],
   });
