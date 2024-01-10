@@ -22,14 +22,26 @@
         "@typescript-eslint",
         "prettier",
         "react",
-        "simple-import-sort"
+        "simple-import-sort",
+        "unused-imports"
     ],
     "rules": {
+        "@typescript-eslint/no-unused-vars": "off",
         "no-use-before-define": "off",
         "no-useless-constructor": "off",
         "no-unused-vars": "off",
         "no-new": "off",
-        "@typescript-eslint/no-unused-vars": "warn",
+        "no-void": "off",
+        "unused-imports/no-unused-imports": "error",
+        "unused-imports/no-unused-vars": [
+        "warn",
+        {
+            "vars": "all",
+            "varsIgnorePattern": "^_",
+            "args": "after-used",
+            "argsIgnorePattern": "^_"
+        }
+        ],
         "react/react-in-jsx-scope": "off",
         "prettier/prettier": [
             "error",
@@ -37,7 +49,8 @@
                 "endOfLine": "auto",
                 "printWidth": 100,
                 "semi": true,
-                "singleQuote": true
+                "singleQuote": true,
+                "trailingComma": "es5"
             }
         ],
         "simple-import-sort/exports": "error",
