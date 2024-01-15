@@ -21,7 +21,7 @@
     "db:migrations:run": "yarn typeorm migration:run",
     "db:migrations:revert": "yarn typeorm migration:revert",
     "db:drop": "yarn typeorm schema:drop",
-    "sdk:generate": "yarn openapi-generator-cli generate -i openapi.yaml -g typescript-axios -o sdk/src -p modelPropertyNaming=original --remove-operation-id-prefix -p useSingleRequestParameter=true"
+    "sdk:generate": "yarn openapi-generator-cli generate --generator-key pga-pool-api --remove-operation-id-prefix"
   },
   "dependencies": {
     "@nestjs/axios": "3.0.1",
