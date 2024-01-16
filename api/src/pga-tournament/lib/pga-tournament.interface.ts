@@ -26,6 +26,7 @@ export enum PgaTournamentStatus {
 
 export enum PgaTournamentRoundStatus {
   UPCOMING = 'UPCOMING',
+  GROUPINGS_OFFICIAL = 'GROUPINGS_OFFICIAL',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETE = 'COMPLETE',
   OFFICIAL = 'OFFICIAL',

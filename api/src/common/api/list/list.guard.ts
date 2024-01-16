@@ -35,6 +35,7 @@ export class ListGuard implements CanActivate {
 
     const rawListParams: InvalidatedListParams = {
       page: this.getRawPageQuery(request),
+      filter: this.getRawFilterQuery(request),
     };
 
     const validationResult = schema.validate(rawListParams);
@@ -50,5 +51,9 @@ export class ListGuard implements CanActivate {
 
   private getRawPageQuery(req: Request): InvalidatedListParams['page'] {
     return isObject(req.query.page) ? req.query.page : {};
+  }
+
+  private getRawFilterQuery(req: Request): InvalidatedListParams['filter'] {
+    return (isObject(req.query.filter) ? req.query.filter : {}) as InvalidatedListParams['filter'];
   }
 }
