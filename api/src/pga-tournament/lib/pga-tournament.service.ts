@@ -1,5 +1,6 @@
-import merge from 'deepmerge';
 import { FindManyOptions, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+
+import { IListParams, Listable, PaginatedCollection } from '../../common/api/list';
 
 import { PgaTournament } from './pga-tournament.entity';
 import { SavePgaTournament } from './pga-tournament.interface';
@@ -14,29 +15,48 @@ interface ListParams {
 }
 
 @Injectable()
-export class PgaTournamentService {
+export class PgaTournamentService implements Listable<PgaTournament> {
   constructor(
     @InjectRepository(PgaTournament)
     private readonly pgaTournamentRepo: Repository<PgaTournament>
   ) {}
 
-  list(params: ListParams = {}): Promise<PgaTournament[]> {
-    const defaults: ListParams = { sort: [{ field: 'date.start' }] };
-    const merged: ListParams = merge(defaults, params, { arrayMerge: (_, src) => src });
-    const fieldMap: Record<string, string> = {
-      'date.start': 'start_date',
-    };
+  async list(params: IListParams): Promise<PaginatedCollection<PgaTournament>> {
+    // const defaults: ListParams = { sort: [{ field: 'date.start' }] };
+    // const merged = deepMerge(defaults, params);
+    // const fieldMap: Record<string, string> = {
+    //   'date.start': 'start_date',
+    // };
+
+    // const findOptions: FindManyOptions<PgaTournament> = {
+    //   order: Object.fromEntries(
+    //     (merged.sort ?? []).map((s) => [
+    //       s.field in fieldMap ? fieldMap[s.field] : s.field,
+    //       s.direction ?? 'ASC',
+    //     ])
+    //   ),
+    // };
+
+    const limit = params.page.size;
+    const offset = (params.page.number - 1) * limit;
 
     const findOptions: FindManyOptions<PgaTournament> = {
-      order: Object.fromEntries(
-        (merged.sort ?? []).map((s) => [
-          s.field in fieldMap ? fieldMap[s.field] : s.field,
-          s.direction ?? 'ASC',
-        ])
-      ),
+      order: { start_date: 'ASC' },
+      take: limit,
+      skip: offset,
     };
 
-    return this.pgaTournamentRepo.find(findOptions);
+    const [tourneys, total] = await this.pgaTournamentRepo.findAndCount(findOptions);
+
+    return {
+      data: tourneys,
+      meta: {
+        number: params.page.number,
+        requested_size: params.page.size,
+        actual_size: tourneys.length,
+        total,
+      },
+    };
   }
 
   get(pgaTournamentId: string): Promise<PgaTournament | null> {

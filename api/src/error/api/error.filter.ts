@@ -1,6 +1,7 @@
 import { Response } from 'express';
+import Joi from 'joi';
 
-import { NotFoundResponse } from './error.dto';
+import { BadRequestResponse, NotFoundResponse } from './error.dto';
 import { ErrorResponse } from './error.interface';
 
 import {
@@ -33,7 +34,7 @@ export class ErrorFilter extends BaseExceptionFilter implements ExceptionFilter 
     if (response) {
       return host.switchToHttp().getResponse<Response>().status(response.status).json(response);
     } else {
-      return super.catch(this.mapErrorToResponse(e), host);
+      return super.catch(e, host);
     }
   }
 
@@ -42,6 +43,8 @@ export class ErrorFilter extends BaseExceptionFilter implements ExceptionFilter 
       if (e.getStatus() === 404) {
         return new NotFoundResponse(e.message);
       }
+    } else if (e instanceof Joi.ValidationError) {
+      return new BadRequestResponse(e.message);
     }
   }
 
