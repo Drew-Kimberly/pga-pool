@@ -9,4 +9,5 @@ export const defaultListOptions: ListOptions = {
     defaultPageSize: 100,
     maxPageSize: 250,
   },
+  filter: {},
 };

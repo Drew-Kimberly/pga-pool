@@ -1,8 +1,12 @@
 import { DeepPartial } from '../../types';
 
+import { FilterSchemaBuilder } from './schema/filter.schema';
+
 export interface Listable<T> {
   list(params: IListParams): Promise<PaginatedCollection<T>>;
 }
+
+// --- Start List Options
 
 export type ListOptions = DeepPartial<MergedListOptions> & {
   path?: string;
@@ -15,7 +19,12 @@ export interface MergedListOptions {
     /** @default 250 */
     maxPageSize: number;
   };
+  filter: Record<string, FilterSchemaBuilder>;
 }
+
+// --- End List Params
+
+// --- Start List Params
 
 export type InvalidatedListParams = DeepPartial<IListParams>;
 
@@ -24,7 +33,12 @@ export interface IListParams {
     size: number;
     number: number;
   };
+  filter: Record<string, FilterValue>;
 }
+
+export type FilterValue = string | number | boolean;
+
+// --- End List Params
 
 export interface PaginatedCollection<T> {
   data: T[];
