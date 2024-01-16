@@ -506,7 +506,10 @@ components:
         page:
           type: object
           additionalProperties: false
-          required: [number, size]
+          required:
+            - requested_size
+            - actual_size
+            - number
           properties:
             requested_size:
               type: integer
