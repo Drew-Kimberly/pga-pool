@@ -1196,10 +1196,10 @@
   resolved "https://registry.yarnpkg.com/@csstools/selector-specificity/-/selector-specificity-2.0.2.tgz#1bfafe4b7ed0f3e4105837e056e0a89b108ebe36"
   integrity sha512-IkpVW/ehM1hWKln4fCA3NzJU8KwD+kIOvPZA4cqxoJHtE21CCzjyp+Kxbu0i5I4tBNOlXPL9mjwnWlL0VEG4Fg==
 
-"@drewkimberly/pga-pool-api@0.0.1-ea33970":
-  version "0.0.1-ea33970"
-  resolved "https://registry.npmjs.org/@drewkimberly/pga-pool-api/-/pga-pool-api-0.0.1-ea33970.tgz#64482b6d9f907d7bd4e4d5eca9ca63911db9e9b0"
-  integrity sha512-fXSFj8HzXZ+UKaJNjSHzkv4PAUuwV+rquphtRnrOLQ3QxH6t/zXd8TsBqXlSsCxDqUGBXQR8l8EN60LuFybHGw==
+"@drewkimberly/pga-pool-api@0.0.1-df4e62b":
+  version "0.0.1-df4e62b"
+  resolved "https://registry.npmjs.org/@drewkimberly/pga-pool-api/-/pga-pool-api-0.0.1-df4e62b.tgz#df0949555fdc706880e05c41ed28431ee9bfa1d6"
+  integrity sha512-ZtYZDx3aYKfLoUnD+HIyfcRPn5fewYJLfRFTtxDkSPmf4VracEtejZW2gmVNyrnchL3sb1cY5PYnpgHVyXR3Lg==
 
 "@emotion/is-prop-valid@^1.1.0":
   version "1.2.1"
