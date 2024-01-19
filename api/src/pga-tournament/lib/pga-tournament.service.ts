@@ -1,6 +1,7 @@
 import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import {
+  defaultListParams,
   IListParams,
   Listable,
   PaginatedCollection,
@@ -22,7 +23,7 @@ export class PgaTournamentService implements Listable<PgaTournament> {
   ) {}
 
   async list(
-    params: IListParams,
+    params: IListParams = defaultListParams,
     fieldMap: Record<string, string> = {}
   ): Promise<PaginatedCollection<PgaTournament>> {
     return this.listService.list(params, {
