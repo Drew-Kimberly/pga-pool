@@ -2,6 +2,7 @@ import path from 'path';
 
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
+import { League } from '../../../league/lib/league.entity';
 import { PgaPlayer } from '../../../pga-player/lib/pga-player.entity';
 import { PgaTournament } from '../../../pga-tournament/lib/pga-tournament.entity';
 import { PgaTournamentPlayer } from '../../../pga-tournament-player/lib/pga-tournament-player.entity';
@@ -23,6 +24,7 @@ export = {
     PgaTournament,
     PgaTournamentPlayer,
     User,
+    League,
     PoolTournament,
     PoolTournamentPlayer,
     PoolUser,

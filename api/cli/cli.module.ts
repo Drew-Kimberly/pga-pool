@@ -1,4 +1,5 @@
 import { RegisteredDatabaseModule } from '../src/database/registered-database.module';
+import { LeagueModule } from '../src/league/lib/league.module';
 import { MetabetApiModule } from '../src/metabet-api/lib/metabet-api.module';
 import { PgaPlayerModule } from '../src/pga-player/lib/pga-player.module';
 import { PgaTourApiModule } from '../src/pga-tour-api/lib/v2/pga-tour-api.module';
@@ -23,6 +24,7 @@ import { Module } from '@nestjs/common';
     PgaTournamentModule,
     PgaTournamentPlayerModule,
     UserModule,
+    LeagueModule,
     PoolTournamentModule,
     PoolTournamentPlayerModule,
     PoolUserModule,

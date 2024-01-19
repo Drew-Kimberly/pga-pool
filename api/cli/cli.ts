@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import figlet from 'figlet';
 
+import { leaguesCommand } from './leagues';
 import { pgaTournamentLeaderboardCommand } from './pga-tournament-leaderboard';
 import { playersCommand } from './players';
 import { poolTournamentsCommand } from './pool-tournaments';
@@ -23,7 +24,8 @@ export function createCli(): PgaPoolCli {
     .addCommand(tournamentsCommand)
     .addCommand(pgaTournamentLeaderboardCommand)
     .addCommand(usersCommand)
-    .addCommand(poolTournamentsCommand);
+    .addCommand(poolTournamentsCommand)
+    .addCommand(leaguesCommand);
 
   cli.run = async function (args: string[]) {
     if (args.length <= 2) {
