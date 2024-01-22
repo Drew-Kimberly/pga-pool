@@ -15,7 +15,9 @@ export async function updateLeague(id: string, name: string) {
     throw new Error(`League ${id} not found!`);
   }
 
-  league = await leagueService.update({ id, name });
+  await leagueService.update({ id, name });
+
+  league = await leagueService.get(id);
 
   outputJson(league);
 

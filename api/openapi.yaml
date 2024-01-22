@@ -5,7 +5,7 @@ info:
   description: The API for PGA Pool
   contact:
     name: Drew Kimberly
-    url: 'https://github.com/Drew-Kimberly'
+    url: 'https://github.com/Drew-Kimberly/pga-pool'
 servers:
   - url: 'https://api.pga-pool.drewk.dev'
     description: Production URL
@@ -459,17 +459,22 @@ components:
       properties:
         id:
           type: string
-          example: drewk
+          format: uuid
         name:
           type: string
           example: 'Drew K'
         nickname:
           type: string
           example: 'Jumbo'
+          nullable: true
+        email:
+          type: string
+          nullable: true
       required:
         - id
         - name
         - nickname
+        - email
     TournamentDate:
       description: Defines a tournament date
       type: object

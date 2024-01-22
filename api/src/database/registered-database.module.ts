@@ -1,4 +1,5 @@
 import { League } from '../league/lib/league.entity';
+import { LeagueUser } from '../league-user/lib/league-user.entity';
 import { PgaPlayer } from '../pga-player/lib/pga-player.entity';
 import { PgaTournament } from '../pga-tournament/lib/pga-tournament.entity';
 import { PgaTournamentPlayer } from '../pga-tournament-player/lib/pga-tournament-player.entity';
@@ -20,6 +21,7 @@ import { Module } from '@nestjs/common';
       PgaTournamentPlayer,
       User,
       League,
+      LeagueUser,
       PoolTournament,
       PoolTournamentPlayer,
       PoolUser,
