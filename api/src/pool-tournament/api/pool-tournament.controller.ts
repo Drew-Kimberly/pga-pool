@@ -9,7 +9,6 @@ import { PoolUser } from '../../pool-user/lib/pool-user.entity';
 import { PoolUserPickDto } from '../../pool-user-pick/api/pool-user-pick.dto';
 import { PoolUserPick } from '../../pool-user-pick/lib/pool-user-pick.entity';
 import { UserDto } from '../../user/api/user.dto';
-import { User } from '../../user/lib/user.entity';
 import { PoolTournament } from '../lib/pool-tournament.entity';
 import { PoolTournamentService } from '../lib/pool-tournament.service';
 
@@ -101,7 +100,7 @@ export class PoolTournamentController extends ControllerBase {
       score: poolUser.score,
       projected_fedex_cup_points:
         typeof poolUser.score === 'number' ? poolUser.projected_fedex_cup_points : null,
-      user: this.toUserDto(poolUser.user),
+      user: UserDto.fromEntity(poolUser.user),
       picks: poolUser.picks.map(this.toPoolUserPickDto.bind(this)),
     };
   }
@@ -133,14 +132,6 @@ export class PoolTournamentController extends ControllerBase {
     return {
       id: player.id,
       name: player.name,
-    };
-  }
-
-  private toUserDto(user: User): UserDto {
-    return {
-      id: user.id,
-      name: user.name,
-      nickname: user.nickname,
     };
   }
 }

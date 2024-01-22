@@ -8,6 +8,7 @@ import {
 } from '../../common/api/list';
 
 import { League } from './league.entity';
+import { CreateLeague, UpdateLeague } from './league.interface';
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -35,11 +36,11 @@ export class LeagueService {
     return this.leagueRepo.findOneBy({ id });
   }
 
-  create(payload: Pick<League, 'name'>): Promise<League> {
+  create(payload: CreateLeague): Promise<League> {
     return this.leagueRepo.save(this.leagueRepo.create(payload));
   }
 
-  update(league: Pick<League, 'id' | 'name'>): Promise<League> {
+  update(league: UpdateLeague): Promise<League> {
     return this.leagueRepo.save(league);
   }
 

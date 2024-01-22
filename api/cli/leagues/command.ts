@@ -2,12 +2,13 @@ import { Command } from 'commander';
 import figlet from 'figlet';
 
 import {
+  addLeagueUserCommand,
   createLeagueCommand,
   deleteLeagueCommand,
   getLeagueCommand,
   listLeaguesCommand,
   updateLeagueCommand,
-} from './commands/crudCommands';
+} from './commands/leagueCommands';
 
 const command = new Command('leagues')
   .description('Manage Leagues')
@@ -16,6 +17,7 @@ const command = new Command('leagues')
   .addCommand(listLeaguesCommand)
   .addCommand(createLeagueCommand)
   .addCommand(updateLeagueCommand)
-  .addCommand(deleteLeagueCommand);
+  .addCommand(deleteLeagueCommand)
+  .addCommand(addLeagueUserCommand);
 
 export const leaguesCommand = command;
