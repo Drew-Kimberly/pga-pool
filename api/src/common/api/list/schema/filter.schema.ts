@@ -4,6 +4,8 @@ import { MergedListOptions } from '../list.interface';
 
 import { SchemaBuilder } from './schema.interface';
 
+import { NotFoundException } from '@nestjs/common';
+
 export class FieldFilterSchema {
   static string() {
     return new FilterSchemaBuilder(Joi.string());
@@ -22,6 +24,16 @@ export class FieldFilterSchema {
       Joi.string()
         .allow(...Object.values(e))
         .only()
+    );
+  }
+
+  static uuid() {
+    return new FilterSchemaBuilder(
+      Joi.string()
+        .uuid()
+        .error(() => {
+          throw new NotFoundException();
+        })
     );
   }
 }

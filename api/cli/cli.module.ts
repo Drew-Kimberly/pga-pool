@@ -8,8 +8,8 @@ import { PgaTournamentModule } from '../src/pga-tournament/lib/pga-tournament.mo
 import { PgaTournamentPlayerModule } from '../src/pga-tournament-player/lib/pga-tournament-player.module';
 import { PoolTournamentModule } from '../src/pool-tournament/lib/pool-tournament.module';
 import { PoolTournamentPlayerModule } from '../src/pool-tournament-player/lib/pool-tournament-player.module';
-import { PoolUserModule } from '../src/pool-user/lib/pool-user.module';
-import { PoolUserPickModule } from '../src/pool-user-pick/lib/pool-user-pick.module';
+import { PoolTournamentUserModule } from '../src/pool-tournament-user/lib/pool-tournament-user.module';
+import { PoolTournamentUserPickModule } from '../src/pool-tournament-user-pick/lib/pool-tournament-user-pick.module';
 import { SeedDataModule } from '../src/seed-data/lib/seed-data.module';
 import { UserModule } from '../src/user/lib/user.module';
 
@@ -29,8 +29,8 @@ import { Module } from '@nestjs/common';
     LeagueUserModule,
     PoolTournamentModule,
     PoolTournamentPlayerModule,
-    PoolUserModule,
-    PoolUserPickModule,
+    PoolTournamentUserModule,
+    PoolTournamentUserPickModule,
   ],
 })
 export class PgaPoolCliModule {}

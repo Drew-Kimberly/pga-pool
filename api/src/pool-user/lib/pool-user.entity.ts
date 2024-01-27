@@ -1,17 +1,22 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 import { CoerceNumericColumnTransformer } from '../../common/db';
-import { PoolTournament } from '../../pool-tournament/lib/pool-tournament.entity';
-import { PoolUserPick } from '../../pool-user-pick/lib/pool-user-pick.entity';
+import { League } from '../../league/lib/league.entity';
+import { Pool } from '../../pool/lib/pool.entity';
 import { User } from '../../user/lib/user.entity';
 
 @Entity('pool_user')
 export class PoolUser {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column({ type: 'int', nullable: true })
-  score: number | null;
 
   @Column({
     type: 'decimal',
@@ -20,19 +25,34 @@ export class PoolUser {
     default: 0,
     transformer: new CoerceNumericColumnTransformer(),
   })
-  projected_fedex_cup_points: number;
+  pool_score: number;
 
-  @OneToMany(() => PoolUserPick, (pick) => pick.pool_user)
-  picks: PoolUserPick[];
+  @JoinColumn({ name: 'pool_id' })
+  @ManyToOne(() => Pool, { eager: true, onDelete: 'CASCADE' })
+  pool: Pool;
 
-  @JoinColumn({ name: 'pool_tournament' })
-  @ManyToOne(() => PoolTournament, { eager: true })
-  pool_tournament: PoolTournament;
+  @Column({ type: 'uuid' })
+  pool_id: string;
 
-  @JoinColumn({ name: 'user' })
+  @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User, {
     eager: true,
-    nullable: false,
   })
   user: User;
+
+  @Column({ type: 'uuid' })
+  user_id: string;
+
+  @JoinColumn({ name: 'league_id' })
+  @ManyToOne(() => League, { eager: true, onDelete: 'CASCADE' })
+  league: League;
+
+  @Column({ type: 'uuid' })
+  league_id: string;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updated_at: Date;
 }

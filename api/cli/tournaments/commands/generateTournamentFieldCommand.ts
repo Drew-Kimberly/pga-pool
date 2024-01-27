@@ -14,12 +14,12 @@ const command = new Command('generate-field')
   )
   .addOption(
     new Option(
-      '--tiers <oddsCutoffList>',
+      '--tiers [oddsCutoffList]',
       'The odds cutoff for each tier. Represented as a comma-delimited list'
-    ).makeOptionMandatory()
+    )
   )
   .action((opts) => {
-    return generateTournamentField(opts.pgaTournamentId, opts.tiers.split(',').map(Number));
+    return generateTournamentField(opts.pgaTournamentId, opts.tiers?.split(',').map(Number));
   });
 
 export const generateTournamentFieldCommand = command;

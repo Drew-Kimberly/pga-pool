@@ -1,25 +1,25 @@
 import { FindOptionsWhere, Repository } from 'typeorm';
 
-import { PoolUserPick } from '../../pool-user-pick/lib/pool-user-pick.entity';
+import { PoolTournamentUserPick } from '../../pool-tournament-user-pick/lib/pool-tournament-user-pick.entity';
 
-import { PoolUser } from './pool-user.entity';
-import { PoolUserFilter } from './pool-user.interface';
+import { PoolTournamentUser } from './pool-tournament-user.entity';
+import { PoolTournamentUserFilter } from './pool-tournament-user.interface';
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class PoolUserService {
+export class PoolTournamentUserService {
   constructor(
-    @InjectRepository(PoolUser)
-    private readonly poolUserRepo: Repository<PoolUser>
+    @InjectRepository(PoolTournamentUser)
+    private readonly poolTournamentUserRepo: Repository<PoolTournamentUser>
   ) {}
 
   list(
-    filter: PoolUserFilter = {},
-    repo: Repository<PoolUser> = this.poolUserRepo
-  ): Promise<PoolUser[]> {
-    const findOptions: FindOptionsWhere<PoolUser> = {
+    filter: PoolTournamentUserFilter = {},
+    repo: Repository<PoolTournamentUser> = this.poolTournamentUserRepo
+  ): Promise<PoolTournamentUser[]> {
+    const findOptions: FindOptionsWhere<PoolTournamentUser> = {
       ...(filter.pgaTournamentId
         ? { pool_tournament: { pga_tournament: { id: filter.pgaTournamentId } } }
         : {}),
@@ -32,26 +32,35 @@ export class PoolUserService {
       relations: [
         'picks',
         'picks.pool_tournament_player.pga_tournament_player',
-        'pool_tournament',
-        'pool_tournament.pga_tournament',
+        'picks.pool_tournament_player.pga_tournament_player.pga_tournament',
         'user',
       ],
       order: {
-        pool_tournament: { pga_tournament: { year: 'DESC', start_date: 'DESC' } },
-        score: 'ASC',
+        picks: {
+          pool_tournament_player: {
+            pga_tournament_player: { pga_tournament: { year: 'DESC', start_date: 'DESC' } },
+          },
+        },
+        tournament_score: 'ASC',
       },
     });
   }
 
-  get(poolUserId: string): Promise<PoolUser | null> {
-    return this.poolUserRepo.findOneBy({ id: poolUserId });
+  get(id: string): Promise<PoolTournamentUser | null> {
+    return this.poolTournamentUserRepo.findOneBy({ id });
   }
 
-  upsert(poolUser: PoolUser, repo: Repository<PoolUser> = this.poolUserRepo): Promise<PoolUser> {
-    return repo.save(poolUser);
+  upsert(
+    payload: PoolTournamentUser,
+    repo: Repository<PoolTournamentUser> = this.poolTournamentUserRepo
+  ): Promise<PoolTournamentUser> {
+    return repo.save(payload);
   }
 
-  async updateScores(poolTournamentId: string, repo: Repository<PoolUser> = this.poolUserRepo) {
+  async updateScores(
+    poolTournamentId: string,
+    repo: Repository<PoolTournamentUser> = this.poolTournamentUserRepo
+  ) {
     const updateBatchSize = 25;
     const users = await this.list({ poolTournamentId }, repo);
 
@@ -61,7 +70,7 @@ export class PoolUserService {
         return this.upsert(
           {
             ...user,
-            score: this.aggregateScore(user.picks),
+            tournament_score: this.aggregateScore(user.picks),
             projected_fedex_cup_points: this.aggregateProjectedFedexPoints(user.picks),
           },
           repo
@@ -72,7 +81,7 @@ export class PoolUserService {
     }
   }
 
-  private aggregateScore(picks: PoolUserPick[]): number | null {
+  private aggregateScore(picks: PoolTournamentUserPick[]): number | null {
     return picks.reduce<number | null>((total, pick) => {
       return total === null
         ? pick.pool_tournament_player.pga_tournament_player.score_total
@@ -80,7 +89,7 @@ export class PoolUserService {
     }, null);
   }
 
-  private aggregateProjectedFedexPoints(picks: PoolUserPick[]): number {
+  private aggregateProjectedFedexPoints(picks: PoolTournamentUserPick[]): number {
     return picks.reduce<number>((total, pick) => {
       return total + pick.pool_tournament_player.pga_tournament_player.projected_fedex_cup_points;
     }, 0);
