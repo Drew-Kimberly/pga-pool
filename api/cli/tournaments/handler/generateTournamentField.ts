@@ -8,12 +8,12 @@ import { PgaTournamentService } from '../../../src/pga-tournament/lib/pga-tourna
 import { PgaTournamentField } from '../../../src/pga-tournament-field/lib/pga-tournament-field.interface';
 import { SeedDataService } from '../../../src/seed-data/lib/seed-data.service';
 import { PgaPoolCliModule } from '../../cli.module';
-import { outputJson } from '../../utils';
+import { Maths, outputJson } from '../../utils';
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
-export async function generateTournamentField(pgaTournamentId: string, tierCutoffs: number[]) {
+export async function generateTournamentField(pgaTournamentId: string, tierCutoffs?: number[]) {
   const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule, {
     logger: ['log', 'warn', 'error'],
   });
@@ -97,30 +97,67 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
 
   const pgaPlayers = Object.fromEntries((await pgaPlayerService.list()).map((p) => [p.name, p]));
 
-  let oddsIdx = 0;
-  for (let tier = 1; tier <= tierCutoffs.length + 1; tier++) {
-    const cutoff = tierCutoffs[tier - 1] ?? Number.MAX_SAFE_INTEGER;
-    field.player_tiers[tier] = {};
+  if (Array.isArray(tierCutoffs)) {
+    let oddsIdx = 0;
+    for (let tier = 1; tier <= tierCutoffs.length + 1; tier++) {
+      const cutoff = tierCutoffs[tier - 1] ?? Number.MAX_SAFE_INTEGER;
+      field.player_tiers[tier] = {};
 
-    while (tournamentOdds.players[oddsIdx] && tournamentOdds.players[oddsIdx].odds <= cutoff) {
-      const pgaPlayer = pgaPlayers[tournamentOdds.players[oddsIdx].name];
-      if (!pgaPlayer) {
-        playersNotFound.push({
-          name: tournamentOdds.players[oddsIdx].name,
-          odds: tournamentOdds.players[oddsIdx].odds,
-          tier,
-        });
+      while (tournamentOdds.players[oddsIdx] && tournamentOdds.players[oddsIdx].odds <= cutoff) {
+        const pgaPlayer = pgaPlayers[tournamentOdds.players[oddsIdx].name];
+        if (!pgaPlayer) {
+          playersNotFound.push({
+            name: tournamentOdds.players[oddsIdx].name,
+            odds: tournamentOdds.players[oddsIdx].odds,
+            tier,
+          });
+
+          oddsIdx++;
+          continue;
+        }
+
+        field.player_tiers[tier][pgaPlayer.id] = {
+          name: pgaPlayer.name,
+          odds: toOddsString(tournamentOdds.players[oddsIdx].odds),
+        };
 
         oddsIdx++;
-        continue;
       }
+    }
+  } else {
+    const odds = tournamentOdds.players.map((p) => p.odds);
+    const zScores = Maths.zScores(...odds);
 
-      field.player_tiers[tier][pgaPlayer.id] = {
-        name: pgaPlayer.name,
-        odds: toOddsString(tournamentOdds.players[oddsIdx].odds),
-      };
+    const cutoffs = [-0.75, -0.65, -0.45];
+    tournamentOdds.players.forEach((p, i) => {
+      console.log(p.name, p.odds, zScores[i]);
+    });
 
-      oddsIdx++;
+    let idx = 0;
+    for (let tier = 1; tier <= 4; tier++) {
+      const cutoff = cutoffs[tier - 1] ?? Number.MAX_SAFE_INTEGER;
+      field.player_tiers[tier] = {};
+
+      while (tournamentOdds.players[idx] && zScores[idx] <= cutoff) {
+        const pgaPlayer = pgaPlayers[tournamentOdds.players[idx].name];
+        if (!pgaPlayer) {
+          playersNotFound.push({
+            name: tournamentOdds.players[idx].name,
+            odds: tournamentOdds.players[idx].odds,
+            tier,
+          });
+
+          idx++;
+          continue;
+        }
+
+        field.player_tiers[tier][pgaPlayer.id] = {
+          name: pgaPlayer.name,
+          odds: toOddsString(tournamentOdds.players[idx].odds),
+        };
+
+        idx++;
+      }
     }
   }
 

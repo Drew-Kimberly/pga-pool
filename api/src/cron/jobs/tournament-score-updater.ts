@@ -1,10 +1,11 @@
+import { randomUUID } from 'crypto';
+
 import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
 import { PgaTournamentPlayer } from '../../pga-tournament-player/lib/pga-tournament-player.entity';
 import { PgaTournamentPlayerService } from '../../pga-tournament-player/lib/pga-tournament-player.service';
-import { PoolTournament } from '../../pool-tournament/lib/pool-tournament.entity';
 import { PoolTournamentService } from '../../pool-tournament/lib/pool-tournament.service';
-import { PoolUser } from '../../pool-user/lib/pool-user.entity';
-import { PoolUserService } from '../../pool-user/lib/pool-user.service';
+import { PoolTournamentUser } from '../../pool-tournament-user/lib/pool-tournament-user.entity';
+import { PoolTournamentUserService } from '../../pool-tournament-user/lib/pool-tournament-user.service';
 import { PgaPoolCronModule } from '../cron.module';
 
 import { Logger } from '@nestjs/common';
@@ -19,7 +20,7 @@ void (async () => {
   const pgaTourneyService = ctx.get(PgaTournamentService);
   const pgaTourneyPlayerService = ctx.get(PgaTournamentPlayerService);
   const poolTourneyService = ctx.get(PoolTournamentService);
-  const poolUserService = ctx.get(PoolUserService);
+  const poolUserService = ctx.get(PoolTournamentUserService);
   const logger = new Logger('tournament-score-updater-cron');
 
   const pgaTournament = await pgaTourneyService.getCurrent();
@@ -39,13 +40,17 @@ void (async () => {
     );
     logger.log(`Updated player scores for PGA Tournament ${pgaTournament.id}`);
 
-    const poolTournaments = await poolTourneyService.list(
-      { pgaTournamentId: pgaTournament.id },
-      txManager.getRepository(PoolTournament)
-    );
+    // TODO - need to provide correct Pool ID.
+    const poolTournaments = await poolTourneyService.list(randomUUID(), {
+      page: { number: 0, size: 100 },
+      filter: { 'pga_tournament.id': pgaTournament.id },
+    });
 
-    for (const poolTournament of poolTournaments) {
-      await poolUserService.updateScores(poolTournament.id, txManager.getRepository(PoolUser));
+    for (const poolTournament of poolTournaments.data) {
+      await poolUserService.updateScores(
+        poolTournament.id,
+        txManager.getRepository(PoolTournamentUser)
+      );
       logger.log(`Updated pool user scores for pool ${poolTournament.id}`);
     }
   });
