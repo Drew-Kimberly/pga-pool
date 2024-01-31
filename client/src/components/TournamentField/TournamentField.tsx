@@ -1,6 +1,7 @@
-import { Box, Grid, Heading, PageContent, ResponsiveContext, Text } from 'grommet';
-import { CircleQuestion } from 'grommet-icons';
+import { Anchor, Box, Grid, Heading, PageContent, ResponsiveContext, Text } from 'grommet';
+import { CircleQuestion, Copy } from 'grommet-icons';
 import React, { useContext } from 'react';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { pgaPoolApi } from '../../api/pga-pool';
 import { Spinner } from '../Spinner';
@@ -13,6 +14,16 @@ import {
 
 export interface TournamentFieldProps {
   pgaTournamentId: string;
+}
+
+function playerTiersToCSV(playerTiers: PgaTournamentField['player_tiers']): string {
+  let csv = '';
+  for (const [tier, players] of Object.entries(playerTiers)) {
+    const line = `tier_${tier},${players.map((p) => p.name).join(',')}`;
+    csv += `${line}\n`;
+  }
+
+  return csv;
 }
 
 export function TournamentField(props: TournamentFieldProps) {
@@ -69,6 +80,23 @@ export function TournamentField(props: TournamentFieldProps) {
       {!isLoading && !fetchError && field && (
         <>
           <TournamentHeader tournament={field.pga_tournament} />
+
+          {size !== 'small' && (
+            <CopyToClipboard text={playerTiersToCSV(field.player_tiers)}>
+              <Anchor
+                label={
+                  <Text
+                    size="small"
+                    textAlign="center"
+                    style={{ float: 'right', marginRight: '5em' }}
+                  >
+                    <Copy size="small" style={{ paddingRight: '3px' }} />
+                    Copy to CSV
+                  </Text>
+                }
+              />
+            </CopyToClipboard>
+          )}
 
           {Object.entries(field.player_tiers).map(([tier, players]) => (
             <>
