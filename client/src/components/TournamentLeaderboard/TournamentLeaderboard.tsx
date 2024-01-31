@@ -91,7 +91,7 @@ export function TournamentLeaderboard() {
           <TournamentHeader tournament={tournament.pga_tournament} round={round} />
 
           {pollErrorCount >= 2 && (
-            <Notification status="critical" message="Error refreshing tournamnet scores" />
+            <Notification status="critical" message="Error refreshing tournament scores" />
           )}
 
           <Box
