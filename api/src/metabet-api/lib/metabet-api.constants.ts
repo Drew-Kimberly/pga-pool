@@ -24,7 +24,8 @@ export const playerMap: Record<string, string> = {
  * PGA Tour Tournament -> Metabet Tournament
  */
 export const tournamentMap: Record<string, string> = {
-  'arnold palmer': 'arnold palmer invitational pres. by mastercard',
+  'arnold palmer invitational presented by mastercard':
+    'arnold palmer invitational pres. by mastercard',
   'the memorial': 'the memorial tournament pres. by workday',
   'cognizant classic in the palm beaches': 'cognizant classic',
 };
