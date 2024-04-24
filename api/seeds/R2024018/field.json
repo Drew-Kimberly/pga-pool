@@ -1,0 +1,326 @@
+{
+    "pga_tournament_id": "R2024018",
+    "created_at": 1713918433,
+    "player_tiers": {
+        "1": {
+            "1": {
+                "name": "Cantlay/Schauffele",
+                "odds": ""
+            },
+            "2": {
+                "name": "McIlroy/Lowry",
+                "odds": ""
+            },
+            "3": {
+                "name": "Theegala/Zalatoris",
+                "odds": ""
+            },
+            "4": {
+                "name": "Morikawa/Kitayama",
+                "odds": ""
+            },
+            "5": {
+                "name": "Hoge/McNealy",
+                "odds": ""
+            },
+            "6": {
+                "name": "N. Hojgaard/R. Hojgaard",
+                "odds": ""
+            },
+            "7": {
+                "name": "M. Fitzpatrick/A. Fitzpatrick",
+                "odds": ""
+            },
+            "8": {
+                "name": "N. Taylor/Hadwin",
+                "odds": ""
+            },
+            "9": {
+                "name": "Garnett/Straka",
+                "odds": ""
+            }
+        },
+        "2": {
+            "1": {
+                "name": "Ghim/C. Kim",
+                "odds": ""
+            },
+            "2": {
+                "name": "Mitchell/Dahmen",
+                "odds": ""
+            },
+            "3": {
+                "name": "Moore/NeSmith",
+                "odds": ""
+            },
+            "4": {
+                "name": "Eckroat/Gotterup",
+                "odds": ""
+            },
+            "5": {
+                "name": "Thompson/Novak",
+                "odds": ""
+            },
+            "6": {
+                "name": "Detry/Macintyre",
+                "odds": ""
+            },
+            "7": {
+                "name": "Horschel/Alexander",
+                "odds": ""
+            },
+            "8": {
+                "name": "Hossler/Ryder",
+                "odds": ""
+            },
+            "9": {
+                "name": "Smalley/Schmid",
+                "odds": ""
+            },
+            "11": {
+                "name": "Hardy/Riley",
+                "odds": ""
+            },
+            "12": {
+                "name": "K.H. Lee/M. Kim",
+                "odds": ""
+            },
+            "13": {
+                "name": "Montgomery/Griffin",
+                "odds": ""
+            },
+            "14": {
+                "name": "Wallace/Olesen",
+                "odds": ""
+            },
+            "15": {
+                "name": "Berger/Perez",
+                "odds": ""
+            },
+            "16": {
+                "name": "D. Wu/Lower",
+                "odds": ""
+            },
+            "17": {
+                "name": "Higgo/Fox",
+                "odds": ""
+            },
+            "18": {
+                "name": "List/Norlander",
+                "odds": ""
+            },
+            "19": {
+                "name": "Phillips/Bridgeman",
+                "odds": ""
+            },
+            "20": {
+                "name": "Putnam/Highsmith",
+                "odds": ""
+            },
+            "21": {
+                "name": "Rai/Lipsky",
+                "odds": ""
+            },
+            "22": {
+                "name": "Sigg/Hadley",
+                "odds": ""
+            },
+            "23": {
+                "name": "Yu/Pan",
+                "odds": ""
+            }
+        },
+        "3": {
+            "1": {
+                "name": "Echavarria/Greyserman",
+                "odds": ""
+            },
+            "2": {
+                "name": "Lashley/Campos",
+                "odds": ""
+            },
+            "3": {
+                "name": "Lashley/Campos",
+                "odds": ""
+            },
+            "4": {
+                "name": "Norrman/Campillo",
+                "odds": ""
+            },
+            "5": {
+                "name": "Meissner/Smotherman",
+                "odds": ""
+            },
+            "6": {
+                "name": "P. Coody/P. Coody",
+                "odds": ""
+            },
+            "7": {
+                "name": "Streelman/Laird",
+                "odds": ""
+            },
+            "8": {
+                "name": "Suh/Hoey",
+                "odds": ""
+            },
+            "9": {
+                "name": "Barnes/Endycott",
+                "odds": ""
+            },
+            "11": {
+                "name": "Kohles/Kizzire",
+                "odds": ""
+            },
+            "12": {
+                "name": "Kraft/Tway",
+                "odds": ""
+            },
+            "13": {
+                "name": "Malnati/Knox",
+                "odds": ""
+            },
+            "14": {
+                "name": "Ramey/Trainer",
+                "odds": ""
+            },
+            "15": {
+                "name": "Vegas/Burgoon",
+                "odds": ""
+            },
+            "16": {
+                "name": "Young/Martin",
+                "odds": ""
+            },
+            "17": {
+                "name": "Brehm/Hubbard",
+                "odds": ""
+            },
+            "18": {
+                "name": "Kuchar/Stricker",
+                "odds": ""
+            },
+            "19": {
+                "name": "Silverman/Dougherty",
+                "odds": ""
+            },
+            "20": {
+                "name": "Spaun/Buckley",
+                "odds": ""
+            },
+            "21": {
+                "name": "Stanger/Dumont de Chassart",
+                "odds": ""
+            },
+            "22": {
+                "name": "Yuan/Dou",
+                "odds": ""
+            }
+        },
+        "4": {
+            "1": {
+                "name": "Champ/Daffue",
+                "odds": ""
+            },
+            "2": {
+                "name": "S.H. Kim/Bae",
+                "odds": ""
+            },
+            "3": {
+                "name": "Shelton/Furr",
+                "odds": ""
+            },
+            "4": {
+                "name": "Springer/Whitney",
+                "odds": ""
+            },
+            "5": {
+                "name": "Tarren/Skinns",
+                "odds": ""
+            },
+            "6": {
+                "name": "Whaley/Long",
+                "odds": ""
+            },
+            "7": {
+                "name": "Hall/Piercy",
+                "odds": ""
+            },
+            "8": {
+                "name": "Merritt/Streb",
+                "odds": ""
+            },
+            "9": {
+                "name": "Stevens/Barjon",
+                "odds": ""
+            },
+            "11": {
+                "name": "Crowe/Higgs",
+                "odds": ""
+            },
+            "12": {
+                "name": "Hoffman/Watney",
+                "odds": ""
+            },
+            "13": {
+                "name": "Molinari/Donald",
+                "odds": ""
+            },
+            "14": {
+                "name": "Reavie/Snedeker",
+                "odds": ""
+            },
+            "15": {
+                "name": "Wu/Nicholas",
+                "odds": ""
+            },
+            "16": {
+                "name": "B. Taylor/O'Hair",
+                "odds": ""
+            },
+            "17": {
+                "name": "Blair/Wishburn",
+                "odds": ""
+            },
+            "18": {
+                "name": "Chappell/Dufner",
+                "odds": ""
+            },
+            "19": {
+                "name": "Sloan/Teater",
+                "odds": ""
+            },
+            "20": {
+                "name": "Tosti/Potter Jr.",
+                "odds": ""
+            },
+            "21": {
+                "name": "Xiong/McCormick",
+                "odds": ""
+            },
+            "22": {
+                "name": "Kisner/Brown",
+                "odds": ""
+            },
+            "23": {
+                "name": "Gutchewski/Byrd",
+                "odds": ""
+            },
+            "24": {
+                "name": "Hale Jr./Haley",
+                "odds": ""
+            },
+            "25": {
+                "name": "Pereda/Cook",
+                "odds": ""
+            },
+            "26": {
+                "name": "Cole/Cochran",
+                "odds": ""
+            },
+            "27": {
+                "name": "Johnson/Palmer",
+                "odds": ""
+            }
+        }
+    }
+}
