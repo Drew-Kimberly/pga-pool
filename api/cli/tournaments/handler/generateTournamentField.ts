@@ -84,7 +84,7 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
   // });
 
   const tournamentOdds = (
-    await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.Consensus)
+    await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.MGM)
   ).find(
     (o) =>
       [pgaTournament.name.toLowerCase(), tournamentMap[pgaTournament.name.toLowerCase()]]
