@@ -110,16 +110,24 @@ export class PgaTournamentPlayerService {
         return this.upsert(
           {
             ...player,
-            active: leaderboardEntry.playerState === 'ACTIVE',
-            current_hole: leaderboardEntry.thruSort >= 18 ? null : leaderboardEntry.thruSort + 1,
+            active: leaderboardEntry.scoringData.playerState === 'ACTIVE',
+            current_hole:
+              leaderboardEntry.scoringData.thruSort >= 18
+                ? null
+                : leaderboardEntry.scoringData.thruSort + 1,
             current_position:
-              leaderboardEntry.position === NullStringValue ? null : leaderboardEntry.position,
-            current_round: leaderboardEntry.currentRound,
-            is_round_complete: leaderboardEntry.thruSort >= 18,
-            score_thru: Math.min(18, leaderboardEntry.thruSort),
-            score_total: leaderboardEntry.totalSort,
-            status: this.coercePlayerStatus(leaderboardEntry.playerState),
-            tee_time: leaderboardEntry.teeTime === -1 ? null : leaderboardEntry.teeTime,
+              leaderboardEntry.scoringData.position === NullStringValue
+                ? null
+                : leaderboardEntry.scoringData.position,
+            current_round: leaderboardEntry.scoringData.currentRound,
+            is_round_complete: leaderboardEntry.scoringData.thruSort >= 18,
+            score_thru: Math.min(18, leaderboardEntry.scoringData.thruSort),
+            score_total: leaderboardEntry.scoringData.totalSort,
+            status: this.coercePlayerStatus(leaderboardEntry.scoringData.playerState),
+            tee_time:
+              leaderboardEntry.scoringData.teeTime === -1
+                ? null
+                : leaderboardEntry.scoringData.teeTime,
             projected_fedex_cup_points: this.coerceFedexCupPoints(
               projectedFedexPoints[player.pga_player.id]?.projectedEventPoints
             ),
@@ -155,10 +163,13 @@ export class PgaTournamentPlayerService {
     return playerPointMap;
   }
 
-  private coercePlayerStatus(val: PgaApiTournamentLeaderboardRow['playerState']): PlayerStatus {
-    const map: Record<PgaApiTournamentLeaderboardRow['playerState'], PlayerStatus> = {
-      ACTIVE: PlayerStatus.Active,
-    };
+  private coercePlayerStatus(
+    val: PgaApiTournamentLeaderboardRow['scoringData']['playerState']
+  ): PlayerStatus {
+    const map: Record<PgaApiTournamentLeaderboardRow['scoringData']['playerState'], PlayerStatus> =
+      {
+        ACTIVE: PlayerStatus.Active,
+      };
 
     return map[val];
   }

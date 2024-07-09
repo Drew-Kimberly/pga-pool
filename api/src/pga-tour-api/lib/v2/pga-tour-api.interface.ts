@@ -109,47 +109,49 @@ export interface PgaApiTournamentsResponse {
 export interface PgaApiTournamentLeaderboardRow {
   /** @note PGA Player ID */
   id: string;
-  /**
-   * @example "T3"
-   * @note can be empty "--" value
-   */
-  position: string;
-  /**
-   * @note can be empty "--" value
-   * @example "+1"
-   * @example "-2"
-   * @example "E"
-   */
-  total: string;
-  totalSort: number;
-  /** @note can be empty "--" value or "F" for finished */
-  thru: string;
-  /** @note value of 19 denotes finished */
-  thruSort: number;
-  /**
-   * @note the round score, I believe
-   */
-  score: string;
-  scoreSort: number;
-  /**
-   * @note teeTime is -1 when unavailable.
-   */
-  teeTime: string | -1;
-  courseId: string;
-  groupNumber: number;
-  currentRound: number;
-  /** @example "R1" */
-  roundHeader: string;
-  /** @example "R1 Completed" */
-  roundStatus: string;
-  playerState: 'ACTIVE';
-  totalStrokes: string;
-  /** @example "+5000" */
-  oddsToWin: string;
   player: {
     firstName: string;
     lastName: string;
     displayName: string;
+  };
+  scoringData: {
+    /**
+     * @example "T3"
+     * @note can be empty "--" value
+     */
+    position: string;
+    /**
+     * @note can be empty "--" value
+     * @example "+1"
+     * @example "-2"
+     * @example "E"
+     */
+    total: string;
+    totalSort: number;
+    /** @note can be empty "--" value or "F" for finished */
+    thru: string;
+    /** @note value of 19 denotes finished */
+    thruSort: number;
+    /**
+     * @note the round score, I believe
+     */
+    score: string;
+    scoreSort: number;
+    /**
+     * @note teeTime is -1 when unavailable.
+     */
+    teeTime: string | -1;
+    courseId: string;
+    groupNumber: number;
+    currentRound: number;
+    /** @example "R1" */
+    roundHeader: string;
+    /** @example "R1 Completed" */
+    roundStatus: string;
+    playerState: 'ACTIVE';
+    totalStrokes: string;
+    /** @example "+5000" */
+    oddsToWin: string;
   };
 }
 
