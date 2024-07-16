@@ -18,6 +18,7 @@ export const playerMap: Record<string, string> = {
   'Seung-Yul Noh': 'S.Y. Noh',
   'Ludvig Aberg': 'Ludvig Åberg',
   'Thorbjorn Olesen': 'Thorbjørn Olesen',
+  'Minwoo Lee': 'Min Woo Lee',
 };
 
 /**
@@ -28,4 +29,5 @@ export const tournamentMap: Record<string, string> = {
     'arnold palmer invitational pres. by mastercard',
   'the memorial tournament presented by workday': 'the memorial tournament pres. by workday',
   'cognizant classic in the palm beaches': 'cognizant classic',
+  'the open championship': 'the open',
 };
