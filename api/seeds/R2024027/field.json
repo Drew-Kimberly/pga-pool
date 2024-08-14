@@ -1,0 +1,294 @@
+{
+    "pga_tournament_id": "R2024027",
+    "created_at": 1723644725,
+    "player_tiers": {
+        "1": {
+            "28237": {
+                "name": "Rory McIlroy",
+                "odds": "+1000"
+            },
+            "29725": {
+                "name": "Tony Finau",
+                "odds": "+3300"
+            },
+            "30911": {
+                "name": "Tommy Fleetwood",
+                "odds": "+2200"
+            },
+            "32839": {
+                "name": "Hideki Matsuyama",
+                "odds": "+2500"
+            },
+            "34098": {
+                "name": "Russell Henley",
+                "odds": "+3300"
+            },
+            "35450": {
+                "name": "Patrick Cantlay",
+                "odds": "+2500"
+            },
+            "39971": {
+                "name": "Sungjae Im",
+                "odds": "+3300"
+            },
+            "46046": {
+                "name": "Scottie Scheffler",
+                "odds": "+400"
+            },
+            "48081": {
+                "name": "Xander Schauffele",
+                "odds": "+800"
+            },
+            "50525": {
+                "name": "Collin Morikawa",
+                "odds": "+1200"
+            },
+            "52955": {
+                "name": "Ludvig Åberg",
+                "odds": "+1800"
+            },
+            "55182": {
+                "name": "Tom Kim",
+                "odds": "+3300"
+            }
+        },
+        "2": {
+            "24502": {
+                "name": "Adam Scott",
+                "odds": "+5500"
+            },
+            "29420": {
+                "name": "Billy Horschel",
+                "odds": "+4500"
+            },
+            "33204": {
+                "name": "Shane Lowry",
+                "odds": "+5000"
+            },
+            "33448": {
+                "name": "Justin Thomas",
+                "odds": "+4000"
+            },
+            "39997": {
+                "name": "Corey Conners",
+                "odds": "+3500"
+            },
+            "46414": {
+                "name": "Aaron Rai",
+                "odds": "+4000"
+            },
+            "46717": {
+                "name": "Viktor Hovland",
+                "odds": "+3500"
+            },
+            "47504": {
+                "name": "Sam Burns",
+                "odds": "+5000"
+            },
+            "51634": {
+                "name": "Sahith Theegala",
+                "odds": "+4500"
+            },
+            "51766": {
+                "name": "Wyndham Clark",
+                "odds": "+5000"
+            },
+            "57366": {
+                "name": "Cameron Young",
+                "odds": "+5000"
+            },
+            "58168": {
+                "name": "Davis Thompson",
+                "odds": "+5500"
+            }
+        },
+        "3": {
+            "27349": {
+                "name": "Alex Noren",
+                "odds": "+8000"
+            },
+            "27644": {
+                "name": "Brian Harman",
+                "odds": "+6600"
+            },
+            "28089": {
+                "name": "Jason Day",
+                "odds": "+6600"
+            },
+            "33141": {
+                "name": "Keegan Bradley",
+                "odds": "+8000"
+            },
+            "33948": {
+                "name": "Byeong Hun An",
+                "odds": "+6600"
+            },
+            "34046": {
+                "name": "Jordan Spieth",
+                "odds": "+6600"
+            },
+            "37455": {
+                "name": "Si Woo Kim",
+                "odds": "+8000"
+            },
+            "39977": {
+                "name": "Max Homa",
+                "odds": "+8000"
+            },
+            "40098": {
+                "name": "Matt Fitzpatrick",
+                "odds": "+6600"
+            },
+            "40250": {
+                "name": "Taylor Pendrith",
+                "odds": "+9000"
+            },
+            "45522": {
+                "name": "Christiaan Bezuidenhout",
+                "odds": "+6600"
+            },
+            "46442": {
+                "name": "Maverick McNealy",
+                "odds": "+8000"
+            },
+            "47483": {
+                "name": "Will Zalatoris",
+                "odds": "+9000"
+            },
+            "47591": {
+                "name": "Eric Cole",
+                "odds": "+9000"
+            },
+            "49960": {
+                "name": "Sepp Straka",
+                "odds": "+6600"
+            },
+            "51977": {
+                "name": "Max Greyserman",
+                "odds": "+9000"
+            },
+            "52215": {
+                "name": "Robert MacIntyre",
+                "odds": "+9000"
+            },
+            "56630": {
+                "name": "Akshay Bhatia",
+                "odds": "+8000"
+            }
+        },
+        "4": {
+            "22405": {
+                "name": "Justin Rose",
+                "odds": "+12500"
+            },
+            "25493": {
+                "name": "Nick Taylor",
+                "odds": "+20000"
+            },
+            "27064": {
+                "name": "Jhonattan Vegas",
+                "odds": "+15000"
+            },
+            "28252": {
+                "name": "Seamus Power",
+                "odds": "+15000"
+            },
+            "30926": {
+                "name": "Chris Kirk",
+                "odds": "+15000"
+            },
+            "30927": {
+                "name": "Brendon Todd",
+                "odds": "+15000"
+            },
+            "31646": {
+                "name": "Emiliano Grillo",
+                "odds": "+25000"
+            },
+            "33399": {
+                "name": "Adam Hadwin",
+                "odds": "+12500"
+            },
+            "33653": {
+                "name": "Thomas Detry",
+                "odds": "+10000"
+            },
+            "34099": {
+                "name": "Harris English",
+                "odds": "+12500"
+            },
+            "34466": {
+                "name": "Peter Malnati",
+                "odds": "+50000"
+            },
+            "35506": {
+                "name": "Mackenzie Hughes",
+                "odds": "+15000"
+            },
+            "35532": {
+                "name": "Tom Hoge",
+                "odds": "+10000"
+            },
+            "36699": {
+                "name": "Patrick Rodgers",
+                "odds": "+15000"
+            },
+            "36799": {
+                "name": "Stephan Jaeger",
+                "odds": "+15000"
+            },
+            "36801": {
+                "name": "Mark Hubbard",
+                "odds": "+20000"
+            },
+            "37378": {
+                "name": "Min Woo Lee",
+                "odds": "+10000"
+            },
+            "40006": {
+                "name": "Erik van Rooyen",
+                "odds": "+15000"
+            },
+            "45157": {
+                "name": "Cam Davis",
+                "odds": "+10000"
+            },
+            "47420": {
+                "name": "Jake Knapp",
+                "odds": "+30000"
+            },
+            "47679": {
+                "name": "Victor Perez",
+                "odds": "+12500"
+            },
+            "47993": {
+                "name": "Denny McCarthy",
+                "odds": "+10000"
+            },
+            "48153": {
+                "name": "Matthieu Pavon",
+                "odds": "+25000"
+            },
+            "49771": {
+                "name": "J.T. Poston",
+                "odds": "+15000"
+            },
+            "49947": {
+                "name": "Taylor Moore",
+                "odds": "+10000"
+            },
+            "54591": {
+                "name": "Ben Griffin",
+                "odds": "+10000"
+            },
+            "57362": {
+                "name": "Austin Eckroat",
+                "odds": "+12500"
+            },
+            "59866": {
+                "name": "Nick Dunlap",
+                "odds": "+12500"
+            }
+        }
+    }
+}
