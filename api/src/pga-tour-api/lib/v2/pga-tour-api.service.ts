@@ -124,52 +124,56 @@ export class PgaTourApiService {
     const query = gql`
       query Tournaments($ids: [ID!]) {
         tournaments(ids: $ids) {
-          id
-          tournamentName
-          tournamentLogo
-          tournamentLocation
-          tournamentStatus
-          roundStatusDisplay
-          roundDisplay
-          roundStatus
-          roundStatusColor
-          currentRound
-          timezone
-          seasonYear
-          displayDate
-          country
-          state
-          city
-          scoredLevel
-          infoPath
-          events {
-            id
-            eventName
-            leaderboardId
-          }
-          courses {
-            id
-            courseName
-            courseCode
-            hostCourse
-            scoringLevel
-          }
-          weather {
-            logo
-            logoDark
-            logoAccessibility
-            tempF
-            tempC
-            condition
-            windDirection
-            windSpeedMPH
-            windSpeedKPH
-            precipitation
-            humidity
-          }
-          formatType
-          features
+          ...TournamentFragment
         }
+      }
+
+      fragment TournamentFragment on Tournament {
+        id
+        tournamentName
+        tournamentLogo
+        tournamentLocation
+        tournamentStatus
+        roundStatusDisplay
+        roundDisplay
+        roundStatus
+        roundStatusColor
+        currentRound
+        timezone
+        seasonYear
+        displayDate
+        country
+        state
+        city
+        scoredLevel
+        infoPath
+        events {
+          id
+          eventName
+          leaderboardId
+        }
+        courses {
+          id
+          courseName
+          courseCode
+          hostCourse
+          scoringLevel
+        }
+        weather {
+          logo
+          logoDark
+          logoAccessibility
+          tempF
+          tempC
+          condition
+          windDirection
+          windSpeedMPH
+          windSpeedKPH
+          precipitation
+          humidity
+        }
+        formatType
+        features
       }
     `;
 
