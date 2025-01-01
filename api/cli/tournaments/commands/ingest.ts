@@ -12,6 +12,12 @@ const command = new Command('ingest')
       '[Optional] Specify specific PGA Tour year to ingest tournaments from'
     ).default('')
   )
-  .action((opts) => ingestTournaments(opts.year));
+  .addOption(
+    new Option(
+      '--tournamentId <tournamentId>',
+      '[Optional] Specify specific PGA Tour tournament ID ingest'
+    ).default('')
+  )
+  .action((opts) => ingestTournaments(opts.year, opts.tournamentId));
 
 export const ingestTournamentsCommand = command;

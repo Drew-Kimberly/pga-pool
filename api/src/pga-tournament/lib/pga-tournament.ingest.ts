@@ -19,7 +19,9 @@ export class PgaTournamentIngestor {
     private readonly logger: LoggerService = new Logger(PgaTournamentIngestor.name)
   ) {}
 
-  async ingest(yearOverride?: number) {
+  async ingest(opts?: { yearOverride?: number; tourneyIdOverride?: string }) {
+    const { yearOverride, tourneyIdOverride } = opts ?? {}
+
     // Use 40 day forward-facing window to accommodate when a PGA Tour season starts in Dec.
     const year = yearOverride ?? new Date(Date.now() + 40 * 24 * 60 * 60 * 1000).getFullYear();
     const tournamentsResponse = await this.pgaTourApi.getTournamentSchedule(year);
@@ -30,33 +32,35 @@ export class PgaTournamentIngestor {
 
     for (const tourneys of [...tournamentsResponse.completed, ...tournamentsResponse.upcoming]) {
       for (const t of tourneys.tournaments) {
-        scheduleTourneys.push(t)
-        tourneyIds.push(t.id);
-        tourneysToIngest[t.id] = {
-          id: t.id,
-          name: t.tournamentName,
-          tournament_id: t.id.substring(5),
-          year,
-          month: tourneys.month,
-          start_date: new Date(t.startDate),
-          // Set the end_date to 1 min before midnight on the 4th day (i.e. Sunday at 11:59pm)
-          end_date: new Date(t.startDate + (PGA_TOURNAMENT_LENGTH_DAYS * 24 * 60 * 60 * 1000) - (60 * 1000)),
-          display_date: t.dateAccessibilityText,
-          display_date_short: t.date,
-          purse: strToNum(t.purse.substring(1).split(',').join('')) ?? 0,
-          fedex_cup_event: t.tourStandingHeading === 'FEDEXCUP',
-          fedex_cup_points: strToNum(t.tourStandingValue.split(' ')[0]) ?? null,
-          course_name: t.courseName,
-          country: t.country,
-          country_code: t.countryCode,
-          state: t.state,
-          state_code: t.stateCode,
-          city: t.city,
-          previous_champion: t.champion ?? null,
-          previous_champion_id: Number(t.championId) ?? null,
-          logo_url: t.tournamentLogo,
-          course_url: t.beautyImage,
-        } as PgaTournament;
+        if (!tourneyIdOverride || tourneyIdOverride === t.id) {
+          scheduleTourneys.push(t)
+          tourneyIds.push(t.id);
+          tourneysToIngest[t.id] = {
+            id: t.id,
+            name: t.tournamentName,
+            tournament_id: t.id.substring(5),
+            year,
+            month: tourneys.month,
+            start_date: new Date(t.startDate),
+            // Set the end_date to 1 min before midnight on the 4th day (i.e. Sunday at 11:59pm)
+            end_date: new Date(t.startDate + (PGA_TOURNAMENT_LENGTH_DAYS * 24 * 60 * 60 * 1000) - (60 * 1000)),
+            display_date: t.dateAccessibilityText,
+            display_date_short: t.date,
+            purse: strToNum(t.purse.substring(1).split(',').join('')) ?? 0,
+            fedex_cup_event: t.tourStandingHeading === 'FEDEXCUP',
+            fedex_cup_points: t.tourStandingValue ? strToNum(t.tourStandingValue.split(' ')[0]) : null,
+            course_name: t.courseName,
+            country: t.country,
+            country_code: t.countryCode,
+            state: t.state,
+            state_code: t.stateCode,
+            city: t.city,
+            previous_champion: t.champion ?? null,
+            previous_champion_id: Number(t.championId) ?? null,
+            logo_url: t.tournamentLogo,
+            course_url: t.beautyImage,
+          } as PgaTournament;
+        }
       }
     }
 

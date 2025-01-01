@@ -38,8 +38,8 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
     player_tiers: {},
   };
 
-  if (pgaTournamentId === 'R2024541' && tierCutoffs) {
-    const { leaderboard } = await pgaTourApi.getTournamentLeaderboard(2024, '541');
+  if (pgaTournamentId === 'R2025016' && tierCutoffs) {
+    const { leaderboard } = await pgaTourApi.getTournamentLeaderboard(2025, '016');
 
     // [pid, odds, playerName]
     const tournamentOdds: [string, number, string][] = leaderboard.players
