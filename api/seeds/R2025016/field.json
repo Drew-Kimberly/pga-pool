@@ -3,6 +3,22 @@
     "created_at": 1735772001,
     "player_tiers": {
         "1": {
+            "48081": {
+                "name": "Xander Schauffele",
+                "odds": "+550"
+            },
+            "33448": {
+                "name": "Justin Thomas",
+                "odds": "+900"
+            },
+            "50525": {
+                "name": "Collin Morikawa",
+                "odds": "+1100"
+            },
+            "52955": {
+                "name": "Ludvig Åberg",
+                "odds": "+1400"
+            },
             "29725": {
                 "name": "Tony Finau",
                 "odds": "+2200"
