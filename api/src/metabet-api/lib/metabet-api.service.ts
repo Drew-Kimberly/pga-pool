@@ -31,6 +31,8 @@ export class MetabetApiService {
         location: oddsLocation,
         q: 'pga/golf_tournament_stroke_winner',
       },
+      // Metabeta API blocking traffic with Axios UA
+      headers: { 'User-Agent': '' },
     });
     const metabetOdds = await lastValueFrom(response$).then((res) => res.data);
 

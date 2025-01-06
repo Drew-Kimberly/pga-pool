@@ -1,4 +1,5 @@
 export enum OddsLocation {
+  Illinois = 'IL',
   NewYork = 'NY',
   NewJersey = 'NJ',
 }
