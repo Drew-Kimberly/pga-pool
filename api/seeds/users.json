@@ -1,34 +1,78 @@
 {
   "drewk": {
-    "name": "Drew K",
+    "name": "Drew Kimberly",
     "nickname": "Jumbo"
   },
   "jber": {
-    "name": "John B",
+    "name": "John Berardino",
     "nickname": "JBer"
   },
   "andyd": {
-    "name": "Andrew D",
-    "nickname": "Andy"
+    "name": "Andrew DeCarlo",
+    "nickname": "Andy D"
   },
   "tomcat": {
-    "name": "Tommy W",
+    "name": "Tommy Winschel",
     "nickname": "Tomcat"
   },
   "harryw": {
-    "name": "Harry W",
-    "nickname": "Harry"
+    "name": "Harry Whiteley",
+    "nickname": "Harry W"
   },
   "ferg": {
-    "name": "Brendan F",
+    "name": "Brendan Ferguson",
     "nickname": "Ferg"
   },
   "bigp": {
-    "name": "Pierce F",
+    "name": "Pierce Fowler",
     "nickname": "Big P"
   },
   "nickk": {
-    "name": "Nick K",
-    "nickname": "Nick"
+    "name": "Nick Krueger",
+    "nickname": "Nick K"
+  },
+  "austinhenry": {
+    "name": "Austin Henry",
+    "nickname": "War Daddy"
+  },
+  "moose": {
+    "name": "Connor Gallagher",
+    "nickname": "Moose"
+  },
+  "bensimmons": {
+    "name": "Ben Simmons",
+    "nickname": "Ben S"
+  },
+  "davefentner": {
+    "name": "Dave Fentner",
+    "nickname": "Raleigh Dave"
+  },
+  "davefishman": {
+    "name": "David Fishman",
+    "nickname": "Frat Dave"
+  },
+  "mickeygorman": {
+    "name": "Mickey Gorman",
+    "nickname": "Uncle Norm"
+  },
+  "jeremyburger": {
+    "name": "Jeremy Burger",
+    "nickname": "Jeremy B"
+  },
+  "tims": {
+    "name": "Tim Santos",
+    "nickname": "Tim S"
+  },
+  "garrin": {
+    "name": "Garrin Marchetti",
+    "nickname": "Garrin M"
+  },
+  "chrisdenison": {
+    "name": "Chris Denison",
+    "nickname": "Big Bear"
+  },
+  "shwin": {
+    "name": "Ashwin Prakash",
+    "nickname": "Shwin"
   }
 }
