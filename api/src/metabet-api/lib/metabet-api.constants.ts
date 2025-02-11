@@ -20,6 +20,7 @@ export const playerMap: Record<string, string> = {
   'Thorbjorn Olesen': 'Thorbjørn Olesen',
   'Minwoo Lee': 'Min Woo Lee',
   'Rasmus Hojgaard': 'Rasmus Højgaard',
+  'Séamus Power': 'Seamus Power',
 };
 
 /**
