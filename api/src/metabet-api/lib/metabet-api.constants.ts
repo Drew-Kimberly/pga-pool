@@ -21,6 +21,7 @@ export const playerMap: Record<string, string> = {
   'Minwoo Lee': 'Min Woo Lee',
   'Rasmus Hojgaard': 'Rasmus Højgaard',
   'Séamus Power': 'Seamus Power',
+  'Sami Välimäki': 'Sami Valimaki',
 };
 
 /**
