@@ -76,19 +76,19 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
       }
     }
   } else {
-    // // Debug metabet tourney names
+    // Debug metabet tourney names
     // await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.Consensus).then((odds) => {
     //   odds.forEach((o) => console.log(o.tournamentName));
     // });
 
-    const tournamentOdds = (
-      await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.MGM)
-    ).find(
-      (o) =>
-        [pgaTournament.name.toLowerCase(), tournamentMap[pgaTournament.name.toLowerCase()]]
-          .filter(Boolean)
-          .includes(o.tournamentName.toLowerCase()) && pgaTournament.year === o.year
-    );
+    const tournamentOdds = (await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.MGM))
+      .reverse()
+      .find(
+        (o) =>
+          [pgaTournament.name.toLowerCase(), tournamentMap[pgaTournament.name.toLowerCase()]]
+            .filter(Boolean)
+            .includes(o.tournamentName.toLowerCase()) && pgaTournament.year === o.year
+      );
 
     if (!tournamentOdds) {
       throw new Error(
