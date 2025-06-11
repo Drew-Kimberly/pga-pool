@@ -1,6 +1,6 @@
 {
     "pga_tournament_id": "R2025026",
-    "created_at": 1749597347,
+    "created_at": 1749667700,
     "player_tiers": {
         "1": {
             "28237": {
@@ -73,10 +73,6 @@
                 "name": "Harris English",
                 "odds": "+8000"
             },
-            "39977": {
-                "name": "Max Homa",
-                "odds": "+6600"
-            },
             "39997": {
                 "name": "Corey Conners",
                 "odds": "+5500"
@@ -115,21 +111,9 @@
                 "name": "Nick Taylor",
                 "odds": "+15000"
             },
-            "27349": {
-                "name": "Alex Noren",
-                "odds": "+12500"
-            },
             "28089": {
                 "name": "Jason Day",
                 "odds": "+10000"
-            },
-            "29420": {
-                "name": "Billy Horschel",
-                "odds": "+12500"
-            },
-            "32102": {
-                "name": "Rickie Fowler",
-                "odds": "+15000"
             },
             "33948": {
                 "name": "Byeong Hun An",
@@ -146,10 +130,6 @@
             "39324": {
                 "name": "J.J. Spaun",
                 "odds": "+12500"
-            },
-            "39546": {
-                "name": "Keith Mitchell",
-                "odds": "+15000"
             },
             "39971": {
                 "name": "Sungjae Im",
@@ -171,20 +151,12 @@
                 "name": "Aaron Rai",
                 "odds": "+12500"
             },
-            "47483": {
-                "name": "Will Zalatoris",
-                "odds": "+12500"
-            },
             "47993": {
                 "name": "Denny McCarthy",
                 "odds": "+15000"
             },
             "49771": {
                 "name": "J.T. Poston",
-                "odds": "+15000"
-            },
-            "51634": {
-                "name": "Sahith Theegala",
                 "odds": "+15000"
             },
             "51766": {
@@ -237,10 +209,6 @@
                 "name": "James Hahn",
                 "odds": "+100000"
             },
-            "33399": {
-                "name": "Adam Hadwin",
-                "odds": "+30000"
-            },
             "33653": {
                 "name": "Thomas Detry",
                 "odds": "+20000"
@@ -253,17 +221,9 @@
                 "name": "Bud Cauley",
                 "odds": "+20000"
             },
-            "34256": {
-                "name": "Andrew Putnam",
-                "odds": "+25000"
-            },
             "35310": {
                 "name": "Lanto Griffin",
                 "odds": "+75000"
-            },
-            "35461": {
-                "name": "Beau Hossler",
-                "odds": "+40000"
             },
             "35506": {
                 "name": "Mackenzie Hughes",
@@ -333,10 +293,6 @@
                 "name": "Davis Riley",
                 "odds": "+30000"
             },
-            "48117": {
-                "name": "Kurt Kitayama",
-                "odds": "+25000"
-            },
             "48153": {
                 "name": "Matthieu Pavon",
                 "odds": "+35000"
@@ -357,10 +313,6 @@
                 "name": "Doug Ghim",
                 "odds": "+30000"
             },
-            "52453": {
-                "name": "Nicolai Højgaard",
-                "odds": "+20000"
-            },
             "52686": {
                 "name": "Rasmus Højgaard",
                 "odds": "+20000"
@@ -372,10 +324,6 @@
             "55893": {
                 "name": "Sam Stevens",
                 "odds": "+20000"
-            },
-            "57362": {
-                "name": "Austin Eckroat",
-                "odds": "+25000"
             },
             "58168": {
                 "name": "Davis Thompson",
