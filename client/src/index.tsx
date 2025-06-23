@@ -4,10 +4,43 @@ import ReactDOM from 'react-dom/client';
 import { App } from './components/App';
 import reportWebVitals from './reportWebVitals';
 
+import { Auth0Provider } from '@auth0/auth0-react';
+
+const auth0Config = {
+  domain: process.env.REACT_APP_AUTH0_DOMAIN!,
+  clientId: process.env.REACT_APP_AUTH0_CLIENT_ID!,
+  authorizationParams: {
+    redirect_uri: window.location.origin + '/post-login',
+    audience: process.env.REACT_APP_AUTH0_AUDIENCE,
+    scope: 'openid profile email',
+  },
+  useRefreshTokens: true,
+  cacheLocation: 'localstorage' as const,
+};
+
+console.log('Auth0 Config:', {
+  domain: process.env.REACT_APP_AUTH0_DOMAIN,
+  clientId: process.env.REACT_APP_AUTH0_CLIENT_ID,
+  audience: process.env.REACT_APP_AUTH0_AUDIENCE,
+});
+
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+
+// Add error handler for Auth0
+const onRedirectCallback = (appState?: { returnTo?: string }) => {
+  console.log('Auth0 redirect callback', appState);
+  window.history.replaceState({}, document.title, appState?.returnTo || window.location.pathname);
+};
+
+const onError = (error: Error) => {
+  console.error('Auth0 error:', error);
+};
+
 root.render(
   <React.StrictMode>
-    <App />
+    <Auth0Provider {...auth0Config} onRedirectCallback={onRedirectCallback} onError={onError}>
+      <App />
+    </Auth0Provider>
   </React.StrictMode>
 );
 

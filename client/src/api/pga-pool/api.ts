@@ -1,13 +1,11 @@
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
+
+import authClient from '../auth-client';
 
 import { Configuration, PGATournamentsApi, PoolTournamentApi } from '@drewkimberly/pga-pool-api';
 
-const client = axios.create({
-  baseURL: process.env.REACT_APP_PGA_POOL_API_URL,
-});
-
-const poolTournamentApi = new PoolTournamentApi(new Configuration(), '', client);
-const pgaTournamentApi = new PGATournamentsApi(new Configuration(), '', client);
+const poolTournamentApi = new PoolTournamentApi(new Configuration(), '', authClient);
+const pgaTournamentApi = new PGATournamentsApi(new Configuration(), '', authClient);
 
 export const pgaPoolApi = {
   poolTournaments: poolTournamentApi,
