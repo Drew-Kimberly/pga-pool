@@ -27,9 +27,9 @@ export const useAuth = () => {
 
   useEffect(() => {
     if (user) {
-      const namespace = 'https://pga-pool.drewk.dev/';
-      const userLeagues = user[`${namespace}leagues`] || [];
-      const activeLeagueId = user[`${namespace}league_id`];
+      // TODO: Once Auth0 Actions are configured, these will be available as custom claims
+      const userLeagues: League[] = [];
+      const activeLeagueId = user.league_id;
 
       setLeagues(userLeagues);
       if (activeLeagueId && userLeagues.length > 0) {
