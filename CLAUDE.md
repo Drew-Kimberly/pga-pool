@@ -192,3 +192,9 @@ Key entities and relationships:
 - Always update `.env.example` files when adding new env vars to `.env`.
 - This is not a production-critical application. Tests are required but we want to favor
 high-level component/integration/e2e tests that cover happy paths.
+- Always check for and fix lint and TS compiler errors prior to finishing.
+- Dependencies should always be pinned in `package.json`.
+- `console.log` and `console.error` changes should not be committed. Logging must be done with a `Logger` instance from NestJS that's injected as an optional parameter in class constructors.
+- Do not include throwaway code (scripts, test controllers, etc) when creating commits / PRs.
+- Avoid using `any` as Typescript type unless absolutely necessary.
+- Database writes (_especially multiple_) should always use a transaction.

@@ -1,7 +1,7 @@
-import { Injectable, ExecutionContext } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { Reflector } from '@nestjs/core';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
 
 export const IS_PUBLIC_KEY = 'isPublic';
 
@@ -9,7 +9,7 @@ export const IS_PUBLIC_KEY = 'isPublic';
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
     private reflector: Reflector,
-    private configService: ConfigService,
+    private configService: ConfigService
   ) {
     super();
   }
@@ -25,7 +25,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getHandler(),
       context.getClass(),
     ]);
-    
+
     if (isPublic) {
       return true;
     }
@@ -36,7 +36,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       // but still try to authenticate if token is present
       const request = context.switchToHttp().getRequest();
       const authHeader = request.headers.authorization;
-      
+
       if (!authHeader) {
         // No token provided and auth not required - allow access
         return true;
