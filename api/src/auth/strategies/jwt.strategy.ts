@@ -13,8 +13,7 @@ interface JwtPayload {
   name?: string;
   nickname?: string;
   picture?: string;
-  'https://pga-pool.drewk.dev/leagues'?: Array<{ id: string; name: string }>;
-  'https://pga-pool.drewk.dev/league_id'?: string;
+  league_id?: string;
   iat: number;
   exp: number;
   azp: string;
@@ -51,8 +50,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
-    const namespace = 'https://pga-pool.drewk.dev/';
-
     // Extract Auth0 user info
     const auth0User = {
       auth0Id: payload.sub,
@@ -67,7 +64,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const { user, leagues } = await this.userSyncService.syncOrCreateUser(auth0User);
 
     // Extract league information from token
-    const activeLeagueId = payload[`${namespace}league_id`];
+    const activeLeagueId = payload.league_id;
 
     // Validate league access if activeLeagueId is present
     if (activeLeagueId) {
