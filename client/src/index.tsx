@@ -18,27 +18,16 @@ const auth0Config = {
   cacheLocation: 'localstorage' as const,
 };
 
-console.log('Auth0 Config:', {
-  domain: process.env.REACT_APP_AUTH0_DOMAIN,
-  clientId: process.env.REACT_APP_AUTH0_CLIENT_ID,
-  audience: process.env.REACT_APP_AUTH0_AUDIENCE,
-});
-
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
 // Add error handler for Auth0
 const onRedirectCallback = (appState?: { returnTo?: string }) => {
-  console.log('Auth0 redirect callback', appState);
   window.history.replaceState({}, document.title, appState?.returnTo || window.location.pathname);
-};
-
-const onError = (error: Error) => {
-  console.error('Auth0 error:', error);
 };
 
 root.render(
   <React.StrictMode>
-    <Auth0Provider {...auth0Config} onRedirectCallback={onRedirectCallback} onError={onError}>
+    <Auth0Provider {...auth0Config} onRedirectCallback={onRedirectCallback}>
       <App />
     </Auth0Provider>
   </React.StrictMode>

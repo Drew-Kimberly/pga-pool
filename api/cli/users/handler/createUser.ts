@@ -20,6 +20,10 @@ export async function createUser(
     nickname: nickname ?? null,
     email: email ?? null,
     is_admin: isAdmin,
+    auth0_id: null,
+    picture_url: null,
+    last_login: null,
+    auth_provider: null,
   });
 
   outputJson(user);

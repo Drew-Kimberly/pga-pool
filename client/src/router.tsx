@@ -1,6 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
 
-import { AuthDebug } from './components/AuthDebug';
 import { ErrorPage } from './components/ErrorPage';
 import { AuthErrorPage } from './pages/AuthErrorPage';
 import { PostLoginPage } from './pages/PostLoginPage';
@@ -11,10 +10,6 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <TournamentLeaderboardPage />,
-  },
-  {
-    path: '/debug/auth',
-    element: <AuthDebug />,
   },
   {
     path: 'pga-tournaments/:pgaTournamentId/field',

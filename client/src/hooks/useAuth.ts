@@ -60,7 +60,6 @@ export const useAuth = () => {
         throw new Error(`Failed to select league: ${response.status} ${errorText}`);
       }
     } catch (error) {
-      console.error('Failed to select league:', error);
       // Navigate to error page
       window.location.href = `/error?error=league_selection_failed&error_description=${encodeURIComponent(
         error instanceof Error ? error.message : 'Failed to select league'

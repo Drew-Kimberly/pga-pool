@@ -21,7 +21,6 @@ authClient.interceptors.request.use(async (config) => {
     }
   } catch (error) {
     // User not authenticated, continue without token
-    console.debug('No auth token available');
   }
   return config;
 });

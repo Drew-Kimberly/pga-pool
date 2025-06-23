@@ -61,7 +61,7 @@ export const AuthErrorPage = () => {
     );
   }
 
-  const errorInfo = error && AUTH_ERROR_MESSAGES[error];
+  const errorInfo = error ? AUTH_ERROR_MESSAGES[error] : undefined;
 
   return (
     <ErrorPage
