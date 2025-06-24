@@ -205,3 +205,49 @@ high-level component/integration/e2e tests that cover happy paths.
 - Do not include throwaway code (scripts, test controllers, etc) when creating commits / PRs.
 - Avoid using `any` as Typescript type unless absolutely necessary.
 - Database writes (_especially multiple_) should always use a transaction.
+
+### PR Review Process
+
+When handling PR reviews, follow this systematic approach:
+
+1. **Check for Review Comments**:
+   ```bash
+   gh pr view [PR_NUMBER] --comments
+   # Or list review comments with details:
+   gh api repos/[OWNER]/[REPO]/pulls/[PR_NUMBER]/comments --jq '.[] | {id: .id, path: .path, line: .line, body: .body, user: .user.login}'
+   ```
+
+2. **Address Each Comment**:
+   - Fix the issue in the code
+   - Test the fix thoroughly
+   - Reply to the specific comment thread
+
+3. **Reply to Comments**:
+   ```bash
+   gh api repos/[OWNER]/[REPO]/pulls/[PR_NUMBER]/comments/[COMMENT_ID]/replies -f body="✅ Fixed in [COMMIT_SHA] - [Brief description of fix]"
+   ```
+
+4. **Verification Steps**:
+   - Run linters: `yarn lint` and `yarn lint:fix`
+   - Check TypeScript: `yarn tsc --noEmit`
+   - For API changes: Build and start with `yarn build && node dist/main.js`
+   - For client changes: Build with `yarn build`
+
+5. **Commit Review Fixes**:
+   ```bash
+   git add -A
+   git commit -m "fix: address PR review comments
+
+   - [List each fix with bullet points]
+   - [Reference specific comments addressed]
+   
+   🤖 Generated with [Claude Code](https://claude.ai/code)
+   
+   Co-Authored-By: Claude <noreply@anthropic.com>"
+   git push
+   ```
+
+6. **Multiple Review Rounds**:
+   - After pushing fixes, check for new comments
+   - Repeat the process for each review round
+   - Always verify previous fixes still work after new changes
