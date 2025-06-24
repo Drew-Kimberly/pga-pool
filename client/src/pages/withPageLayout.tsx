@@ -2,6 +2,7 @@ import { Page } from 'grommet';
 import React from 'react';
 
 import { AppBar } from '../components/AppBar';
+import { Footer } from '../components/Footer';
 import { useThemeContext } from '../contexts/ThemeContext';
 
 export function withPageLayout<TProps extends object>(PageContents: React.ComponentType<TProps>) {
@@ -14,6 +15,7 @@ export function withPageLayout<TProps extends object>(PageContents: React.Compon
         <Page>
           <PageContents {...props} />
         </Page>
+        <Footer />
       </>
     );
   };

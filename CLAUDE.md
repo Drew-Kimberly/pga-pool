@@ -247,7 +247,13 @@ When handling PR reviews, follow this systematic approach:
    git push
    ```
 
-6. **Multiple Review Rounds**:
+6. **Monitor PR until CI passes
+   ```bash
+   sleep 30 && gh pr checks [PR_NUMBER]
+   ```
+
+
+7. **Multiple Review Rounds**:
    - After pushing fixes, check for new comments
    - Repeat the process for each review round
    - Always verify previous fixes still work after new changes
