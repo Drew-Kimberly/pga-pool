@@ -210,7 +210,7 @@ high-level component/integration/e2e tests that cover happy paths.
 
 When handling PR reviews, follow this systematic approach:
 
-1. **Check for Review Comments**:
+1. **Check for UNRESOLVED Review Comments**:
    ```bash
    gh pr view [PR_NUMBER] --comments
    # Or list review comments with details:
@@ -228,9 +228,9 @@ When handling PR reviews, follow this systematic approach:
    ```
 
 4. **Verification Steps**:
-   - Run linters: `yarn lint` and `yarn lint:fix`
-   - Check TypeScript: `yarn tsc --noEmit`
-   - For API changes: Build and start with `yarn build && node dist/main.js`
+   - Run linters: `yarn lint:fix`
+   - Check TypeScript: `yarn build`
+   - For API changes: Build and start with `yarn start`
    - For client changes: Build with `yarn build`
 
 5. **Commit Review Fixes**:
@@ -251,3 +251,37 @@ When handling PR reviews, follow this systematic approach:
    - After pushing fixes, check for new comments
    - Repeat the process for each review round
    - Always verify previous fixes still work after new changes
+
+### Pre-Commit Verification Checklist
+
+Before committing any changes, **ALWAYS** run the following verification steps to ensure code quality.
+Paralellize the `api` and `client` steps with sub-agents when possible.
+
+1. **API Verification** (if API changes were made):
+   ```bash
+   cd api/
+   yarn lint:fix               # Auto-fix linting errors if any
+   yarn build                  # Ensure API builds successfully
+   yarn start                  # Verify API starts without errors (Ctrl+C to stop)
+   ```
+
+2. **Client Verification** (if client changes were made):
+   ```bash
+   cd client/
+   yarn lint:fix               # Auto-fix linting errors if any
+   yarn build                 # Ensure client builds successfully
+   ```
+
+3. **Common Issues to Check**:
+   - No `console.log` or `console.error` statements (use Logger in API)
+   - No unpinned dependencies (remove ^ from version numbers)
+   - No `any` types unless absolutely necessary
+   - All database writes wrapped in transactions
+   - All new env vars added to `.env.example`
+
+4. **Final Steps**:
+   - Review all changes with `git diff`
+   - Ensure commit message follows project conventions
+   - Double-check that all verification commands passed
+
+**Important**: Never skip these verification steps. Running these commands takes only a few minutes but prevents breaking changes and maintains code quality standards.
