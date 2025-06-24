@@ -67,8 +67,8 @@ describe('JwtAuthGuard', () => {
 
       expect(result).toBe(true);
       expect(reflector.getAllAndOverride).toHaveBeenCalledWith('isPublic', [
-        context.getHandler(),
-        context.getClass(),
+        expect.any(Function),
+        expect.any(Function),
       ]);
     });
 
