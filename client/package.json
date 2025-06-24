@@ -6,7 +6,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@auth0/auth0-react": "^2.3.0",
+    "@auth0/auth0-react": "2.3.0",
     "@drewkimberly/pga-pool-api": "0.0.1-df4e62b",
     "@testing-library/jest-dom": "6.2.0",
     "@testing-library/react": "14.1.2",
