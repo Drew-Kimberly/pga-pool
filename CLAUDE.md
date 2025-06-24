@@ -206,6 +206,18 @@ high-level component/integration/e2e tests that cover happy paths.
 - Avoid using `any` as Typescript type unless absolutely necessary.
 - Database writes (_especially multiple_) should always use a transaction.
 
+### Creating Pull Requests
+
+When creating a new pull request, always follow these steps:
+
+1. **Create the PR** using the gh CLI with a descriptive title and comprehensive body
+2. **Monitor PR until CI passes**:
+   ```bash
+   sleep 30 && gh pr checks [PR_NUMBER]
+   ```
+3. **Address any CI failures** immediately before moving on to other tasks
+4. **Return the PR URL** to the user so they can review it
+
 ### PR Review Process
 
 When handling PR reviews, follow this systematic approach:
@@ -247,11 +259,10 @@ When handling PR reviews, follow this systematic approach:
    git push
    ```
 
-6. **Monitor PR until CI passes
+6. **Monitor PR until CI passes**:
    ```bash
    sleep 30 && gh pr checks [PR_NUMBER]
    ```
-
 
 7. **Multiple Review Rounds**:
    - After pushing fixes, check for new comments
