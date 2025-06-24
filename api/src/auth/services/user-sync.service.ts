@@ -28,7 +28,7 @@ export class UserSyncService {
     private leagueUserService: LeagueUserService,
     private dataSource: DataSource,
     @Optional()
-    private logger: LoggerService = new Logger(UserSyncService.name),
+    private logger: LoggerService = new Logger(UserSyncService.name)
   ) {}
 
   async syncOrCreateUser(auth0User: Auth0User) {

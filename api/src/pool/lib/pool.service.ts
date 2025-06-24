@@ -38,7 +38,7 @@ export class PoolService {
 
   // TODO - need to start validating payloads at the business logic layer.
   async create(payload: CreatePool): Promise<Pool> {
-    const { tournaments, users, ...rest } = payload;
+    const { tournaments: _tournaments, users: _users, ...rest } = payload;
 
     const pool = await this.poolRepo.save(this.poolRepo.create(rest));
     // TODO: save tournaments and users. Use TX manager.
@@ -47,7 +47,7 @@ export class PoolService {
   }
 
   async update(payload: UpdatePool): Promise<Pool> {
-    const { tournaments, users, ...rest } = payload;
+    const { tournaments: _tournaments, users: _users, ...rest } = payload;
 
     await this.poolRepo.save(rest);
     // TODO: save tournaments and users. Use TX manager.

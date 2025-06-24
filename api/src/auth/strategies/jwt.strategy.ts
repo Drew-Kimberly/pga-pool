@@ -26,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private configService: ConfigService,
     private userSyncService: UserSyncService,
     @Optional()
-    private logger: LoggerService = new Logger(JwtStrategy.name),
+    private logger: LoggerService = new Logger(JwtStrategy.name)
   ) {
     const domain = configService.get('AUTH0_DOMAIN');
     const audience = configService.get('AUTH0_AUDIENCE');
