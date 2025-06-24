@@ -193,8 +193,15 @@ Key entities and relationships:
 - This is not a production-critical application. Tests are required but we want to favor
 high-level component/integration/e2e tests that cover happy paths.
 - Always check for and fix lint and TS compiler errors prior to finishing.
-- Dependencies should always be pinned in `package.json`.
-- `console.log` and `console.error` changes should not be committed. Logging must be done with a `Logger` instance from NestJS that's injected as an optional parameter in class constructors.
+- For `client/` changes always confirm that the application compiles and starts successfully before completing.
+- For `api/` changes always confirm that the application starts successfully before completing.
+- Dependencies should always be pinned in `package.json` (i.e. no SemVer ranges!).
+- `console.log` and `console.error` changes should not be committed. Logging must be done with a `Logger` instance from NestJS that's injected as an optional parameter in class constructors like so (no setter necessary in the constructor):
+    
+    ```ts
+    @Optional()
+    private logger: LoggerService = new Logger(MyClass.name)
+    ```
 - Do not include throwaway code (scripts, test controllers, etc) when creating commits / PRs.
 - Avoid using `any` as Typescript type unless absolutely necessary.
 - Database writes (_especially multiple_) should always use a transaction.

@@ -5,7 +5,7 @@ import { LeagueUserService } from '../../league-user/lib/league-user.service';
 import { User } from '../../user/lib/user.entity';
 import { UserService } from '../../user/lib/user.service';
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, LoggerService, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 interface Auth0User {
@@ -19,8 +19,6 @@ interface Auth0User {
 
 @Injectable()
 export class UserSyncService {
-  private readonly logger?: Logger;
-
   constructor(
     @InjectRepository(User)
     private userRepo: Repository<User>,
@@ -29,10 +27,9 @@ export class UserSyncService {
     private userService: UserService,
     private leagueUserService: LeagueUserService,
     private dataSource: DataSource,
-    logger?: Logger
-  ) {
-    this.logger = logger;
-  }
+    @Optional()
+    private logger: LoggerService = new Logger(UserSyncService.name),
+  ) {}
 
   async syncOrCreateUser(auth0User: Auth0User) {
     return await this.dataSource.transaction(async (manager) => {

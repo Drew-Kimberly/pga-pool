@@ -3,7 +3,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { UserSyncService } from '../services/user-sync.service';
 
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, LoggerService, Optional, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 
@@ -22,12 +22,11 @@ interface JwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  private readonly logger?: Logger;
-
   constructor(
     private configService: ConfigService,
     private userSyncService: UserSyncService,
-    logger?: Logger
+    @Optional()
+    private logger: LoggerService = new Logger(JwtStrategy.name),
   ) {
     const domain = configService.get('AUTH0_DOMAIN');
     const audience = configService.get('AUTH0_AUDIENCE');
@@ -45,8 +44,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       algorithms: ['RS256'],
     });
 
-    this.logger = logger;
-    this.logger?.log(`JWT Strategy initialized with domain: ${domain}`);
+    this.logger.log(`JWT Strategy initialized with domain: ${domain}`);
   }
 
   async validate(payload: JwtPayload) {

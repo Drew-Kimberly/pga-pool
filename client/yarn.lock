@@ -24,7 +24,7 @@
     jsonpointer "^5.0.0"
     leven "^3.1.0"
 
-"@auth0/auth0-react@^2.3.0":
+"@auth0/auth0-react@2.3.0":
   version "2.3.0"
   resolved "https://registry.npmjs.org/@auth0/auth0-react/-/auth0-react-2.3.0.tgz#59273aeafac8494ad87bfc8e5dfb9d72a8fbd80f"
   integrity sha512-YYTc/DWWigKC9fURufR/79h3+3DAnIzbfEzJLZ8Z4Q0BXE0azru3pKUbU+vYzS4lMAJkclwLuAbUnLjK81vCpA==
