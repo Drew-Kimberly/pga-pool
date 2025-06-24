@@ -261,6 +261,7 @@ Paralellize the `api` and `client` steps with sub-agents when possible.
    ```bash
    cd api/
    yarn lint:fix               # Auto-fix linting errors if any
+   yarn test                   # Run all tests and ensure they pass
    yarn build                  # Ensure API builds successfully
    yarn start                  # Verify API starts without errors (Ctrl+C to stop)
    ```
@@ -269,6 +270,7 @@ Paralellize the `api` and `client` steps with sub-agents when possible.
    ```bash
    cd client/
    yarn lint:fix               # Auto-fix linting errors if any
+   yarn test                   # Run all tests and ensure they pass
    yarn build                 # Ensure client builds successfully
    ```
 
