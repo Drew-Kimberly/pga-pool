@@ -4,12 +4,17 @@ import { ErrorPage } from './components/ErrorPage';
 import { AuthErrorPage } from './pages/AuthErrorPage';
 import { PostLoginPage } from './pages/PostLoginPage';
 import { TournamentFieldPage } from './pages/TournamentFieldPage';
+import { WeeklyTournamentFieldPage } from './pages/WeeklyTournamentFieldPage';
 import { TournamentLeaderboardPage } from './pages';
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <TournamentLeaderboardPage />,
+  },
+  {
+    path: 'pga-tournaments/weekly-field',
+    element: <WeeklyTournamentFieldPage />,
   },
   {
     path: 'pga-tournaments/:pgaTournamentId/field',
