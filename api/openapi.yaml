@@ -12,9 +12,23 @@ servers:
   - url: 'http://localhost:3000'
     description: Local Dev URL
 tags:
+  - name: PGA Players
   - name: PGA Tournaments
   - name: PoolTournament
 paths:
+  /pga-players:
+    get:
+      summary: Lists PGA Players
+      description: Lists PGA Players. Returns only active players by default.
+      operationId: listPgaPlayers
+      parameters:
+        - $ref: '#/components/parameters/LimitOffsetPaginationParam'
+        - $ref: '#/components/parameters/PgaPlayerFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListPgaPlayersResponse'
+      tags:
+        - PGA Players
   /pga-tournaments:
     get:
       summary: Lists PGA Tournaments
@@ -94,6 +108,23 @@ paths:
         - PoolTournament
 components:
   responses:
+    ListPgaPlayersResponse:
+      description: Response containing paginated collection of PGA Players
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              meta:
+                $ref: '#/components/schemas/LimitOffsetResponseMeta'
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PgaPlayer'
+            required:
+              - meta
+              - data
     ListPgaTournamentsResponse:
       description: Response containing paginated collection of PGA Tournaments
       content:
@@ -161,6 +192,21 @@ components:
               - message
               - details
   parameters:
+    PgaPlayerFilter:
+      name: filter
+      description: Filters a collection of PGA Players.
+      required: false
+      in: query
+      schema:
+        type: object
+        additionalProperties: false
+        properties:
+          name:
+            type: string
+            description: Case-insensitive partial match on player name
+          active:
+            type: boolean
+            description: Filter by active status (defaults to true if not specified)
     PgaTournamentFilter:
       name: filter
       description: Filters a collection of PGA Tournaments.
@@ -322,9 +368,30 @@ components:
         name:
           type: string
           example: 'Tiger Woods'
+        short_name:
+          type: string
+          example: 'T. Woods'
+        first_name:
+          type: string
+          example: 'Tiger'
+        last_name:
+          type: string
+          example: 'Woods'
+        active:
+          type: boolean
+          example: true
+        headshot_url:
+          type: string
+          nullable: true
+          example: 'https://pga-tour-res.cloudinary.com/image/upload/c_fill,f_auto,h_256,w_256/headshots_46046.png'
       required:
         - id
         - name
+        - short_name
+        - first_name
+        - last_name
+        - active
+        - headshot_url
     PgaTournamentPlayer:
       description: Defines a PGA player participating in a PGA tournament
       type: object
