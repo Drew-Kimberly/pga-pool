@@ -1,3 +1,4 @@
+import { ListModule } from '../../common/api/list';
 import { PgaTourApiModule } from '../../pga-tour-api/lib/v2/pga-tour-api.module';
 
 import { PgaPlayer } from './pga-player.entity';
@@ -8,7 +9,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PgaPlayer]), PgaTourApiModule],
+  imports: [TypeOrmModule.forFeature([PgaPlayer]), PgaTourApiModule, ListModule],
   providers: [PgaPlayerService, PgaPlayerIngestor],
   exports: [PgaPlayerService, PgaPlayerIngestor],
 })
