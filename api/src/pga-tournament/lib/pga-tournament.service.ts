@@ -1,4 +1,4 @@
-import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import {
   defaultListParams,
@@ -7,6 +7,7 @@ import {
   PaginatedCollection,
   TypeOrmListService,
 } from '../../common/api/list';
+import { getWeekBoundary } from '../../common/util';
 
 import { PgaTournament } from './pga-tournament.entity';
 import { SavePgaTournament } from './pga-tournament.interface';
@@ -44,6 +45,17 @@ export class PgaTournamentService implements Listable<PgaTournament> {
       start_date: LessThanOrEqual(now),
       end_date: MoreThanOrEqual(now),
       ...(pgaTournamentId ? { id: pgaTournamentId } : {}),
+    });
+  }
+
+  async getWeeklyTournament(): Promise<PgaTournament | null> {
+    const now = new Date();
+    const weekStart = getWeekBoundary(now, 'start');
+    const weekEnd = getWeekBoundary(now, 'end');
+
+    return this.pgaTournamentRepo.findOne({
+      where: { start_date: Between(weekStart, weekEnd) },
+      order: { start_date: 'ASC' },
     });
   }
 

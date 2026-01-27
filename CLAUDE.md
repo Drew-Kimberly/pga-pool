@@ -32,60 +32,62 @@ The project consists of two main components:
 
 ## Common Development Commands
 
-### API Commands (`cd api/`)
+**Important**: Use `yarn --cwd api` or `yarn --cwd client` to run commands from the project root without changing directories. This is the preferred method for running commands.
+
+### API Commands
 
 Assume dependencies are already available within the bash session (i.e. `docker-compose up -d` has been run).
 
 ```bash
 # Install dependencies
-yarn install
+yarn --cwd api install
 
 # Development (with hot reload)
-yarn start
+yarn --cwd api start
 
 # Build for production
-yarn build
+yarn --cwd api build
 
 # Run linter
-yarn lint
-yarn lint:fix
+yarn --cwd api lint
+yarn --cwd api lint:fix
 
 # Run tests
-yarn test
+yarn --cwd api test
 
 # Database migrations
-yarn db:migrations:generate -- src/database/migrations/MigrationName
-yarn db:migrations:run
-yarn db:migrations:revert
+yarn --cwd api db:migrations:generate -- src/database/migrations/MigrationName
+yarn --cwd api db:migrations:run
+yarn --cwd api db:migrations:revert
 
 # CLI commands
-yarn pgapool [command]  # Custom CLI for various operations
+yarn --cwd api pgapool [command]  # Custom CLI for various operations
 
 # Generate SDK from OpenAPI spec
-yarn sdk:generate
+yarn --cwd api sdk:generate
 
 # Run cron job for tournament score updates
-yarn cron:tournament-score-updater
+yarn --cwd api cron:tournament-score-updater
 ```
 
-### Client Commands (`cd client/`)
+### Client Commands
 
 ```bash
 # Install dependencies
-yarn install
+yarn --cwd client install
 
 # Development server (port 3000)
-yarn start
+yarn --cwd client start
 
 # Build for production
-yarn build
+yarn --cwd client build
 
 # Run linter
-yarn lint
-yarn lint:fix
+yarn --cwd client lint
+yarn --cwd client lint:fix
 
 # Run tests
-yarn test
+yarn --cwd client test
 ```
 
 ## High-Level Architecture
@@ -255,23 +257,21 @@ When handling PR reviews, follow this systematic approach:
 ### Pre-Commit Verification Checklist
 
 Before committing any changes, **ALWAYS** run the following verification steps to ensure code quality.
-Paralellize the `api` and `client` steps with sub-agents when possible.
+Parallelize the `api` and `client` steps with sub-agents when possible.
 
 1. **API Verification** (if API changes were made):
    ```bash
-   cd api/
-   yarn lint:fix               # Auto-fix linting errors if any
-   yarn test                   # Run all tests and ensure they pass
-   yarn build                  # Ensure API builds successfully
-   yarn start                  # Verify API starts without errors (Ctrl+C to stop)
+   yarn --cwd api lint:fix     # Auto-fix linting errors if any
+   yarn --cwd api test         # Run all tests and ensure they pass
+   yarn --cwd api build        # Ensure API builds successfully
+   yarn --cwd api start        # Verify API starts without errors (Ctrl+C to stop)
    ```
 
 2. **Client Verification** (if client changes were made):
    ```bash
-   cd client/
-   yarn lint:fix               # Auto-fix linting errors if any
-   yarn test                   # Run all tests and ensure they pass
-   yarn build                 # Ensure client builds successfully
+   yarn --cwd client lint:fix  # Auto-fix linting errors if any
+   yarn --cwd client test      # Run all tests and ensure they pass
+   yarn --cwd client build     # Ensure client builds successfully
    ```
 
 3. **Common Issues to Check**:
