@@ -24,6 +24,11 @@ export function WeeklyTournamentField() {
 
       try {
         const res = await pgaPoolApi.pgaTournaments.getWeeklyField();
+
+        if (!res.headers['content-type']?.startsWith('application/json')) {
+          throw new Error(`Unexpected response type: ${res.headers['content-type']}`);
+        }
+
         setWeeklyField(res.data);
       } catch (e) {
         if (pgaPoolApi.is404Error(e as Error)) {

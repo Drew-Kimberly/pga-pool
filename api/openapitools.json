@@ -6,9 +6,9 @@
     "generators": {
       "pga-pool-api": {
         "generatorName": "typescript-axios",
-        "output": "sdk/src",
+        "output": "../client/sdk/src",
         "glob": "openapi.yaml",
-        "templateDir": "sdk/generator-templates",
+        "templateDir": "openapi-generator/templates",
         "additionalProperties": {
           "modelPropertyNaming": "original",
           "useSingleRequestParameter": "true"
