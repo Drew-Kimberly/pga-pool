@@ -42,6 +42,22 @@ paths:
           $ref: '#/components/responses/ListPgaTournamentsResponse'
       tags:
         - PGA Tournaments
+  /pga-tournaments/weekly-field:
+    get:
+      summary: Fetches the player field for the current week's tournament
+      description: |
+        Returns the tournament field for the current week (Sunday 2AM EST to Sunday 2AM EST).
+        Returns 404 if no tournament is scheduled this week.
+        Returns 200 with player_tiers: null if tournament exists but field data is not yet available.
+      operationId: getWeeklyField
+      responses:
+        '200':
+          $ref: '#/components/responses/WeeklyPgaTournamentFieldResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+        - PGA Tournaments
+        - PoolTournament
   /pga-tournaments/{pgaTournamentId}/field:
     parameters:
       - schema:
@@ -148,6 +164,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PgaTournamentField'
+    WeeklyPgaTournamentFieldResponse:
+      description: Response containing the weekly PGA Tournament field
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WeeklyPgaTournamentField'
     PoolTournamentsResponse:
       description: Response containing a collection of pool tournaments
       content:
@@ -491,7 +513,44 @@ components:
                 - odds
       required:
         - pga_tournament
-        - created_at  
+        - created_at
+        - player_tiers
+    WeeklyPgaTournamentField:
+      description: The PGA Tournament player field for the current week, divided into tiers.
+      type: object
+      additionalProperties: false
+      properties:
+        pga_tournament:
+          $ref: '#/components/schemas/PgaTournament'
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        player_tiers:
+          type: object
+          nullable: true
+          additionalProperties:
+            type: array
+            items:
+              type: object
+              additionalProperties: false
+              properties:
+                player_id:
+                  type: number
+                  example: 27644
+                name:
+                  type: string
+                  example: 'Tiger Woods'
+                odds:
+                  type: string
+                  example: '+3000'
+              required:
+                - player_id
+                - name
+                - odds
+      required:
+        - pga_tournament
+        - created_at
         - player_tiers
     PoolUser:
       description: Defines a pool user
