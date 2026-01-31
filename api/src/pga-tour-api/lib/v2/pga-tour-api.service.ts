@@ -36,32 +36,12 @@ export class PgaTourApiService {
   }
 
   async getPlayers(onlyActive: boolean): Promise<PgaApiPlayer[]> {
-    const query = gql`
-      query PlayerDirectory($tourCode: TourCode!, $active: Boolean) {
-        playerDirectory(tourCode: $tourCode, active: $active) {
-          tourCode
-          players {
-            id
-            isActive
-            firstName
-            lastName
-            shortName
-            displayName
-            alphaSort
-            country
-            countryFlag
-            headshot
-          }
-        }
-      }
-    `;
+    const url = `https://data-api.pgatour.com/player/list/R`;
+    const response$ = this.httpClient.get<PgaApiPlayersResponse>(url);
+    const response = await lastValueFrom(response$).then((res) => res.data);
+    const players = response.players ?? [];
 
-    const response = await this.gqlClient.request<PgaApiPlayersResponse>(query, {
-      tourCode: 'R',
-      active: onlyActive,
-    });
-
-    return response.playerDirectory.players;
+    return onlyActive ? players.filter((player) => player.isActive) : players;
   }
 
   async getTournamentSchedule(year: number): Promise<PgaApiTournamentSchedule> {

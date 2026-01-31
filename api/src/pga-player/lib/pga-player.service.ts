@@ -19,7 +19,7 @@ export class PgaPlayerService {
 
   list(opts: { filter?: { name?: string } } = {}): Promise<PgaPlayer[]> {
     return this.pgaPlayerRepo.find({
-      where: opts.filter ? { name: Like(`%${opts.filter.name}%` ?? '') } : {},
+      where: opts.filter ? { name: Like(`%${opts.filter.name}%`) } : {},
     });
   }
 
