@@ -1,11 +1,16 @@
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere, Repository } from 'typeorm';
 
+import { IListParams, PaginatedCollection } from '../../common/api/list';
+import { DeepPartial } from '../../common/types';
+import { PgaPlayerService } from '../../pga-player/lib/pga-player.service';
 import { NullStringValue } from '../../pga-tour-api/lib/v2/pga-tour-api.constants';
 import {
   PgaApiProjectedPlayerPoints,
   PgaApiTournamentLeaderboardRow,
 } from '../../pga-tour-api/lib/v2/pga-tour-api.interface';
 import { PgaTourApiService } from '../../pga-tour-api/lib/v2/pga-tour-api.service';
+import { PgaTournament } from '../../pga-tournament/lib/pga-tournament.entity';
+import { PgaTournamentStatus } from '../../pga-tournament/lib/pga-tournament.interface';
 import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
 
 import { PgaTournamentPlayer } from './pga-tournament-player.entity';
@@ -20,29 +25,56 @@ export class PgaTournamentPlayerService {
     @InjectRepository(PgaTournamentPlayer)
     private readonly tourneyPlayerRepo: Repository<PgaTournamentPlayer>,
     private readonly pgaTourApi: PgaTourApiService,
+    private readonly pgaPlayerService: PgaPlayerService,
     private readonly pgaTournamentService: PgaTournamentService,
     @Optional()
     private readonly logger: LoggerService = new Logger(PgaTournamentPlayerService.name)
   ) {}
 
-  list(
+  async list(
     filter: PgaTournamentPlayerFilter,
+    options: { page?: IListParams['page']; order?: FindOptionsOrder<PgaTournamentPlayer> } = {},
     repo: Repository<PgaTournamentPlayer> = this.tourneyPlayerRepo
-  ): Promise<PgaTournamentPlayer[]> {
+  ): Promise<PgaTournamentPlayer[] | PaginatedCollection<PgaTournamentPlayer>> {
     const findOptions: FindOptionsWhere<PgaTournamentPlayer> = {
       ...(filter.tournamentId ? { pga_tournament: { id: filter.tournamentId } } : {}),
       ...(filter.playerId ? { pga_player: { id: filter.playerId } } : {}),
       ...(filter.year ? { pga_tournament: { year: filter.year } } : {}),
     };
 
-    return repo.find({
-      where: findOptions,
-      relations: ['pga_tournament', 'pga_player'],
-      order: {
+    const order: FindOptionsOrder<PgaTournamentPlayer> =
+      options.order ??
+      ({
         pga_tournament: { year: 'DESC', start_date: 'DESC' },
         score_total: 'DESC',
-      },
+      } as FindOptionsOrder<PgaTournamentPlayer>);
+
+    if (!options.page) {
+      return repo.find({
+        where: findOptions,
+        relations: ['pga_tournament', 'pga_player'],
+        order,
+      });
+    }
+
+    const { number, size } = options.page;
+    const [data, total] = await repo.findAndCount({
+      where: findOptions,
+      relations: ['pga_tournament', 'pga_player'],
+      order,
+      take: size,
+      skip: (number - 1) * size,
     });
+
+    return {
+      data,
+      meta: {
+        requested_size: size,
+        actual_size: data.length,
+        number,
+        total,
+      },
+    };
   }
 
   get(
@@ -63,87 +95,120 @@ export class PgaTournamentPlayerService {
     pgaTournamentId: string,
     repo: Repository<PgaTournamentPlayer> = this.tourneyPlayerRepo
   ) {
-    const updateBatchSize = 25;
-
     const pgaTournament = await this.pgaTournamentService.get(pgaTournamentId);
     if (!pgaTournament) {
       throw new Error(`PGA Tournament ${pgaTournamentId} does not exist`);
     }
 
-    const players = await this.list({ tournamentId: pgaTournament.id }, repo);
     const pgaLeaderboard = await this.pgaTourApi.getTournamentLeaderboard(
       pgaTournament.year,
       pgaTournament.tournament_id
     );
-    const projectedFedexPoints = await this.tryGetProjectedFedexCupPoints(pgaTournament.id);
+    await this.updateScoresWithLeaderboard(pgaTournament, pgaLeaderboard, repo);
+  }
 
-    for (let i = 0; i < players.length; i += updateBatchSize) {
-      const batch = players.slice(i, i + updateBatchSize);
-      const updates = batch.map((player) => {
-        const leaderboardEntry = pgaLeaderboard.leaderboard.players.find(
-          (r) => r.id === this.coercePgaPlayerId(player.pga_player.id.toString())
+  async upsertFieldForTournament(
+    pgaTournamentId: string,
+    repo: Repository<PgaTournamentPlayer> = this.tourneyPlayerRepo
+  ) {
+    const pgaTournament = await this.pgaTournamentService.get(pgaTournamentId);
+    if (!pgaTournament) {
+      throw new Error(`PGA Tournament ${pgaTournamentId} does not exist`);
+    }
+
+    let pgaLeaderboard: Awaited<ReturnType<PgaTourApiService['getTournamentLeaderboard']>>;
+    try {
+      pgaLeaderboard = await this.pgaTourApi.getTournamentLeaderboard(
+        pgaTournament.year,
+        pgaTournament.tournament_id
+      );
+    } catch (e) {
+      this.logger.warn(
+        `Skipping field upsert for PGA Tournament ${pgaTournament.id}: leaderboard not available (${e})`
+      );
+      return;
+    }
+
+    const leaderboardPlayers = pgaLeaderboard.leaderboard.players;
+    if (!Array.isArray(leaderboardPlayers) || leaderboardPlayers.length === 0) {
+      this.logger.warn(
+        `Skipping field upsert for PGA Tournament ${pgaTournament.id}: empty leaderboard`
+      );
+      return;
+    }
+
+    if (leaderboardPlayers.length === 0) {
+      this.logger.warn(
+        `Skipping field upsert for PGA Tournament ${pgaTournament.id}: no valid player IDs`
+      );
+      return;
+    }
+
+    if (pgaTournament.tournament_status === PgaTournamentStatus.NOT_STARTED) {
+      const existing = await repo
+        .createQueryBuilder('ptp')
+        .select(['ptp.id', 'ptp.pga_player'])
+        .where('ptp.pga_tournament = :tournamentId', { tournamentId: pgaTournament.id })
+        .getRawMany<{ ptp_id: string; ptp_pga_player: number }>();
+
+      const incomingIds = new Set(leaderboardPlayers.map((player) => Number(player.id)));
+      const idsToDelete = existing
+        .filter((row) => !incomingIds.has(Number(row.ptp_pga_player)))
+        .map((row) => row.ptp_id);
+
+      if (idsToDelete.length > 0) {
+        await repo.delete(idsToDelete);
+      }
+    }
+    await this.updateScoresWithLeaderboard(pgaTournament, pgaLeaderboard, repo);
+  }
+
+  private async updateScoresWithLeaderboard(
+    pgaTournament: PgaTournament,
+    pgaLeaderboard: Awaited<ReturnType<PgaTourApiService['getTournamentLeaderboard']>>,
+    repo: Repository<PgaTournamentPlayer>
+  ) {
+    const updateBatchSize = 100;
+    const leaderboardPlayers = pgaLeaderboard.leaderboard.players;
+    const projectedFedexPoints = await this.tryGetProjectedFedexCupPoints(pgaTournament);
+
+    for (let i = 0; i < leaderboardPlayers.length; i += updateBatchSize) {
+      const batch = leaderboardPlayers.slice(i, i + updateBatchSize);
+      const updates: Array<DeepPartial<PgaTournamentPlayer>> = batch.map((entry) => {
+        const playerId = Number(entry.id);
+        const projectedPoints = this.coerceFedexCupPoints(
+          projectedFedexPoints[playerId]?.projectedEventPoints
         );
 
-        if (!leaderboardEntry) {
-          this.logger.warn(
-            `No ${pgaTournament.year} ${pgaTournament.name} Leaderboard row found for PGA Player ${player.pga_player.name} (ID: ${player.pga_player.id}). Marking as cut...`
-          );
-
-          return this.upsert({
-            ...player,
-            active: false,
-            current_hole: null,
-            current_position: null,
-            current_round: null,
-            is_round_complete: true,
-            score_thru: null,
-            score_total: player.score_total,
-            starting_hole: player.starting_hole,
-            status: PlayerStatus.Cut,
-            tee_time: null,
-            projected_fedex_cup_points: this.coerceFedexCupPoints(
-              projectedFedexPoints[player.pga_player.id]?.projectedEventPoints
-            ),
-          });
-        }
-
-        return this.upsert(
-          {
-            ...player,
-            active: leaderboardEntry.scoringData.playerState === 'ACTIVE',
-            current_hole:
-              leaderboardEntry.scoringData.thruSort >= 18
-                ? null
-                : leaderboardEntry.scoringData.thruSort + 1,
-            current_position:
-              leaderboardEntry.scoringData.position === NullStringValue
-                ? null
-                : leaderboardEntry.scoringData.position,
-            current_round: leaderboardEntry.scoringData.currentRound,
-            is_round_complete: leaderboardEntry.scoringData.thruSort >= 18,
-            score_thru: Math.min(18, leaderboardEntry.scoringData.thruSort),
-            score_total: leaderboardEntry.scoringData.totalSort,
-            status: this.coercePlayerStatus(leaderboardEntry.scoringData.playerState),
-            tee_time:
-              leaderboardEntry.scoringData.teeTime === -1
-                ? null
-                : leaderboardEntry.scoringData.teeTime,
-            projected_fedex_cup_points: this.coerceFedexCupPoints(
-              projectedFedexPoints[player.pga_player.id]?.projectedEventPoints
-            ),
-          },
-          repo
-        );
+        return {
+          id: `${playerId}-${pgaTournament.id}`,
+          pga_player: { id: playerId },
+          pga_tournament: { id: pgaTournament.id },
+          active: entry.scoringData.playerState === 'ACTIVE',
+          status: this.coercePlayerStatus(entry.scoringData.playerState),
+          is_round_complete: entry.scoringData.thruSort >= 18,
+          current_round: entry.scoringData.currentRound,
+          current_hole: entry.scoringData.thruSort >= 18 ? null : entry.scoringData.thruSort + 1,
+          starting_hole: 1,
+          tee_time: entry.scoringData.teeTime === -1 ? null : entry.scoringData.teeTime,
+          score_total: entry.scoringData.totalSort,
+          score_thru: Math.min(18, entry.scoringData.thruSort),
+          current_position:
+            entry.scoringData.position === NullStringValue ? null : entry.scoringData.position,
+          projected_fedex_cup_points: projectedPoints,
+        };
       });
 
-      await Promise.all(updates);
+      await repo.upsert(updates, ['id']);
     }
   }
 
-  private async tryGetProjectedFedexCupPoints(pgaTournamentId: string) {
+  private async tryGetProjectedFedexCupPoints(pgaTournament: PgaTournament) {
     let points: PgaApiProjectedPlayerPoints[];
     try {
-      points = await this.pgaTourApi.getProjectedFedexCupPoints().then((r) => r.points);
+      points = await this.pgaTourApi
+        .getProjectedFedexCupPoints(pgaTournament.year, pgaTournament.tournament_id)
+        .then((r) => r.points);
     } catch (e) {
       this.logger.error(
         `Error fetching projected FedEx Cup points from PGA Tour API: ${e}`,
@@ -153,9 +218,10 @@ export class PgaTournamentPlayerService {
     }
 
     const playerPointMap: Record<number, PgaApiProjectedPlayerPoints> = {};
+    const projectedTournamentId = this.toProjectedPointTournamentId(pgaTournament.id);
 
     for (const playerPoints of points) {
-      if (playerPoints.tournamentId === this.toProjectedPointTournamentId(pgaTournamentId)) {
+      if (playerPoints.tournamentId === projectedTournamentId) {
         playerPointMap[Number(playerPoints.playerId)] = playerPoints;
       }
     }
@@ -166,12 +232,16 @@ export class PgaTournamentPlayerService {
   private coercePlayerStatus(
     val: PgaApiTournamentLeaderboardRow['scoringData']['playerState']
   ): PlayerStatus {
-    const map: Record<PgaApiTournamentLeaderboardRow['scoringData']['playerState'], PlayerStatus> =
-      {
-        ACTIVE: PlayerStatus.Active,
-      };
+    const map: Record<string, PlayerStatus> = {
+      ACTIVE: PlayerStatus.Active,
+      COMPLETE: PlayerStatus.Complete,
+      CUT: PlayerStatus.Cut,
+      WITHDRAWN: PlayerStatus.Withdrawn,
+      WD: PlayerStatus.Withdrawn,
+      DQ: PlayerStatus.Withdrawn,
+    };
 
-    return map[val];
+    return map[val] ?? PlayerStatus.Active;
   }
 
   private coercePgaPlayerId(id: string) {
@@ -183,8 +253,16 @@ export class PgaTournamentPlayerService {
   }
 
   private toProjectedPointTournamentId(tournamentId: string): string {
+    if (tournamentId.startsWith('R')) {
+      return tournamentId;
+    }
+
     const [tourneyId, year] = tournamentId.split('-');
-    return `R${year}${tourneyId}`;
+    if (tourneyId && year) {
+      return `R${year}${tourneyId}`;
+    }
+
+    return tournamentId;
   }
 
   private coerceFedexCupPoints(points: string): number {

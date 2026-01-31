@@ -1,5 +1,6 @@
+import { gunzipSync, inflateSync, unzipSync } from 'zlib';
+
 import { gql, GraphQLClient } from 'graphql-request';
-import { parse } from 'node-html-parser';
 import { lastValueFrom } from 'rxjs';
 
 import { InjectPgaTourApiConfig, PgaTourApiConfig } from './pga-tour-api.config';
@@ -9,6 +10,7 @@ import {
   PgaApiProjectedFedexCupPointsResponse,
   PgaApiTournament,
   PgaApiTournamentLeaderboardResponse,
+  PgaApiTournamentLeaderboardRow,
   PgaApiTournamentSchedule,
   PgaApiTournamentScheduleResponse,
   PgaApiTournamentsResponse,
@@ -188,43 +190,231 @@ export class PgaTourApiService {
     year: string | number,
     tournamentId: string
   ): Promise<PgaApiTournamentLeaderboardResponse> {
-    const url = `https://www.pgatour.com/leaderboard`;
-    const response$ = this.httpClient.get(url, {
-      headers: { 'Accept-Encoding': 'gzip,deflate,compress' },
-    });
+    const leaderboardId = `R${year}${tournamentId}`;
+    const query = gql`
+      query LeaderboardCompressedV3($leaderboardCompressedV3Id: ID!) {
+        leaderboardCompressedV3(id: $leaderboardCompressedV3Id) {
+          id
+          payload
+        }
+      }
+    `;
 
-    const res = await lastValueFrom(response$).then((res) => res.data);
+    const response$ = this.httpClient.post(
+      this.pgaTourApiConfig.PGA_TOUR_API_GQL_URL,
+      {
+        query,
+        variables: { leaderboardCompressedV3Id: leaderboardId },
+      },
+      {
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          'x-api-key': this.pgaTourApiConfig.PGA_TOUR_API_GQL_API_KEY,
+          'x-pgat-platform': 'web',
+        },
+      }
+    );
 
-    const root = parse(res);
-
-    const embeddedJSScript = root.querySelector('script#__NEXT_DATA__') as HTMLScriptElement | null;
-    if (!embeddedJSScript) {
-      throw new Error(`Could not find <script id="__NEXT_DATA__"> tag in the DOM`);
+    const res = await lastValueFrom(response$).then((result) => result.data);
+    if (res?.errors?.length) {
+      throw new Error(`PGA Tour GraphQL errors: ${JSON.stringify(res.errors)}`);
     }
 
-    const data = JSON.parse(embeddedJSScript.text)?.props?.pageProps;
-
-    if (!data) {
-      throw new Error(`Failed to parse ${year} ${tournamentId} leaderboard data from the DOM`);
+    const payload = res?.data?.leaderboardCompressedV3?.payload;
+    if (!payload) {
+      throw new Error(`Missing leaderboard payload for ${leaderboardId}`);
     }
 
-    const leaderboard: PgaApiTournamentLeaderboardResponse = {
-      leaderboardId: data.leaderboardId,
-      leaderboard: data.leaderboard,
-    };
+    const decoded = this.decodeCompressedPayload(payload);
+    const { leaderboard, leaderboardId: decodedLeaderboardId } =
+      this.extractLeaderboardFromPayload(decoded);
 
-    if (leaderboard.leaderboardId !== `R${year}${tournamentId}`) {
-      throw new Error(
-        `Could not find leaderboard (year=${year}, tournamentId=${tournamentId}). Only found ${leaderboard.leaderboardId}`
-      );
+    if (!leaderboard) {
+      throw new Error(`Could not parse leaderboard players for ${leaderboardId}`);
     }
 
-    return leaderboard;
+    return {
+      leaderboardId: decodedLeaderboardId ?? leaderboardId,
+      leaderboard: {
+        ...leaderboard,
+        players: this.normalizeLeaderboardPlayers(leaderboard.players ?? []),
+      },
+    } as PgaApiTournamentLeaderboardResponse;
   }
 
-  async getProjectedFedexCupPoints(): Promise<PgaApiProjectedFedexCupPointsResponse> {
-    const url = `https://statdata.pgatour.com/r/current/projected_points/2671.json`;
-    const response$ = this.httpClient.get<PgaApiProjectedFedexCupPointsResponse>(url);
-    return lastValueFrom(response$).then((res) => res.data);
+  async getProjectedFedexCupPoints(
+    year: number,
+    tournamentId: string
+  ): Promise<PgaApiProjectedFedexCupPointsResponse> {
+    const query = gql`
+      query TourCupSplit(
+        $tourCode: TourCode!
+        $id: String
+        $year: Int
+        $eventQuery: StatDetailEventQuery
+      ) {
+        tourCupSplit(tourCode: $tourCode, id: $id, year: $year, eventQuery: $eventQuery) {
+          projectedPlayers {
+            __typename
+            ... on TourCupCombinedPlayer {
+              id
+              firstName
+              lastName
+              pointData {
+                event
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const response$ = this.httpClient.post(
+      this.pgaTourApiConfig.PGA_TOUR_API_GQL_URL,
+      {
+        query,
+        variables: {
+          tourCode: 'R',
+          id: '02671',
+          year,
+          eventQuery: null,
+        },
+      },
+      {
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          'x-api-key': this.pgaTourApiConfig.PGA_TOUR_API_GQL_API_KEY,
+          'x-pgat-platform': 'web',
+        },
+      }
+    );
+
+    const res = await lastValueFrom(response$).then((result) => result.data);
+    if (res?.errors?.length) {
+      throw new Error(`PGA Tour GraphQL errors: ${JSON.stringify(res.errors)}`);
+    }
+
+    const projectedPlayers = res?.data?.tourCupSplit?.projectedPlayers ?? [];
+    const projectedTournamentId = `R${year}${tournamentId}`;
+
+    return {
+      seasonYear: year,
+      lastUpdated: new Date().toISOString(),
+      points: projectedPlayers
+        .filter((player: { __typename?: string }) => player.__typename === 'TourCupCombinedPlayer')
+        .map(
+          (player: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            pointData?: { event?: string };
+          }) => {
+            return {
+              playerId: player.id,
+              firstName: player.firstName,
+              lastName: player.lastName,
+              tournamentId: projectedTournamentId,
+              tournamentName: '',
+              playerPosition: '',
+              projectedEventPoints: player.pointData?.event ?? '0',
+            };
+          }
+        ),
+    };
+  }
+
+  private decodeCompressedPayload(payload: string): unknown {
+    const buf = Buffer.from(payload, 'base64');
+    const input = Uint8Array.from(buf);
+    const decode = (fn: (input: Uint8Array) => Buffer) => fn(input).toString('utf8');
+
+    try {
+      return JSON.parse(decode((input) => gunzipSync(input)));
+    } catch (e) {
+      // Fall back to alternate zlib formats in case PGA changes compression.
+    }
+
+    try {
+      return JSON.parse(decode((input) => unzipSync(input)));
+    } catch (e) {
+      // Continue to final fallback.
+    }
+
+    try {
+      return JSON.parse(decode((input) => inflateSync(input)));
+    } catch (e) {
+      throw new Error(`Failed to decode leaderboard payload: ${e}`);
+    }
+  }
+
+  private extractLeaderboardFromPayload(payload: unknown): {
+    leaderboard?: PgaApiTournamentLeaderboardResponse['leaderboard'];
+    leaderboardId?: string;
+  } {
+    const root = this.asRecord(payload);
+    if (!root) {
+      return {};
+    }
+
+    const leaderboardId =
+      (typeof root.leaderboardId === 'string' && root.leaderboardId) ||
+      (typeof root.id === 'string' && root.id) ||
+      undefined;
+    const candidates = [
+      root.leaderboard,
+      this.asRecord(root.data)?.leaderboard,
+      this.asRecord(root.leaderboardCompressedV3)?.leaderboard,
+      this.asRecord(root.leaderboardV3)?.leaderboard,
+      root.leaderboardV3,
+      root,
+    ];
+
+    for (const candidate of candidates) {
+      const leaderboard = this.asRecord(candidate);
+      if (leaderboard && Array.isArray(leaderboard.players)) {
+        return {
+          leaderboard: leaderboard as PgaApiTournamentLeaderboardResponse['leaderboard'],
+          leaderboardId,
+        };
+      }
+    }
+
+    return { leaderboardId };
+  }
+
+  private normalizeLeaderboardPlayers(
+    players: Array<PgaApiTournamentLeaderboardRow | { __typename?: string }>
+  ): PgaApiTournamentLeaderboardRow[] {
+    return players.filter(this.isLeaderboardPlayerRow);
+  }
+
+  private isLeaderboardPlayerRow(
+    row: PgaApiTournamentLeaderboardRow | { __typename?: string }
+  ): row is PgaApiTournamentLeaderboardRow {
+    if (!row || typeof row !== 'object') {
+      return false;
+    }
+
+    const candidate = row as Record<string, unknown>;
+    if (candidate.__typename === 'InformationRow') {
+      return false;
+    }
+
+    return (
+      typeof candidate.id === 'string' &&
+      /^\d+$/.test(candidate.id) &&
+      typeof candidate.player === 'object' &&
+      typeof candidate.scoringData === 'object'
+    );
+  }
+
+  private asRecord(value: unknown): Record<string, unknown> | null {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return value as Record<string, unknown>;
+    }
+
+    return null;
   }
 }

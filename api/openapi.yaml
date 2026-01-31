@@ -14,6 +14,7 @@ servers:
 tags:
   - name: PGA Players
   - name: PGA Tournaments
+  - name: PGA Tournament Players
   - name: PoolTournament
 paths:
   /pga-players:
@@ -79,6 +80,28 @@ paths:
       tags:
         - PGA Tournaments
         - PoolTournament
+  /pga-tournaments/{pgaTournamentId}/players:
+    parameters:
+      - schema:
+          type: string
+          example: '002-2023'
+          description: The PGA Tournament ID
+        name: pgaTournamentId
+        in: path
+        required: true
+    get:
+      summary: Lists players for a given PGA Tournament
+      description: Lists players for a given PGA Tournament
+      operationId: listPgaTournamentPlayers
+      parameters:
+        - $ref: '#/components/parameters/LimitOffsetPaginationParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListPgaTournamentPlayersResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+        - PGA Tournament Players
   /pool/tournaments:
     get:
       summary: List pool tournaments
@@ -138,6 +161,23 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/PgaPlayer'
+            required:
+              - meta
+              - data
+    ListPgaTournamentPlayersResponse:
+      description: Response containing paginated collection of PGA Tournament Players
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              meta:
+                $ref: '#/components/schemas/LimitOffsetResponseMeta'
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PgaTournamentPlayer'
             required:
               - meta
               - data
@@ -427,7 +467,7 @@ components:
           type: boolean
         status:
           type: string
-          enum: ['active', 'wd', 'cut']
+          enum: ['active', 'complete', 'wd', 'cut']
           example: 'active'
         is_round_complete:
           type: boolean

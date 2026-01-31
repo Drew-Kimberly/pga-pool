@@ -59,6 +59,13 @@ export class PgaTournamentService implements Listable<PgaTournament> {
     });
   }
 
+  listByDateRange(start: Date, end: Date): Promise<PgaTournament[]> {
+    return this.pgaTournamentRepo.find({
+      where: { start_date: Between(start, end) },
+      order: { start_date: 'ASC' },
+    });
+  }
+
   save(payload: SavePgaTournament[]): Promise<PgaTournament[]> {
     return this.pgaTournamentRepo.save(payload);
   }
