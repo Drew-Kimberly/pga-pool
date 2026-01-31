@@ -137,9 +137,16 @@ export class PgaTournamentPlayerService {
       return;
     }
 
-    if (leaderboardPlayers.length === 0) {
+    const leaderboardPlayerIds = leaderboardPlayers.map((player) => Number(player.id));
+    const existingPlayers = await this.pgaPlayerService.listByIds(leaderboardPlayerIds);
+    const existingPlayerIdSet = new Set(existingPlayers.map((player) => player.id));
+    const filteredLeaderboardPlayers = leaderboardPlayers.filter((player) =>
+      existingPlayerIdSet.has(Number(player.id))
+    );
+
+    if (filteredLeaderboardPlayers.length === 0) {
       this.logger.warn(
-        `Skipping field upsert for PGA Tournament ${pgaTournament.id}: no valid player IDs`
+        `Skipping field upsert for PGA Tournament ${pgaTournament.id}: no leaderboard players found in pga_player`
       );
       return;
     }
@@ -151,7 +158,7 @@ export class PgaTournamentPlayerService {
         .where('ptp.pga_tournament = :tournamentId', { tournamentId: pgaTournament.id })
         .getRawMany<{ ptp_id: string; ptp_pga_player: number }>();
 
-      const incomingIds = new Set(leaderboardPlayers.map((player) => Number(player.id)));
+      const incomingIds = new Set(filteredLeaderboardPlayers.map((player) => Number(player.id)));
       const idsToDelete = existing
         .filter((row) => !incomingIds.has(Number(row.ptp_pga_player)))
         .map((row) => row.ptp_id);
@@ -160,7 +167,14 @@ export class PgaTournamentPlayerService {
         await repo.delete(idsToDelete);
       }
     }
-    await this.updateScoresWithLeaderboard(pgaTournament, pgaLeaderboard, repo);
+    await this.updateScoresWithLeaderboard(
+      pgaTournament,
+      {
+        ...pgaLeaderboard,
+        leaderboard: { ...pgaLeaderboard.leaderboard, players: filteredLeaderboardPlayers },
+      },
+      repo
+    );
   }
 
   private async updateScoresWithLeaderboard(
