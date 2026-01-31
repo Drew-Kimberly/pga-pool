@@ -165,6 +165,25 @@ export interface ListPgaPlayersPageParameter {
 /**
  * 
  * @export
+ * @interface ListPgaTournamentPlayers200Response
+ */
+export interface ListPgaTournamentPlayers200Response {
+    /**
+     * 
+     * @type {LimitOffsetResponseMeta}
+     * @memberof ListPgaTournamentPlayers200Response
+     */
+    'meta': LimitOffsetResponseMeta;
+    /**
+     * 
+     * @type {Array<PgaTournamentPlayer>}
+     * @memberof ListPgaTournamentPlayers200Response
+     */
+    'data': Array<PgaTournamentPlayer>;
+}
+/**
+ * 
+ * @export
  * @interface ListPgaTournaments200Response
  */
 export interface ListPgaTournaments200Response {
@@ -563,6 +582,7 @@ export interface PgaTournamentPlayer {
 
 export const PgaTournamentPlayerStatusEnum = {
     Active: 'active',
+    Complete: 'complete',
     Wd: 'wd',
     Cut: 'cut'
 } as const;
@@ -887,6 +907,141 @@ export class PGAPlayersApi extends BaseAPI {
      */
     public listPgaPlayers(requestParameters: PGAPlayersApiListPgaPlayersRequest = {}, options?: RawAxiosRequestConfig) {
         return PGAPlayersApiFp(this.configuration).listPgaPlayers(requestParameters.page, requestParameters.filter, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * PGATournamentPlayersApi - axios parameter creator
+ * @export
+ */
+export const PGATournamentPlayersApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Lists players for a given PGA Tournament
+         * @summary Lists players for a given PGA Tournament
+         * @param {string} pgaTournamentId 
+         * @param {ListPgaPlayersPageParameter} [page] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPgaTournamentPlayers: async (pgaTournamentId: string, page?: ListPgaPlayersPageParameter, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pgaTournamentId' is not null or undefined
+            assertParamExists('listPgaTournamentPlayers', 'pgaTournamentId', pgaTournamentId)
+            const localVarPath = `/pga-tournaments/{pgaTournamentId}/players`
+                .replace(`{${"pgaTournamentId"}}`, encodeURIComponent(String(pgaTournamentId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * PGATournamentPlayersApi - functional programming interface
+ * @export
+ */
+export const PGATournamentPlayersApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = PGATournamentPlayersApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Lists players for a given PGA Tournament
+         * @summary Lists players for a given PGA Tournament
+         * @param {string} pgaTournamentId 
+         * @param {ListPgaPlayersPageParameter} [page] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listPgaTournamentPlayers(pgaTournamentId: string, page?: ListPgaPlayersPageParameter, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPgaTournamentPlayers200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listPgaTournamentPlayers(pgaTournamentId, page, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PGATournamentPlayersApi.listPgaTournamentPlayers']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * PGATournamentPlayersApi - factory interface
+ * @export
+ */
+export const PGATournamentPlayersApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = PGATournamentPlayersApiFp(configuration)
+    return {
+        /**
+         * Lists players for a given PGA Tournament
+         * @summary Lists players for a given PGA Tournament
+         * @param {PGATournamentPlayersApiListPgaTournamentPlayersRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPgaTournamentPlayers(requestParameters: PGATournamentPlayersApiListPgaTournamentPlayersRequest, options?: RawAxiosRequestConfig): AxiosPromise<ListPgaTournamentPlayers200Response> {
+            return localVarFp.listPgaTournamentPlayers(requestParameters.pgaTournamentId, requestParameters.page, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * Request parameters for listPgaTournamentPlayers operation in PGATournamentPlayersApi.
+ * @export
+ * @interface PGATournamentPlayersApiListPgaTournamentPlayersRequest
+ */
+export interface PGATournamentPlayersApiListPgaTournamentPlayersRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof PGATournamentPlayersApiListPgaTournamentPlayers
+     */
+    readonly pgaTournamentId: string
+
+    /**
+     * 
+     * @type {ListPgaPlayersPageParameter}
+     * @memberof PGATournamentPlayersApiListPgaTournamentPlayers
+     */
+    readonly page?: ListPgaPlayersPageParameter
+}
+
+/**
+ * PGATournamentPlayersApi - object-oriented interface
+ * @export
+ * @class PGATournamentPlayersApi
+ * @extends {BaseAPI}
+ */
+export class PGATournamentPlayersApi extends BaseAPI {
+    /**
+     * Lists players for a given PGA Tournament
+     * @summary Lists players for a given PGA Tournament
+     * @param {PGATournamentPlayersApiListPgaTournamentPlayersRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PGATournamentPlayersApi
+     */
+    public listPgaTournamentPlayers(requestParameters: PGATournamentPlayersApiListPgaTournamentPlayersRequest, options?: RawAxiosRequestConfig) {
+        return PGATournamentPlayersApiFp(this.configuration).listPgaTournamentPlayers(requestParameters.pgaTournamentId, requestParameters.page, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

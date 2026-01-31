@@ -21,7 +21,9 @@
     "db:migrations:run": "yarn typeorm migration:run",
     "db:migrations:revert": "yarn typeorm migration:revert",
     "db:drop": "yarn typeorm schema:drop",
-    "sdk:generate": "yarn openapi-generator-cli generate --generator-key pga-pool-api --remove-operation-id-prefix"
+    "sdk:generate": "yarn openapi-generator-cli generate --generator-key pga-pool-api --remove-operation-id-prefix",
+    "async-worker": "ts-node src/async-worker/index.ts",
+    "start:async-worker": "cross-env ASYNC_WORKER_JITTER_MS=10000 ts-node src/async-worker/index.ts"
   },
   "dependencies": {
     "@nestjs/axios": "3.0.1",

@@ -148,7 +148,7 @@ export interface PgaApiTournamentLeaderboardRow {
     roundHeader: string;
     /** @example "R1 Completed" */
     roundStatus: string;
-    playerState: 'ACTIVE';
+    playerState: string;
     totalStrokes: string;
     /** @example "+5000" */
     oddsToWin: string;

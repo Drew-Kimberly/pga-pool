@@ -1,10 +1,7 @@
-import { randomUUID } from 'crypto';
-
 import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
 import { PgaTournamentPlayer } from '../../pga-tournament-player/lib/pga-tournament-player.entity';
 import { PgaTournamentPlayerService } from '../../pga-tournament-player/lib/pga-tournament-player.service';
 import { PoolTournamentService } from '../../pool-tournament/lib/pool-tournament.service';
-import { PoolTournamentUser } from '../../pool-tournament-user/lib/pool-tournament-user.entity';
 import { PoolTournamentUserService } from '../../pool-tournament-user/lib/pool-tournament-user.service';
 import { PgaPoolCronModule } from '../cron.module';
 
@@ -41,18 +38,18 @@ void (async () => {
     logger.log(`Updated player scores for PGA Tournament ${pgaTournament.id}`);
 
     // TODO - need to provide correct Pool ID.
-    const poolTournaments = await poolTourneyService.list(randomUUID(), {
-      page: { number: 0, size: 100 },
-      filter: { 'pga_tournament.id': pgaTournament.id },
-    });
+    // const poolTournaments = await poolTourneyService.list(randomUUID(), {
+    //   page: { number: 0, size: 100 },
+    //   filter: { 'pga_tournament.id': pgaTournament.id },
+    // });
 
-    for (const poolTournament of poolTournaments.data) {
-      await poolUserService.updateScores(
-        poolTournament.id,
-        txManager.getRepository(PoolTournamentUser)
-      );
-      logger.log(`Updated pool user scores for pool ${poolTournament.id}`);
-    }
+    // for (const poolTournament of poolTournaments.data) {
+    //   await poolUserService.updateScores(
+    //     poolTournament.id,
+    //     txManager.getRepository(PoolTournamentUser)
+    //   );
+    //   logger.log(`Updated pool user scores for pool ${poolTournament.id}`);
+    // }
   });
 
   await ctx.close();

@@ -1,5 +1,6 @@
 export enum PlayerStatus {
   Active = 'active',
+  Complete = 'complete',
   Withdrawn = 'wd',
   Cut = 'cut',
 }
