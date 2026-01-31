@@ -14,11 +14,7 @@ export class PgaPlayerIngestor {
   ) {}
 
   async ingest(includeInactive = false) {
-    let tourPlayers = await this.pgaTourApi.getPlayers(true);
-    if (includeInactive) {
-      const inactivePlayers = await this.pgaTourApi.getPlayers(false);
-      tourPlayers = [...inactivePlayers, ...tourPlayers];
-    }
+    const tourPlayers = await this.pgaTourApi.getPlayers(!includeInactive);
 
     this.logger.log(`Ingesting ${tourPlayers.length} players`);
 

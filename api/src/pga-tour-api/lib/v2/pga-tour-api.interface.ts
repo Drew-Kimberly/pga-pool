@@ -13,13 +13,9 @@ export interface PgaApiPlayer {
   alphaSort: string;
 }
 
-export interface PgaApiPlayerDirectory {
+export interface PgaApiPlayersResponse {
   tourCode: PgaTourCode;
   players: PgaApiPlayer[];
-}
-
-export interface PgaApiPlayersResponse {
-  playerDirectory: PgaApiPlayerDirectory;
 }
 
 export interface PgaApiTourScheduleTournament {
