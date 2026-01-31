@@ -51,7 +51,7 @@ void (async () => {
       await pgaTournamentIngestor.ingest({ yearOverride: year });
     }
 
-    await pgaPlayerIngestor.ingest(false);
+    await pgaPlayerIngestor.ingest(true);
 
     const tournaments = await pgaTournamentService.listByDateRange(start, end);
     for (const tournament of tournaments) {
