@@ -1,4 +1,4 @@
-import { Like, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 
 import { IListParams, PaginatedCollection } from '../../common/api/list';
 import { TypeOrmListService } from '../../common/api/list/service';
@@ -21,6 +21,14 @@ export class PgaPlayerService {
     return this.pgaPlayerRepo.find({
       where: opts.filter ? { name: Like(`%${opts.filter.name}%` ?? '') } : {},
     });
+  }
+
+  listByIds(ids: number[]): Promise<PgaPlayer[]> {
+    if (ids.length === 0) {
+      return Promise.resolve([]);
+    }
+
+    return this.pgaPlayerRepo.findBy({ id: In(ids) });
   }
 
   listPaginated(params: IListParams): Promise<PaginatedCollection<PgaPlayer>> {
