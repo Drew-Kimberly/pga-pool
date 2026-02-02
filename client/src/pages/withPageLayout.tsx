@@ -7,10 +7,11 @@ import { useThemeContext } from '../contexts/ThemeContext';
 export function withPageLayout<TProps extends object>(PageContents: React.ComponentType<TProps>) {
   const PageComponent = (props: TProps) => {
     const { darkMode, setDarkMode } = useThemeContext();
+    const authEnabled = process.env.REACT_APP_AUTH_ENABLED === 'true';
 
     return (
       <>
-        <AppBar darkMode={darkMode} setDarkMode={setDarkMode} />
+        <AppBar authEnabled={authEnabled} darkMode={darkMode} setDarkMode={setDarkMode} />
         <Page>
           <PageContents {...props} />
         </Page>
