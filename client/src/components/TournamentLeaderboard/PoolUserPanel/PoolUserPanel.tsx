@@ -4,7 +4,7 @@ import { useContext } from 'react';
 
 import { ParentComponentProps } from '../../types';
 import { RankType } from '../types';
-import { toFedexCupPointsString, toScoreString } from '../utils';
+import { getEffectiveFedexCupPoints, toFedexCupPointsString, toScoreString } from '../utils';
 
 import { getRoundStatus } from './getRoundStatus';
 import { StartDuration } from './StartDuration';
@@ -89,7 +89,7 @@ function _PoolUserPanel({ user, pgaTournament, rankType }: Omit<PoolUserPanelPro
         <Text weight="bold" size="xlarge" alignSelf="end">{`${
           rankType === 'score'
             ? toScoreString(user.score)
-            : toFedexCupPointsString(user.projected_fedex_cup_points)
+            : toFedexCupPointsString(getEffectiveFedexCupPoints(user))
         }`}</Text>
       </Box>
     </Box>

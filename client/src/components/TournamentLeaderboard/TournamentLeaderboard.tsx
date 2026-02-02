@@ -12,7 +12,7 @@ import { TournamentHeader } from '../TournamentHeader';
 import { PgaPlayerName } from './PgaPlayerName';
 import { PoolUserPanel } from './PoolUserPanel';
 import { RankType } from './types';
-import { toFedexCupPointsString, toScoreString } from './utils';
+import { getEffectiveFedexCupPoints, toFedexCupPointsString, toScoreString } from './utils';
 
 import { PoolTournament } from '@drewkimberly/pga-pool-api';
 
@@ -65,7 +65,9 @@ export function TournamentLeaderboard() {
       if (rankType === 'score') {
         return a.score - b.score;
       } else if (rankType === 'fedex_cup_points') {
-        return (b.projected_fedex_cup_points ?? 0) - (a.projected_fedex_cup_points ?? 0);
+        const aPoints = getEffectiveFedexCupPoints(a) ?? 0;
+        const bPoints = getEffectiveFedexCupPoints(b) ?? 0;
+        return bPoints - aPoints;
       } else {
         throw new Error(`Unsupported leaderboard rank type: ${rankType}`);
       }
@@ -101,9 +103,7 @@ export function TournamentLeaderboard() {
           >
             <Toggle
               label={
-                <Text size="small">
-                  {size !== 'small' ? 'FedEx Cup Points (projected)' : 'FedEx Points'}
-                </Text>
+                <Text size="small">{size !== 'small' ? 'FedEx Cup Points' : 'FedEx Points'}</Text>
               }
               checked={rankType === 'fedex_cup_points'}
               onChange={(event) => setRankType(event.target.checked ? 'fedex_cup_points' : 'score')}
@@ -125,7 +125,7 @@ export function TournamentLeaderboard() {
                     <Text weight={'bold'}>
                       {rankType === 'score'
                         ? toScoreString(pick.score_total)
-                        : toFedexCupPointsString(pick.projected_fedex_cup_points)}
+                        : toFedexCupPointsString(getEffectiveFedexCupPoints(pick))}
                     </Text>
                   </Box>
                 ))}

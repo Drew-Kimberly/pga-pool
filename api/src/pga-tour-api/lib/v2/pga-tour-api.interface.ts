@@ -184,6 +184,7 @@ export interface PgaApiProjectedPlayerPoints {
   playerPosition: string | 'CUT' | '';
   /**
    * @example "52.000"
+   * @note Only populated while a tournament is active; PGA Tour API returns "0" after completion.
    */
   projectedEventPoints: string;
 }
@@ -196,4 +197,14 @@ export interface PgaApiProjectedFedexCupPointsResponse {
   lastUpdated: string;
 
   points: PgaApiProjectedPlayerPoints[];
+}
+
+export interface PgaApiPlayerSeasonResultsResponse {
+  resultsData?: Array<{
+    title?: string;
+    data?: Array<{
+      tournamentId: string;
+      fields: string[];
+    }>;
+  }>;
 }

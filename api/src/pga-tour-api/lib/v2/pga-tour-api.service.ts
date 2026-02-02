@@ -6,6 +6,7 @@ import { lastValueFrom } from 'rxjs';
 import { InjectPgaTourApiConfig, PgaTourApiConfig } from './pga-tour-api.config';
 import {
   PgaApiPlayer,
+  PgaApiPlayerSeasonResultsResponse,
   PgaApiPlayersResponse,
   PgaApiProjectedFedexCupPointsResponse,
   PgaApiTournament,
@@ -42,6 +43,16 @@ export class PgaTourApiService {
     const players = response.players ?? [];
 
     return onlyActive ? players.filter((player) => player.isActive) : players;
+  }
+
+  async getPlayerSeasonResults(
+    playerId: number | string,
+    season?: number
+  ): Promise<PgaApiPlayerSeasonResultsResponse> {
+    const seasonParam = season ? `&season=${season}` : '';
+    const url = `https://data-api.pgatour.com/player/profiles/${playerId}/results/season?tour=R${seasonParam}`;
+    const response$ = this.httpClient.get<PgaApiPlayerSeasonResultsResponse>(url);
+    return await lastValueFrom(response$).then((res) => res.data);
   }
 
   async getTournamentSchedule(year: number): Promise<PgaApiTournamentSchedule> {

@@ -51,6 +51,15 @@ export class PgaTournamentPlayer {
   })
   projected_fedex_cup_points: number;
 
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 3,
+    nullable: true,
+    transformer: new CoerceNumericColumnTransformer(),
+  })
+  official_fedex_cup_points: number | null;
+
   @JoinColumn({ name: 'pga_player' })
   @ManyToOne(() => PgaPlayer, { eager: true })
   pga_player: PgaPlayer;

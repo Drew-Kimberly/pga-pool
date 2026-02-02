@@ -91,7 +91,9 @@ export class PoolTournamentUserService {
 
   private aggregateProjectedFedexPoints(picks: PoolTournamentUserPick[]): number {
     return picks.reduce<number>((total, pick) => {
-      return total + pick.pool_tournament_player.pga_tournament_player.projected_fedex_cup_points;
+      const player = pick.pool_tournament_player.pga_tournament_player;
+      const points = player.official_fedex_cup_points ?? player.projected_fedex_cup_points;
+      return total + points;
     }, 0);
   }
 }

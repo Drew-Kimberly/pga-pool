@@ -431,6 +431,8 @@ components:
           nullable: true
         fedex_cup_event:
           type: boolean
+        official_fedex_cup_points_calculated:
+          type: boolean
         scoring_format:
           type: string
           enum:
@@ -489,6 +491,7 @@ components:
         - purse
         - fedex_cup_points
         - fedex_cup_event
+        - official_fedex_cup_points_calculated
         - scoring_format
         - tournament_status
         - round_status
@@ -582,6 +585,10 @@ components:
         projected_fedex_cup_points:
           type: number
           example: 130.57
+        official_fedex_cup_points:
+          type: number
+          nullable: true
+          example: 500.0
         withdrawn:
           type: boolean
         pga_player:
