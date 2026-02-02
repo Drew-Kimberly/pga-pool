@@ -7,9 +7,10 @@ import { LoginButton } from '../LoginButton';
 export interface AppBarProps {
   darkMode: boolean;
   setDarkMode: (isDark: boolean) => void;
+  authEnabled: boolean;
 }
 
-export function AppBar({ darkMode, setDarkMode }: AppBarProps) {
+export function AppBar({ authEnabled, darkMode, setDarkMode }: AppBarProps) {
   const navigate = useNavigate();
   const btnTitle = darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode';
 
@@ -28,13 +29,13 @@ export function AppBar({ darkMode, setDarkMode }: AppBarProps) {
         <Text size="large">PGA Pool</Text>
       </Button>
       <Box direction="row" align="center" gap="small">
-        <LoginButton />
         <Button
           a11yTitle={btnTitle}
           title={btnTitle}
           icon={darkMode ? <Moon /> : <Sun />}
           onClick={() => setDarkMode(!darkMode)}
         />
+        {authEnabled && <LoginButton />}
       </Box>
     </Header>
   );
