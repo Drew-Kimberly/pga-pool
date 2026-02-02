@@ -24,6 +24,31 @@ import type { RequestArgs } from './base';
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
 
 /**
+ * @type BooleanFieldFilter
+ * @export
+ */
+export type BooleanFieldFilter = BooleanFilterOps | boolean;
+
+/**
+ * 
+ * @export
+ * @interface BooleanFilterOps
+ */
+export interface BooleanFilterOps {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof BooleanFilterOps
+     */
+    'eq'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof BooleanFilterOps
+     */
+    'neq'?: boolean;
+}
+/**
  * 
  * @export
  * @interface GetWeeklyField404Response
@@ -208,34 +233,95 @@ export interface ListPgaTournaments200Response {
 export interface ListPgaTournamentsFilterParameter {
     /**
      * 
-     * @type {string}
+     * @type {StringFieldFilter}
      * @memberof ListPgaTournamentsFilterParameter
      */
-    'name'?: string;
+    'name'?: StringFieldFilter;
+    /**
+     * 
+     * @type {NumberFieldFilter}
+     * @memberof ListPgaTournamentsFilterParameter
+     */
+    'date.year'?: NumberFieldFilter;
+    /**
+     * 
+     * @type {TimestampFilterOps}
+     * @memberof ListPgaTournamentsFilterParameter
+     */
+    'date.start'?: TimestampFilterOps;
+    /**
+     * 
+     * @type {TimestampFilterOps}
+     * @memberof ListPgaTournamentsFilterParameter
+     */
+    'date.end'?: TimestampFilterOps;
+    /**
+     * 
+     * @type {BooleanFieldFilter}
+     * @memberof ListPgaTournamentsFilterParameter
+     */
+    'fedex_cup_event'?: BooleanFieldFilter;
+    /**
+     * 
+     * @type {StringEqNeqFieldFilter}
+     * @memberof ListPgaTournamentsFilterParameter
+     */
+    'scoring_format'?: StringEqNeqFieldFilter;
+    /**
+     * 
+     * @type {StringEqNeqFieldFilter}
+     * @memberof ListPgaTournamentsFilterParameter
+     */
+    'tournament_status'?: StringEqNeqFieldFilter;
+}
+/**
+ * @type NumberFieldFilter
+ * @export
+ */
+export type NumberFieldFilter = NumberFilterOps | number;
+
+/**
+ * 
+ * @export
+ * @interface NumberFilterOps
+ */
+export interface NumberFilterOps {
     /**
      * 
      * @type {number}
-     * @memberof ListPgaTournamentsFilterParameter
+     * @memberof NumberFilterOps
      */
-    'date.year'?: number;
+    'eq'?: number;
     /**
      * 
-     * @type {boolean}
-     * @memberof ListPgaTournamentsFilterParameter
+     * @type {number}
+     * @memberof NumberFilterOps
      */
-    'fedex_cup_event'?: boolean;
+    'neq'?: number;
     /**
      * 
-     * @type {string}
-     * @memberof ListPgaTournamentsFilterParameter
+     * @type {number}
+     * @memberof NumberFilterOps
      */
-    'scoring_format'?: string;
+    'gt'?: number;
     /**
      * 
-     * @type {string}
-     * @memberof ListPgaTournamentsFilterParameter
+     * @type {number}
+     * @memberof NumberFilterOps
      */
-    'tournament_status'?: string;
+    'gte'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof NumberFilterOps
+     */
+    'lt'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof NumberFilterOps
+     */
+    'lte'?: number;
 }
 /**
  * Defines a PGA player (i.e. golfer)
@@ -675,6 +761,93 @@ export interface PoolUser {
      * @memberof PoolUser
      */
     'picks': Array<PgaTournamentPlayer>;
+}
+/**
+ * @type StringEqNeqFieldFilter
+ * @export
+ */
+export type StringEqNeqFieldFilter = StringEqNeqFilterOps | string;
+
+/**
+ * 
+ * @export
+ * @interface StringEqNeqFilterOps
+ */
+export interface StringEqNeqFilterOps {
+    /**
+     * 
+     * @type {string}
+     * @memberof StringEqNeqFilterOps
+     */
+    'eq'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof StringEqNeqFilterOps
+     */
+    'neq'?: string;
+}
+/**
+ * @type StringFieldFilter
+ * @export
+ */
+export type StringFieldFilter = StringFilterOps | string;
+
+/**
+ * 
+ * @export
+ * @interface StringFilterOps
+ */
+export interface StringFilterOps {
+    /**
+     * 
+     * @type {string}
+     * @memberof StringFilterOps
+     */
+    'eq'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof StringFilterOps
+     */
+    'neq'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof StringFilterOps
+     */
+    'contains'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface TimestampFilterOps
+ */
+export interface TimestampFilterOps {
+    /**
+     * 
+     * @type {string}
+     * @memberof TimestampFilterOps
+     */
+    'gt'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TimestampFilterOps
+     */
+    'gte'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TimestampFilterOps
+     */
+    'lt'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TimestampFilterOps
+     */
+    'lte'?: string;
 }
 /**
  * Defines a tournament date

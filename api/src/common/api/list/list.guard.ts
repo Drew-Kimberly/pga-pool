@@ -44,7 +44,10 @@ export class ListGuard implements CanActivate {
     }
 
     // @ts-expect-error setting context on Express req object.
-    request[LIST_PARAMS_REQUEST_KEY] = validationResult.value;
+    request[LIST_PARAMS_REQUEST_KEY] = {
+      ...validationResult.value,
+      filter: validationResult.value.filter,
+    };
 
     return true;
   }
@@ -56,4 +59,6 @@ export class ListGuard implements CanActivate {
   private getRawFilterQuery(req: Request): InvalidatedListParams['filter'] {
     return (isObject(req.query.filter) ? req.query.filter : {}) as InvalidatedListParams['filter'];
   }
+
+  // No normalization: only filter[field][op] and filter[field] are supported.
 }
