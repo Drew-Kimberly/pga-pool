@@ -12,6 +12,7 @@ export class PgaTournamentDto {
   purse: number;
   fedex_cup_points: number | null;
   fedex_cup_event: boolean;
+  official_fedex_cup_points_calculated: boolean;
   scoring_format: PgaTournamentScoringFormat;
   tournament_status: PgaTournamentStatus;
   round_status: PgaTournamentRoundStatus;
@@ -37,6 +38,7 @@ export class PgaTournamentDto {
     dto.purse = t.purse;
     dto.fedex_cup_points = t.fedex_cup_points;
     dto.fedex_cup_event = t.fedex_cup_event;
+    dto.official_fedex_cup_points_calculated = t.official_fedex_cup_points_calculated;
     dto.scoring_format = t.scoring_format;
     dto.tournament_status = t.tournament_status;
     dto.round_status = t.round_status;

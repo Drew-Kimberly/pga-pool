@@ -25,3 +25,12 @@ export function toFedexCupPointsString(points: number | null | undefined): strin
 
   return `${Math.round(numPoints * 10) / 10}`;
 }
+
+export function getEffectiveFedexCupPoints<
+  T extends {
+    official_fedex_cup_points?: number | null;
+    projected_fedex_cup_points?: number | null;
+  },
+>(value: T): number | null | undefined {
+  return value.official_fedex_cup_points ?? value.projected_fedex_cup_points;
+}

@@ -57,6 +57,9 @@ export class PgaTournament {
   @Column({ type: 'boolean' })
   fedex_cup_event: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  official_fedex_cup_points_calculated: boolean;
+
   @Column({ type: 'varchar', length: 64 })
   scoring_format: PgaTournamentScoringFormat;
 

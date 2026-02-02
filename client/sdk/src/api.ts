@@ -416,6 +416,12 @@ export interface PgaTournament {
     'fedex_cup_event': boolean;
     /**
      * 
+     * @type {boolean}
+     * @memberof PgaTournament
+     */
+    'official_fedex_cup_points_calculated': boolean;
+    /**
+     * 
      * @type {string}
      * @memberof PgaTournament
      */
@@ -646,6 +652,12 @@ export interface PgaTournamentPlayer {
      * @memberof PgaTournamentPlayer
      */
     'projected_fedex_cup_points'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PgaTournamentPlayer
+     */
+    'official_fedex_cup_points'?: number | null;
     /**
      * 
      * @type {boolean}

@@ -18,6 +18,7 @@ export class PgaTournamentPlayerDto {
   score_thru: number | null;
   current_position: string | null;
   projected_fedex_cup_points: number;
+  official_fedex_cup_points: number | null;
   withdrawn: boolean;
   pga_player: PgaPlayerDto;
   pga_tournament: PgaTournamentDto;
@@ -37,6 +38,7 @@ export class PgaTournamentPlayerDto {
     dto.score_thru = p.score_thru;
     dto.current_position = p.current_position;
     dto.projected_fedex_cup_points = p.projected_fedex_cup_points;
+    dto.official_fedex_cup_points = p.official_fedex_cup_points;
     dto.withdrawn = p.status === PlayerStatus.Withdrawn;
     dto.pga_player = PgaPlayerDto.fromEntity(p.pga_player);
     dto.pga_tournament = PgaTournamentDto.fromEntity(p.pga_tournament);

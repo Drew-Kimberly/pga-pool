@@ -5,6 +5,7 @@ import { DeepPartial } from '../../common/types';
 import { PgaPlayerService } from '../../pga-player/lib/pga-player.service';
 import { NullStringValue } from '../../pga-tour-api/lib/v2/pga-tour-api.constants';
 import {
+  PgaApiPlayerSeasonResultsResponse,
   PgaApiProjectedPlayerPoints,
   PgaApiTournamentLeaderboardRow,
 } from '../../pga-tour-api/lib/v2/pga-tour-api.interface';
@@ -175,6 +176,8 @@ export class PgaTournamentPlayerService {
       },
       repo
     );
+
+    await this.tryCalculateOfficialFedexCupPoints(pgaTournament, filteredLeaderboardPlayers, repo);
   }
 
   private async updateScoresWithLeaderboard(
@@ -241,6 +244,135 @@ export class PgaTournamentPlayerService {
     }
 
     return playerPointMap;
+  }
+
+  private async tryCalculateOfficialFedexCupPoints(
+    pgaTournament: PgaTournament,
+    leaderboardPlayers: PgaApiTournamentLeaderboardRow[],
+    repo: Repository<PgaTournamentPlayer>
+  ) {
+    if (
+      pgaTournament.tournament_status !== PgaTournamentStatus.COMPLETED ||
+      pgaTournament.official_fedex_cup_points_calculated
+    ) {
+      return;
+    }
+
+    await repo.manager.transaction(async (txManager) => {
+      const tournamentRepo = txManager.getRepository(PgaTournament);
+      const tournamentPlayerRepo = txManager.getRepository(PgaTournamentPlayer);
+      const tournament = await tournamentRepo.findOneBy({ id: pgaTournament.id });
+      if (!tournament) {
+        throw new Error(`PGA Tournament ${pgaTournament.id} does not exist`);
+      }
+      if (tournament.official_fedex_cup_points_calculated) {
+        return;
+      }
+
+      const updateBatchSize = 50;
+      const fetchConcurrency = 10;
+      const playerIds = leaderboardPlayers.map((player) => Number(player.id));
+      for (let i = 0; i < playerIds.length; i += updateBatchSize) {
+        const batch = playerIds.slice(i, i + updateBatchSize);
+        const pointsByPlayer = await this.mapWithConcurrency(
+          batch,
+          fetchConcurrency,
+          async (playerId) => {
+            try {
+              const results = await this.pgaTourApi.getPlayerSeasonResults(
+                playerId,
+                tournament.year
+              );
+              return this.extractOfficialFedexCupPoints(results, tournament.id, playerId);
+            } catch (e) {
+              this.logger.error(
+                `Failed to calculate official FedEx Cup points for player ${playerId} tournament ${tournament.id}: ${e}`,
+                e.stack
+              );
+              throw e;
+            }
+          }
+        );
+
+        this.logger.debug?.(
+          `FedExCup official points fetched for ${batch.length} players (${i + 1}-${
+            i + batch.length
+          } of ${playerIds.length})`
+        );
+
+        const updates = batch.map((playerId, index) =>
+          tournamentPlayerRepo.update(`${playerId}-${tournament.id}`, {
+            official_fedex_cup_points: pointsByPlayer[index],
+          })
+        );
+        await Promise.all(updates);
+      }
+
+      await tournamentRepo.update(tournament.id, {
+        official_fedex_cup_points_calculated: true,
+      });
+    });
+  }
+
+  private extractOfficialFedexCupPoints(
+    results: PgaApiPlayerSeasonResultsResponse,
+    tournamentId: string,
+    playerId: number
+  ): number {
+    const data = results?.resultsData?.[0]?.data ?? [];
+    const tournamentData = data.find((row) => row.tournamentId === tournamentId);
+    if (!tournamentData) {
+      throw new Error(
+        `No results for tournament ${tournamentId} found in season results for player ${playerId}`
+      );
+    }
+
+    const pointsField = tournamentData.fields?.[10];
+    if (pointsField === undefined) {
+      throw new Error(
+        `FedEx Cup points missing for tournament ${tournamentId} in season results for player ${playerId}`
+      );
+    }
+
+    const normalizedPointsField =
+      typeof pointsField === 'string' ? pointsField.trim() : String(pointsField);
+
+    if (normalizedPointsField === '-' || normalizedPointsField === '') {
+      return 0;
+    }
+
+    const points = Number(normalizedPointsField);
+    if (Number.isNaN(points)) {
+      throw new Error(
+        `Invalid FedEx Cup points "${pointsField}" for tournament ${tournamentId} and player ${playerId}`
+      );
+    }
+
+    return points;
+  }
+
+  private async mapWithConcurrency<T, R>(
+    items: T[],
+    concurrency: number,
+    worker: (item: T, index: number) => Promise<R>
+  ): Promise<R[]> {
+    const results = new Array<R>(items.length);
+    let nextIndex = 0;
+
+    const runWorker = async () => {
+      while (true) {
+        const currentIndex = nextIndex;
+        if (currentIndex >= items.length) {
+          return;
+        }
+        nextIndex += 1;
+        results[currentIndex] = await worker(items[currentIndex], currentIndex);
+      }
+    };
+
+    const runners = Array.from({ length: Math.min(concurrency, items.length) }, runWorker);
+    await Promise.all(runners);
+    return results;
   }
 
   private coercePlayerStatus(
