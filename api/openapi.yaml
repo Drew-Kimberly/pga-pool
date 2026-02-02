@@ -279,15 +279,19 @@ components:
         additionalProperties: false
         properties:
           name:
-            type: string
+            $ref: '#/components/schemas/StringFieldFilter'
           date.year:
-            type: number
+            $ref: '#/components/schemas/NumberFieldFilter'
+          date.start:
+            $ref: '#/components/schemas/TimestampFilterOps'
+          date.end:
+            $ref: '#/components/schemas/TimestampFilterOps'
           fedex_cup_event:
-            type: boolean
+            $ref: '#/components/schemas/BooleanFieldFilter'
           scoring_format:
-            type: string
+            $ref: '#/components/schemas/StringEqNeqFieldFilter'
           tournament_status:
-            type: string
+            $ref: '#/components/schemas/StringEqNeqFieldFilter'
     LimitOffsetPaginationParam:
       name: page
       required: false
@@ -305,6 +309,85 @@ components:
             type: integer
             example: 2
   schemas:
+    StringFieldFilter:
+      oneOf:
+        - type: string
+        - $ref: '#/components/schemas/StringFilterOps'
+    StringEqNeqFieldFilter:
+      oneOf:
+        - type: string
+        - $ref: '#/components/schemas/StringEqNeqFilterOps'
+    NumberFieldFilter:
+      oneOf:
+        - type: number
+        - $ref: '#/components/schemas/NumberFilterOps'
+    BooleanFieldFilter:
+      oneOf:
+        - type: boolean
+        - $ref: '#/components/schemas/BooleanFilterOps'
+    StringFilterOps:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        eq:
+          type: string
+        neq:
+          type: string
+        contains:
+          type: string
+    StringEqNeqFilterOps:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        eq:
+          type: string
+        neq:
+          type: string
+    NumberFilterOps:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        eq:
+          type: number
+        neq:
+          type: number
+        gt:
+          type: number
+        gte:
+          type: number
+        lt:
+          type: number
+        lte:
+          type: number
+    BooleanFilterOps:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        eq:
+          type: boolean
+        neq:
+          type: boolean
+    TimestampFilterOps:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        gt:
+          type: string
+          format: date-time
+        gte:
+          type: string
+          format: date-time
+        lt:
+          type: string
+          format: date-time
+        lte:
+          type: string
+          format: date-time
     PoolTournament:
       description: Defines a pool tournament
       type: object

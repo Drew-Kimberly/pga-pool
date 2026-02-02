@@ -36,7 +36,10 @@ export interface IListParams {
   filter: Record<string, FilterValue>;
 }
 
-export type FilterValue = string | number | boolean;
+export type FilterOperator = 'eq' | 'neq' | 'contains' | 'gt' | 'gte' | 'lt' | 'lte';
+export type FilterPrimitive = string | number | boolean | null;
+export type FilterOperators = Partial<Record<FilterOperator, FilterPrimitive>>;
+export type FilterValue = FilterPrimitive | FilterOperators;
 
 // --- End List Params
 
