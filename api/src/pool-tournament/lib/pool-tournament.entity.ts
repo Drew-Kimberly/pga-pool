@@ -48,4 +48,7 @@ export class PoolTournament {
 
   @Column({ type: 'uuid' })
   league_id: string;
+
+  @Column({ type: 'boolean', default: false })
+  scores_are_official: boolean;
 }

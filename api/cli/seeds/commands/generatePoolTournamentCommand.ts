@@ -4,22 +4,13 @@ import figlet from 'figlet';
 import { generatePoolTournament } from '../handler/generatePoolTournament';
 
 const command = new Command('generate-pool-tournament')
-  .description('Generates a seed JSON file for the given PGA tournament pick sheet')
-  .addHelpText('before', figlet.textSync('PGA Pool', { horizontalLayout: 'fitted' }))
-  .addOption(
-    new Option(
-      '--pickSheet <filepath>',
-      'Path the tournament pick sheet in TXT format (required)'
-    ).makeOptionMandatory()
+  .description(
+    'Creates pool tournament data from seeds/<PGA_TOURNAMENT_ID>/field.json and picks.json'
   )
+  .addHelpText('before', figlet.textSync('PGA Pool', { horizontalLayout: 'fitted' }))
   .addOption(
     new Option('--tournamentId <id>', 'PGA Tournament ID (required)').makeOptionMandatory()
   )
-  .addOption(
-    new Option('--year <year>', 'PGA Tournament year. Defaults to the current year').default(
-      new Date().getFullYear().toString()
-    )
-  )
-  .action((opts) => generatePoolTournament(opts.pickSheet, opts.tournamentId, opts.year));
+  .action((opts) => generatePoolTournament(opts.tournamentId));
 
 export const generatePoolTournamentCommand = command;

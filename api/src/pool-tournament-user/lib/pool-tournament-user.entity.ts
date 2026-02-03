@@ -2,7 +2,6 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 
 import { CoerceNumericColumnTransformer } from '../../common/db';
 import { League } from '../../league/lib/league.entity';
-import { Pool } from '../../pool/lib/pool.entity';
 import { PoolTournament } from '../../pool-tournament/lib/pool-tournament.entity';
 import { PoolTournamentUserPick } from '../../pool-tournament-user-pick/lib/pool-tournament-user-pick.entity';
 import { PoolUser } from '../../pool-user/lib/pool-user.entity';
@@ -22,7 +21,7 @@ export class PoolTournamentUser {
     default: 0,
     transformer: new CoerceNumericColumnTransformer(),
   })
-  projected_fedex_cup_points: number;
+  fedex_cup_points: number;
 
   @OneToMany(() => PoolTournamentUserPick, (pick) => pick.pool_tournament_user)
   picks: PoolTournamentUserPick[];
@@ -35,7 +34,7 @@ export class PoolTournamentUser {
   pool_tournament_id: string;
 
   @JoinColumn({ name: 'pool_user_id' })
-  @ManyToOne(() => Pool, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => PoolUser, { eager: true, onDelete: 'CASCADE' })
   pool_user: PoolUser;
 
   @Column({ type: 'uuid' })
