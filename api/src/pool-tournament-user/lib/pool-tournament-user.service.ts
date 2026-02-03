@@ -24,7 +24,7 @@ export class PoolTournamentUserService {
         ? { pool_tournament: { pga_tournament: { id: filter.pgaTournamentId } } }
         : {}),
       ...(filter.poolTournamentId ? { pool_tournament: { id: filter.poolTournamentId } } : {}),
-      ...(filter.userId ? { user: { id: filter.userId } } : {}),
+      ...(filter.userId ? { pool_user: { user: { id: filter.userId } } } : {}),
     };
 
     return repo.find({
@@ -33,7 +33,8 @@ export class PoolTournamentUserService {
         'picks',
         'picks.pool_tournament_player.pga_tournament_player',
         'picks.pool_tournament_player.pga_tournament_player.pga_tournament',
-        'user',
+        'pool_user',
+        'pool_user.user',
       ],
       order: {
         picks: {
@@ -71,7 +72,7 @@ export class PoolTournamentUserService {
           {
             ...user,
             tournament_score: this.aggregateScore(user.picks),
-            projected_fedex_cup_points: this.aggregateProjectedFedexPoints(user.picks),
+            fedex_cup_points: this.aggregateProjectedFedexPoints(user.picks),
           },
           repo
         );

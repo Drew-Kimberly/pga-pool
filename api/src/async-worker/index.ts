@@ -2,6 +2,7 @@ import { PgaPlayerIngestor } from '../pga-player/lib/pga-player.ingest';
 import { PgaTournamentIngestor } from '../pga-tournament/lib/pga-tournament.ingest';
 import { PgaTournamentService } from '../pga-tournament/lib/pga-tournament.service';
 import { PgaTournamentPlayerService } from '../pga-tournament-player/lib/pga-tournament-player.service';
+import { PoolTournamentFinalizerService } from '../pool-tournament/lib/pool-tournament-finalizer.service';
 
 import { PgaPoolAsyncWorkerModule } from './async-worker.module';
 
@@ -41,6 +42,7 @@ void (async () => {
   const pgaTournamentPlayerService = ctx.get(PgaTournamentPlayerService);
   const pgaTournamentIngestor = ctx.get(PgaTournamentIngestor);
   const pgaPlayerIngestor = ctx.get(PgaPlayerIngestor);
+  const poolTournamentFinalizer = ctx.get(PoolTournamentFinalizerService);
 
   const runOnce = async () => {
     const { start, end } = computeWindow();
@@ -57,6 +59,7 @@ void (async () => {
     for (const tournament of tournaments) {
       try {
         await pgaTournamentPlayerService.upsertFieldForTournament(tournament.id);
+        await poolTournamentFinalizer.finalizeForPgaTournament(tournament.id);
       } catch (e) {
         logger.error(`Error syncing field for PGA Tournament ${tournament.id}: ${e}`, e.stack);
       }
