@@ -1,0 +1,4 @@
+interface:
+  display_name: "PGA Pool Picks"
+  short_description: "Create picks.json from PGA field + CSV"
+  default_prompt: "Use $pga-pool-picks to generate picks.json from a field.json path, a CSV of picks, and the output schema."
