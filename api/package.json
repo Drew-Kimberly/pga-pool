@@ -21,7 +21,9 @@
     "db:migrations:run": "yarn typeorm migration:run",
     "db:migrations:revert": "yarn typeorm migration:revert",
     "db:drop": "yarn typeorm schema:drop",
+    "sdk:build": "yarn --cwd ../client/sdk compile",
     "sdk:generate": "yarn openapi-generator-cli generate --generator-key pga-pool-api --remove-operation-id-prefix",
+    "sdk:generate:build": "yarn sdk:generate && yarn sdk:build",
     "async-worker": "ts-node src/async-worker/index.ts",
     "start:async-worker": "cross-env ASYNC_WORKER_JITTER_MS=10000 ts-node src/async-worker/index.ts"
   },

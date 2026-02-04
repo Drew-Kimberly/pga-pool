@@ -4,15 +4,15 @@ import { useContext } from 'react';
 
 import { ParentComponentProps } from '../../types';
 import { RankType } from '../types';
-import { getEffectiveFedexCupPoints, toFedexCupPointsString, toScoreString } from '../utils';
+import { toFedexCupPointsString, toScoreString } from '../utils';
 
 import { getRoundStatus } from './getRoundStatus';
 import { StartDuration } from './StartDuration';
 
-import { PgaTournament, PoolUser } from '@drewkimberly/pga-pool-api';
+import { PgaTournament, PoolTournamentUser } from '@drewkimberly/pga-pool-api';
 
 export interface PoolUserPanelProps extends ParentComponentProps {
-  user: PoolUser;
+  user: PoolTournamentUser;
   pgaTournament: PgaTournament;
   tournamentRound?: number;
   rankType: RankType;
@@ -24,7 +24,10 @@ export interface PoolUserPanelProps extends ParentComponentProps {
  */
 function _PoolUserPanel({ user, pgaTournament, rankType }: Omit<PoolUserPanelProps, 'children'>) {
   const size = useContext(ResponsiveContext);
-  const roundStatus = getRoundStatus(user.picks, pgaTournament);
+  const roundStatus = getRoundStatus(
+    user.picks.map((pick) => pick.pga_tournament_player),
+    pgaTournament
+  );
 
   return (
     <Box direction="row" height="100%">
@@ -89,7 +92,7 @@ function _PoolUserPanel({ user, pgaTournament, rankType }: Omit<PoolUserPanelPro
         <Text weight="bold" size="xlarge" alignSelf="end">{`${
           rankType === 'score'
             ? toScoreString(user.score)
-            : toFedexCupPointsString(getEffectiveFedexCupPoints(user))
+            : toFedexCupPointsString(user.fedex_cup_points)
         }`}</Text>
       </Box>
     </Box>

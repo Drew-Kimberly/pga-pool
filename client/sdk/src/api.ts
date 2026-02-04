@@ -51,25 +51,25 @@ export interface BooleanFilterOps {
 /**
  * 
  * @export
- * @interface GetWeeklyField404Response
+ * @interface GetPool404Response
  */
-export interface GetWeeklyField404Response {
+export interface GetPool404Response {
     /**
      * The HTTP status code
      * @type {number}
-     * @memberof GetWeeklyField404Response
+     * @memberof GetPool404Response
      */
     'status': number;
     /**
      * The error response code
      * @type {string}
-     * @memberof GetWeeklyField404Response
+     * @memberof GetPool404Response
      */
     'message': string;
     /**
      * Additional detail about the error
      * @type {string}
-     * @memberof GetWeeklyField404Response
+     * @memberof GetPool404Response
      */
     'detail'?: string | null;
 }
@@ -120,19 +120,6 @@ export interface LimitOffsetResponseMetaPage {
 /**
  * 
  * @export
- * @interface List200Response
- */
-export interface List200Response {
-    /**
-     * 
-     * @type {Array<PoolTournament>}
-     * @memberof List200Response
-     */
-    'data': Array<PoolTournament>;
-}
-/**
- * 
- * @export
  * @interface ListPgaPlayers200Response
  */
 export interface ListPgaPlayers200Response {
@@ -167,25 +154,6 @@ export interface ListPgaPlayersFilterParameter {
      * @memberof ListPgaPlayersFilterParameter
      */
     'active'?: boolean;
-}
-/**
- * 
- * @export
- * @interface ListPgaPlayersPageParameter
- */
-export interface ListPgaPlayersPageParameter {
-    /**
-     * The number of items included per page.
-     * @type {number}
-     * @memberof ListPgaPlayersPageParameter
-     */
-    'size'?: number;
-    /**
-     * The specific page number (1-based) of the collection results.
-     * @type {number}
-     * @memberof ListPgaPlayersPageParameter
-     */
-    'number'?: number;
 }
 /**
  * 
@@ -228,51 +196,246 @@ export interface ListPgaTournaments200Response {
 /**
  * 
  * @export
- * @interface ListPgaTournamentsFilterParameter
+ * @interface ListPoolTournamentPlayers200Response
  */
-export interface ListPgaTournamentsFilterParameter {
+export interface ListPoolTournamentPlayers200Response {
+    /**
+     * 
+     * @type {LimitOffsetResponseMeta}
+     * @memberof ListPoolTournamentPlayers200Response
+     */
+    'meta': LimitOffsetResponseMeta;
+    /**
+     * 
+     * @type {Array<PoolTournamentPlayer>}
+     * @memberof ListPoolTournamentPlayers200Response
+     */
+    'data': Array<PoolTournamentPlayer>;
+}
+/**
+ * 
+ * @export
+ * @interface ListPoolTournamentPlayersFilterParameter
+ */
+export interface ListPoolTournamentPlayersFilterParameter {
+    /**
+     * 
+     * @type {NumberFieldFilter}
+     * @memberof ListPoolTournamentPlayersFilterParameter
+     */
+    'tier'?: NumberFieldFilter;
+    /**
+     * 
+     * @type {NumberFieldFilter}
+     * @memberof ListPoolTournamentPlayersFilterParameter
+     */
+    'pga_player_id'?: NumberFieldFilter;
+    /**
+     * 
+     * @type {StringEqNeqFieldFilter}
+     * @memberof ListPoolTournamentPlayersFilterParameter
+     */
+    'status'?: StringEqNeqFieldFilter;
+    /**
+     * 
+     * @type {BooleanFieldFilter}
+     * @memberof ListPoolTournamentPlayersFilterParameter
+     */
+    'active'?: BooleanFieldFilter;
+}
+/**
+ * 
+ * @export
+ * @interface ListPoolTournamentUsers200Response
+ */
+export interface ListPoolTournamentUsers200Response {
+    /**
+     * 
+     * @type {LimitOffsetResponseMeta}
+     * @memberof ListPoolTournamentUsers200Response
+     */
+    'meta': LimitOffsetResponseMeta;
+    /**
+     * 
+     * @type {Array<PoolTournamentUser>}
+     * @memberof ListPoolTournamentUsers200Response
+     */
+    'data': Array<PoolTournamentUser>;
+}
+/**
+ * 
+ * @export
+ * @interface ListPoolTournaments200Response
+ */
+export interface ListPoolTournaments200Response {
+    /**
+     * 
+     * @type {Array<PoolTournament>}
+     * @memberof ListPoolTournaments200Response
+     */
+    'data': Array<PoolTournament>;
+}
+/**
+ * 
+ * @export
+ * @interface ListPoolTournamentsFilterParameter
+ */
+export interface ListPoolTournamentsFilterParameter {
     /**
      * 
      * @type {StringFieldFilter}
-     * @memberof ListPgaTournamentsFilterParameter
+     * @memberof ListPoolTournamentsFilterParameter
      */
     'name'?: StringFieldFilter;
     /**
      * 
      * @type {NumberFieldFilter}
-     * @memberof ListPgaTournamentsFilterParameter
+     * @memberof ListPoolTournamentsFilterParameter
      */
     'date.year'?: NumberFieldFilter;
     /**
      * 
      * @type {TimestampFilterOps}
-     * @memberof ListPgaTournamentsFilterParameter
+     * @memberof ListPoolTournamentsFilterParameter
      */
     'date.start'?: TimestampFilterOps;
     /**
      * 
      * @type {TimestampFilterOps}
-     * @memberof ListPgaTournamentsFilterParameter
+     * @memberof ListPoolTournamentsFilterParameter
      */
     'date.end'?: TimestampFilterOps;
     /**
      * 
      * @type {BooleanFieldFilter}
-     * @memberof ListPgaTournamentsFilterParameter
+     * @memberof ListPoolTournamentsFilterParameter
      */
     'fedex_cup_event'?: BooleanFieldFilter;
     /**
      * 
      * @type {StringEqNeqFieldFilter}
-     * @memberof ListPgaTournamentsFilterParameter
+     * @memberof ListPoolTournamentsFilterParameter
      */
     'scoring_format'?: StringEqNeqFieldFilter;
     /**
      * 
      * @type {StringEqNeqFieldFilter}
-     * @memberof ListPgaTournamentsFilterParameter
+     * @memberof ListPoolTournamentsFilterParameter
      */
     'tournament_status'?: StringEqNeqFieldFilter;
+}
+/**
+ * 
+ * @export
+ * @interface ListPoolUsers200Response
+ */
+export interface ListPoolUsers200Response {
+    /**
+     * 
+     * @type {LimitOffsetResponseMeta}
+     * @memberof ListPoolUsers200Response
+     */
+    'meta': LimitOffsetResponseMeta;
+    /**
+     * 
+     * @type {Array<PoolUser>}
+     * @memberof ListPoolUsers200Response
+     */
+    'data': Array<PoolUser>;
+}
+/**
+ * 
+ * @export
+ * @interface ListPoolUsersFilterParameter
+ */
+export interface ListPoolUsersFilterParameter {
+    /**
+     * 
+     * @type {StringEqNeqFieldFilter}
+     * @memberof ListPoolUsersFilterParameter
+     */
+    'user.id'?: StringEqNeqFieldFilter;
+    /**
+     * 
+     * @type {StringFieldFilter}
+     * @memberof ListPoolUsersFilterParameter
+     */
+    'user.name'?: StringFieldFilter;
+    /**
+     * 
+     * @type {StringFieldFilter}
+     * @memberof ListPoolUsersFilterParameter
+     */
+    'user.nickname'?: StringFieldFilter;
+    /**
+     * 
+     * @type {NumberFieldFilter}
+     * @memberof ListPoolUsersFilterParameter
+     */
+    'pool_score'?: NumberFieldFilter;
+}
+/**
+ * 
+ * @export
+ * @interface ListPools200Response
+ */
+export interface ListPools200Response {
+    /**
+     * 
+     * @type {LimitOffsetResponseMeta}
+     * @memberof ListPools200Response
+     */
+    'meta': LimitOffsetResponseMeta;
+    /**
+     * 
+     * @type {Array<Pool>}
+     * @memberof ListPools200Response
+     */
+    'data': Array<Pool>;
+}
+/**
+ * 
+ * @export
+ * @interface ListPoolsFilterParameter
+ */
+export interface ListPoolsFilterParameter {
+    /**
+     * 
+     * @type {NumberFieldFilter}
+     * @memberof ListPoolsFilterParameter
+     */
+    'year'?: NumberFieldFilter;
+    /**
+     * 
+     * @type {StringEqNeqFieldFilter}
+     * @memberof ListPoolsFilterParameter
+     */
+    'type'?: StringEqNeqFieldFilter;
+    /**
+     * 
+     * @type {StringFieldFilter}
+     * @memberof ListPoolsFilterParameter
+     */
+    'name'?: StringFieldFilter;
+}
+/**
+ * 
+ * @export
+ * @interface ListPoolsPageParameter
+ */
+export interface ListPoolsPageParameter {
+    /**
+     * The number of items included per page.
+     * @type {number}
+     * @memberof ListPoolsPageParameter
+     */
+    'size'?: number;
+    /**
+     * The specific page number (1-based) of the collection results.
+     * @type {number}
+     * @memberof ListPoolsPageParameter
+     */
+    'number'?: number;
 }
 /**
  * @type NumberFieldFilter
@@ -707,6 +870,90 @@ export interface PgaTournamentPreviousChampion {
     'name': string | null;
 }
 /**
+ * Defines a pool
+ * @export
+ * @interface Pool
+ */
+export interface Pool {
+    /**
+     * 
+     * @type {string}
+     * @memberof Pool
+     */
+    'id': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Pool
+     */
+    'year': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Pool
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Pool
+     */
+    'type': PoolTypeEnum;
+    /**
+     * 
+     * @type {PoolSettings}
+     * @memberof Pool
+     */
+    'settings': PoolSettings;
+    /**
+     * 
+     * @type {string}
+     * @memberof Pool
+     */
+    'created_at': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Pool
+     */
+    'updated_at': string;
+}
+
+export const PoolTypeEnum = {
+    SingleTournament: 'single_tournament',
+    Season: 'season'
+} as const;
+
+export type PoolTypeEnum = typeof PoolTypeEnum[keyof typeof PoolTypeEnum];
+
+/**
+ * Pool configuration settings
+ * @export
+ * @interface PoolSettings
+ */
+export interface PoolSettings {
+    /**
+     * 
+     * @type {string}
+     * @memberof PoolSettings
+     */
+    'scoring_format': PoolSettingsScoringFormatEnum;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PoolSettings
+     */
+    'include_LIV'?: boolean | null;
+}
+
+export const PoolSettingsScoringFormatEnum = {
+    Strokes: 'strokes',
+    FedexCupPoints: 'fedex_cup_points'
+} as const;
+
+export type PoolSettingsScoringFormatEnum = typeof PoolSettingsScoringFormatEnum[keyof typeof PoolSettingsScoringFormatEnum];
+
+/**
  * Defines a pool tournament
  * @export
  * @interface PoolTournament
@@ -719,11 +966,11 @@ export interface PoolTournament {
      */
     'id': string;
     /**
-     * Whether the pool tournament is currently live
+     * 
      * @type {boolean}
      * @memberof PoolTournament
      */
-    'active': boolean;
+    'scores_are_official': boolean;
     /**
      * 
      * @type {PgaTournament}
@@ -732,10 +979,116 @@ export interface PoolTournament {
     'pga_tournament': PgaTournament;
     /**
      * 
-     * @type {Array<PoolUser>}
+     * @type {Pool}
      * @memberof PoolTournament
      */
-    'pool_users': Array<PoolUser>;
+    'pool': Pool;
+}
+/**
+ * The pool tournament player field divided into tiers.
+ * @export
+ * @interface PoolTournamentField
+ */
+export interface PoolTournamentField {
+    /**
+     * 
+     * @type {PoolTournament}
+     * @memberof PoolTournamentField
+     */
+    'pool_tournament': PoolTournament;
+    /**
+     * 
+     * @type {string}
+     * @memberof PoolTournamentField
+     */
+    'created_at': string;
+    /**
+     * 
+     * @type {{ [key: string]: Array<PoolTournamentPlayer>; }}
+     * @memberof PoolTournamentField
+     */
+    'player_tiers': { [key: string]: Array<PoolTournamentPlayer>; };
+}
+/**
+ * Defines a pool tournament player
+ * @export
+ * @interface PoolTournamentPlayer
+ */
+export interface PoolTournamentPlayer {
+    /**
+     * 
+     * @type {string}
+     * @memberof PoolTournamentPlayer
+     */
+    'id': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PoolTournamentPlayer
+     */
+    'tier': number;
+    /**
+     * 
+     * @type {PgaTournamentPlayer}
+     * @memberof PoolTournamentPlayer
+     */
+    'pga_tournament_player': PgaTournamentPlayer;
+}
+/**
+ * Defines a pool tournament user
+ * @export
+ * @interface PoolTournamentUser
+ */
+export interface PoolTournamentUser {
+    /**
+     * 
+     * @type {string}
+     * @memberof PoolTournamentUser
+     */
+    'id': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PoolTournamentUser
+     */
+    'score': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof PoolTournamentUser
+     */
+    'fedex_cup_points': number | null;
+    /**
+     * 
+     * @type {User}
+     * @memberof PoolTournamentUser
+     */
+    'user': User;
+    /**
+     * 
+     * @type {Array<PoolTournamentUserPick>}
+     * @memberof PoolTournamentUser
+     */
+    'picks': Array<PoolTournamentUserPick>;
+}
+/**
+ * Defines a pool tournament user pick
+ * @export
+ * @interface PoolTournamentUserPick
+ */
+export interface PoolTournamentUserPick {
+    /**
+     * 
+     * @type {number}
+     * @memberof PoolTournamentUserPick
+     */
+    'tier': number;
+    /**
+     * 
+     * @type {PgaTournamentPlayer}
+     * @memberof PoolTournamentUserPick
+     */
+    'pga_tournament_player': PgaTournamentPlayer;
 }
 /**
  * Defines a pool user
@@ -751,16 +1104,16 @@ export interface PoolUser {
     'id': string;
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof PoolUser
      */
-    'score': number;
+    'pool_id': string;
     /**
      * 
      * @type {number}
      * @memberof PoolUser
      */
-    'projected_fedex_cup_points'?: number | null;
+    'pool_score': number;
     /**
      * 
      * @type {User}
@@ -769,10 +1122,16 @@ export interface PoolUser {
     'user': User;
     /**
      * 
-     * @type {Array<PgaTournamentPlayer>}
+     * @type {string}
      * @memberof PoolUser
      */
-    'picks': Array<PgaTournamentPlayer>;
+    'created_at': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PoolUser
+     */
+    'updated_at': string;
 }
 /**
  * @type StringEqNeqFieldFilter
@@ -970,12 +1329,12 @@ export const PGAPlayersApiAxiosParamCreator = function (configuration?: Configur
         /**
          * Lists PGA Players. Returns only active players by default.
          * @summary Lists PGA Players
-         * @param {ListPgaPlayersPageParameter} [page] 
+         * @param {ListPoolsPageParameter} [page] 
          * @param {ListPgaPlayersFilterParameter} [filter] Filters a collection of PGA Players.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listPgaPlayers: async (page?: ListPgaPlayersPageParameter, filter?: ListPgaPlayersFilterParameter, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listPgaPlayers: async (page?: ListPoolsPageParameter, filter?: ListPgaPlayersFilterParameter, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/pga-players`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1020,12 +1379,12 @@ export const PGAPlayersApiFp = function(configuration?: Configuration) {
         /**
          * Lists PGA Players. Returns only active players by default.
          * @summary Lists PGA Players
-         * @param {ListPgaPlayersPageParameter} [page] 
+         * @param {ListPoolsPageParameter} [page] 
          * @param {ListPgaPlayersFilterParameter} [filter] Filters a collection of PGA Players.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listPgaPlayers(page?: ListPgaPlayersPageParameter, filter?: ListPgaPlayersFilterParameter, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPgaPlayers200Response>> {
+        async listPgaPlayers(page?: ListPoolsPageParameter, filter?: ListPgaPlayersFilterParameter, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPgaPlayers200Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listPgaPlayers(page, filter, options);
             const index = configuration?.serverIndex ?? 0;
             const operationBasePath = operationServerMap['PGAPlayersApi.listPgaPlayers']?.[index]?.url;
@@ -1062,10 +1421,10 @@ export const PGAPlayersApiFactory = function (configuration?: Configuration, bas
 export interface PGAPlayersApiListPgaPlayersRequest {
     /**
      * 
-     * @type {ListPgaPlayersPageParameter}
+     * @type {ListPoolsPageParameter}
      * @memberof PGAPlayersApiListPgaPlayers
      */
-    readonly page?: ListPgaPlayersPageParameter
+    readonly page?: ListPoolsPageParameter
 
     /**
      * Filters a collection of PGA Players.
@@ -1107,11 +1466,11 @@ export const PGATournamentPlayersApiAxiosParamCreator = function (configuration?
          * Lists players for a given PGA Tournament
          * @summary Lists players for a given PGA Tournament
          * @param {string} pgaTournamentId 
-         * @param {ListPgaPlayersPageParameter} [page] 
+         * @param {ListPoolsPageParameter} [page] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listPgaTournamentPlayers: async (pgaTournamentId: string, page?: ListPgaPlayersPageParameter, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listPgaTournamentPlayers: async (pgaTournamentId: string, page?: ListPoolsPageParameter, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'pgaTournamentId' is not null or undefined
             assertParamExists('listPgaTournamentPlayers', 'pgaTournamentId', pgaTournamentId)
             const localVarPath = `/pga-tournaments/{pgaTournamentId}/players`
@@ -1156,11 +1515,11 @@ export const PGATournamentPlayersApiFp = function(configuration?: Configuration)
          * Lists players for a given PGA Tournament
          * @summary Lists players for a given PGA Tournament
          * @param {string} pgaTournamentId 
-         * @param {ListPgaPlayersPageParameter} [page] 
+         * @param {ListPoolsPageParameter} [page] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listPgaTournamentPlayers(pgaTournamentId: string, page?: ListPgaPlayersPageParameter, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPgaTournamentPlayers200Response>> {
+        async listPgaTournamentPlayers(pgaTournamentId: string, page?: ListPoolsPageParameter, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPgaTournamentPlayers200Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listPgaTournamentPlayers(pgaTournamentId, page, options);
             const index = configuration?.serverIndex ?? 0;
             const operationBasePath = operationServerMap['PGATournamentPlayersApi.listPgaTournamentPlayers']?.[index]?.url;
@@ -1204,10 +1563,10 @@ export interface PGATournamentPlayersApiListPgaTournamentPlayersRequest {
 
     /**
      * 
-     * @type {ListPgaPlayersPageParameter}
+     * @type {ListPoolsPageParameter}
      * @memberof PGATournamentPlayersApiListPgaTournamentPlayers
      */
-    readonly page?: ListPgaPlayersPageParameter
+    readonly page?: ListPoolsPageParameter
 }
 
 /**
@@ -1305,12 +1664,12 @@ export const PGATournamentsApiAxiosParamCreator = function (configuration?: Conf
         /**
          * Lists PGA Tournaments
          * @summary Lists PGA Tournaments
-         * @param {ListPgaPlayersPageParameter} [page] 
-         * @param {ListPgaTournamentsFilterParameter} [filter] Filters a collection of PGA Tournaments.
+         * @param {ListPoolsPageParameter} [page] 
+         * @param {ListPoolTournamentsFilterParameter} [filter] Filters a collection of PGA Tournaments.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listPgaTournaments: async (page?: ListPgaPlayersPageParameter, filter?: ListPgaTournamentsFilterParameter, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listPgaTournaments: async (page?: ListPoolsPageParameter, filter?: ListPoolTournamentsFilterParameter, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/pga-tournaments`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1380,12 +1739,12 @@ export const PGATournamentsApiFp = function(configuration?: Configuration) {
         /**
          * Lists PGA Tournaments
          * @summary Lists PGA Tournaments
-         * @param {ListPgaPlayersPageParameter} [page] 
-         * @param {ListPgaTournamentsFilterParameter} [filter] Filters a collection of PGA Tournaments.
+         * @param {ListPoolsPageParameter} [page] 
+         * @param {ListPoolTournamentsFilterParameter} [filter] Filters a collection of PGA Tournaments.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listPgaTournaments(page?: ListPgaPlayersPageParameter, filter?: ListPgaTournamentsFilterParameter, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPgaTournaments200Response>> {
+        async listPgaTournaments(page?: ListPoolsPageParameter, filter?: ListPoolTournamentsFilterParameter, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPgaTournaments200Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listPgaTournaments(page, filter, options);
             const index = configuration?.serverIndex ?? 0;
             const operationBasePath = operationServerMap['PGATournamentsApi.listPgaTournaments']?.[index]?.url;
@@ -1455,17 +1814,17 @@ export interface PGATournamentsApiGetFieldRequest {
 export interface PGATournamentsApiListPgaTournamentsRequest {
     /**
      * 
-     * @type {ListPgaPlayersPageParameter}
+     * @type {ListPoolsPageParameter}
      * @memberof PGATournamentsApiListPgaTournaments
      */
-    readonly page?: ListPgaPlayersPageParameter
+    readonly page?: ListPoolsPageParameter
 
     /**
      * Filters a collection of PGA Tournaments.
-     * @type {ListPgaTournamentsFilterParameter}
+     * @type {ListPoolTournamentsFilterParameter}
      * @memberof PGATournamentsApiListPgaTournaments
      */
-    readonly filter?: ListPgaTournamentsFilterParameter
+    readonly filter?: ListPoolTournamentsFilterParameter
 }
 
 /**
@@ -1618,6 +1977,82 @@ export const PoolTournamentApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
+         * Fetches a pool tournament by ID
+         * @summary Fetches a pool tournament by ID
+         * @param {string} poolId Pool ID
+         * @param {string} poolTournamentId Pool Tournament ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPoolTournament: async (poolId: string, poolTournamentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'poolId' is not null or undefined
+            assertParamExists('getPoolTournament', 'poolId', poolId)
+            // verify required parameter 'poolTournamentId' is not null or undefined
+            assertParamExists('getPoolTournament', 'poolTournamentId', poolTournamentId)
+            const localVarPath = `/pools/{poolId}/tournaments/{poolTournamentId}`
+                .replace(`{${"poolId"}}`, encodeURIComponent(String(poolId)))
+                .replace(`{${"poolTournamentId"}}`, encodeURIComponent(String(poolTournamentId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Fetches the tiered player field for a given pool tournament
+         * @summary Fetches the player field for a given pool tournament
+         * @param {string} poolId Pool ID
+         * @param {string} poolTournamentId Pool Tournament ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPoolTournamentField: async (poolId: string, poolTournamentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'poolId' is not null or undefined
+            assertParamExists('getPoolTournamentField', 'poolId', poolId)
+            // verify required parameter 'poolTournamentId' is not null or undefined
+            assertParamExists('getPoolTournamentField', 'poolTournamentId', poolTournamentId)
+            const localVarPath = `/pools/{poolId}/tournaments/{poolTournamentId}/field`
+                .replace(`{${"poolId"}}`, encodeURIComponent(String(poolId)))
+                .replace(`{${"poolTournamentId"}}`, encodeURIComponent(String(poolTournamentId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Returns the tournament field for the current week (Sunday 2AM EST to Sunday 2AM EST). Returns 404 if no tournament is scheduled this week. Returns 200 with player_tiers: null if tournament exists but field data is not yet available. 
          * @summary Fetches the player field for the current week\'s tournament
          * @param {*} [options] Override http request option.
@@ -1665,6 +2100,141 @@ export const PoolTournamentApiAxiosParamCreator = function (configuration?: Conf
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Lists players for a given pool tournament
+         * @summary Lists players for a given pool tournament
+         * @param {string} poolId Pool ID
+         * @param {string} poolTournamentId Pool Tournament ID
+         * @param {ListPoolsPageParameter} [page] 
+         * @param {ListPoolTournamentPlayersFilterParameter} [filter] Filters a collection of Pool Tournament Players.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPoolTournamentPlayers: async (poolId: string, poolTournamentId: string, page?: ListPoolsPageParameter, filter?: ListPoolTournamentPlayersFilterParameter, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'poolId' is not null or undefined
+            assertParamExists('listPoolTournamentPlayers', 'poolId', poolId)
+            // verify required parameter 'poolTournamentId' is not null or undefined
+            assertParamExists('listPoolTournamentPlayers', 'poolTournamentId', poolTournamentId)
+            const localVarPath = `/pools/{poolId}/tournaments/{poolTournamentId}/players`
+                .replace(`{${"poolId"}}`, encodeURIComponent(String(poolId)))
+                .replace(`{${"poolTournamentId"}}`, encodeURIComponent(String(poolTournamentId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Lists users for a given pool tournament
+         * @summary Lists users for a given pool tournament
+         * @param {string} poolId Pool ID
+         * @param {string} poolTournamentId Pool Tournament ID
+         * @param {ListPoolsPageParameter} [page] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPoolTournamentUsers: async (poolId: string, poolTournamentId: string, page?: ListPoolsPageParameter, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'poolId' is not null or undefined
+            assertParamExists('listPoolTournamentUsers', 'poolId', poolId)
+            // verify required parameter 'poolTournamentId' is not null or undefined
+            assertParamExists('listPoolTournamentUsers', 'poolTournamentId', poolTournamentId)
+            const localVarPath = `/pools/{poolId}/tournaments/{poolTournamentId}/users`
+                .replace(`{${"poolId"}}`, encodeURIComponent(String(poolId)))
+                .replace(`{${"poolTournamentId"}}`, encodeURIComponent(String(poolTournamentId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Returns all pool tournaments for a pool
+         * @summary Lists pool tournaments
+         * @param {string} poolId Pool ID
+         * @param {ListPoolsPageParameter} [page] 
+         * @param {ListPoolTournamentsFilterParameter} [filter] Filters a collection of PGA Tournaments.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPoolTournaments: async (poolId: string, page?: ListPoolsPageParameter, filter?: ListPoolTournamentsFilterParameter, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'poolId' is not null or undefined
+            assertParamExists('listPoolTournaments', 'poolId', poolId)
+            const localVarPath = `/pools/{poolId}/tournaments`
+                .replace(`{${"poolId"}}`, encodeURIComponent(String(poolId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
 
 
     
@@ -1726,6 +2296,34 @@ export const PoolTournamentApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
+         * Fetches a pool tournament by ID
+         * @summary Fetches a pool tournament by ID
+         * @param {string} poolId Pool ID
+         * @param {string} poolTournamentId Pool Tournament ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getPoolTournament(poolId: string, poolTournamentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PoolTournament>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getPoolTournament(poolId, poolTournamentId, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PoolTournamentApi.getPoolTournament']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
+         * Fetches the tiered player field for a given pool tournament
+         * @summary Fetches the player field for a given pool tournament
+         * @param {string} poolId Pool ID
+         * @param {string} poolTournamentId Pool Tournament ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getPoolTournamentField(poolId: string, poolTournamentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PoolTournamentField>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getPoolTournamentField(poolId, poolTournamentId, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PoolTournamentApi.getPoolTournamentField']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
          * Returns the tournament field for the current week (Sunday 2AM EST to Sunday 2AM EST). Returns 404 if no tournament is scheduled this week. Returns 200 with player_tiers: null if tournament exists but field data is not yet available. 
          * @summary Fetches the player field for the current week\'s tournament
          * @param {*} [options] Override http request option.
@@ -1743,10 +2341,56 @@ export const PoolTournamentApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async list(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<List200Response>> {
+        async list(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPoolTournaments200Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.list(options);
             const index = configuration?.serverIndex ?? 0;
             const operationBasePath = operationServerMap['PoolTournamentApi.list']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
+         * Lists players for a given pool tournament
+         * @summary Lists players for a given pool tournament
+         * @param {string} poolId Pool ID
+         * @param {string} poolTournamentId Pool Tournament ID
+         * @param {ListPoolsPageParameter} [page] 
+         * @param {ListPoolTournamentPlayersFilterParameter} [filter] Filters a collection of Pool Tournament Players.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listPoolTournamentPlayers(poolId: string, poolTournamentId: string, page?: ListPoolsPageParameter, filter?: ListPoolTournamentPlayersFilterParameter, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPoolTournamentPlayers200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listPoolTournamentPlayers(poolId, poolTournamentId, page, filter, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PoolTournamentApi.listPoolTournamentPlayers']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
+         * Lists users for a given pool tournament
+         * @summary Lists users for a given pool tournament
+         * @param {string} poolId Pool ID
+         * @param {string} poolTournamentId Pool Tournament ID
+         * @param {ListPoolsPageParameter} [page] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listPoolTournamentUsers(poolId: string, poolTournamentId: string, page?: ListPoolsPageParameter, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPoolTournamentUsers200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listPoolTournamentUsers(poolId, poolTournamentId, page, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PoolTournamentApi.listPoolTournamentUsers']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
+         * Returns all pool tournaments for a pool
+         * @summary Lists pool tournaments
+         * @param {string} poolId Pool ID
+         * @param {ListPoolsPageParameter} [page] 
+         * @param {ListPoolTournamentsFilterParameter} [filter] Filters a collection of PGA Tournaments.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listPoolTournaments(poolId: string, page?: ListPoolsPageParameter, filter?: ListPoolTournamentsFilterParameter, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPoolTournaments200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listPoolTournaments(poolId, page, filter, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PoolTournamentApi.listPoolTournaments']?.[index]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
     }
@@ -1789,6 +2433,26 @@ export const PoolTournamentApiFactory = function (configuration?: Configuration,
             return localVarFp.getField(requestParameters.pgaTournamentId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Fetches a pool tournament by ID
+         * @summary Fetches a pool tournament by ID
+         * @param {PoolTournamentApiGetPoolTournamentRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPoolTournament(requestParameters: PoolTournamentApiGetPoolTournamentRequest, options?: RawAxiosRequestConfig): AxiosPromise<PoolTournament> {
+            return localVarFp.getPoolTournament(requestParameters.poolId, requestParameters.poolTournamentId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Fetches the tiered player field for a given pool tournament
+         * @summary Fetches the player field for a given pool tournament
+         * @param {PoolTournamentApiGetPoolTournamentFieldRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPoolTournamentField(requestParameters: PoolTournamentApiGetPoolTournamentFieldRequest, options?: RawAxiosRequestConfig): AxiosPromise<PoolTournamentField> {
+            return localVarFp.getPoolTournamentField(requestParameters.poolId, requestParameters.poolTournamentId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Returns the tournament field for the current week (Sunday 2AM EST to Sunday 2AM EST). Returns 404 if no tournament is scheduled this week. Returns 200 with player_tiers: null if tournament exists but field data is not yet available. 
          * @summary Fetches the player field for the current week\'s tournament
          * @param {*} [options] Override http request option.
@@ -1803,8 +2467,38 @@ export const PoolTournamentApiFactory = function (configuration?: Configuration,
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        list(options?: RawAxiosRequestConfig): AxiosPromise<List200Response> {
+        list(options?: RawAxiosRequestConfig): AxiosPromise<ListPoolTournaments200Response> {
             return localVarFp.list(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Lists players for a given pool tournament
+         * @summary Lists players for a given pool tournament
+         * @param {PoolTournamentApiListPoolTournamentPlayersRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPoolTournamentPlayers(requestParameters: PoolTournamentApiListPoolTournamentPlayersRequest, options?: RawAxiosRequestConfig): AxiosPromise<ListPoolTournamentPlayers200Response> {
+            return localVarFp.listPoolTournamentPlayers(requestParameters.poolId, requestParameters.poolTournamentId, requestParameters.page, requestParameters.filter, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Lists users for a given pool tournament
+         * @summary Lists users for a given pool tournament
+         * @param {PoolTournamentApiListPoolTournamentUsersRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPoolTournamentUsers(requestParameters: PoolTournamentApiListPoolTournamentUsersRequest, options?: RawAxiosRequestConfig): AxiosPromise<ListPoolTournamentUsers200Response> {
+            return localVarFp.listPoolTournamentUsers(requestParameters.poolId, requestParameters.poolTournamentId, requestParameters.page, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Returns all pool tournaments for a pool
+         * @summary Lists pool tournaments
+         * @param {PoolTournamentApiListPoolTournamentsRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPoolTournaments(requestParameters: PoolTournamentApiListPoolTournamentsRequest, options?: RawAxiosRequestConfig): AxiosPromise<ListPoolTournaments200Response> {
+            return localVarFp.listPoolTournaments(requestParameters.poolId, requestParameters.page, requestParameters.filter, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1835,6 +2529,139 @@ export interface PoolTournamentApiGetFieldRequest {
      * @memberof PoolTournamentApiGetField
      */
     readonly pgaTournamentId: string
+}
+
+/**
+ * Request parameters for getPoolTournament operation in PoolTournamentApi.
+ * @export
+ * @interface PoolTournamentApiGetPoolTournamentRequest
+ */
+export interface PoolTournamentApiGetPoolTournamentRequest {
+    /**
+     * Pool ID
+     * @type {string}
+     * @memberof PoolTournamentApiGetPoolTournament
+     */
+    readonly poolId: string
+
+    /**
+     * Pool Tournament ID
+     * @type {string}
+     * @memberof PoolTournamentApiGetPoolTournament
+     */
+    readonly poolTournamentId: string
+}
+
+/**
+ * Request parameters for getPoolTournamentField operation in PoolTournamentApi.
+ * @export
+ * @interface PoolTournamentApiGetPoolTournamentFieldRequest
+ */
+export interface PoolTournamentApiGetPoolTournamentFieldRequest {
+    /**
+     * Pool ID
+     * @type {string}
+     * @memberof PoolTournamentApiGetPoolTournamentField
+     */
+    readonly poolId: string
+
+    /**
+     * Pool Tournament ID
+     * @type {string}
+     * @memberof PoolTournamentApiGetPoolTournamentField
+     */
+    readonly poolTournamentId: string
+}
+
+/**
+ * Request parameters for listPoolTournamentPlayers operation in PoolTournamentApi.
+ * @export
+ * @interface PoolTournamentApiListPoolTournamentPlayersRequest
+ */
+export interface PoolTournamentApiListPoolTournamentPlayersRequest {
+    /**
+     * Pool ID
+     * @type {string}
+     * @memberof PoolTournamentApiListPoolTournamentPlayers
+     */
+    readonly poolId: string
+
+    /**
+     * Pool Tournament ID
+     * @type {string}
+     * @memberof PoolTournamentApiListPoolTournamentPlayers
+     */
+    readonly poolTournamentId: string
+
+    /**
+     * 
+     * @type {ListPoolsPageParameter}
+     * @memberof PoolTournamentApiListPoolTournamentPlayers
+     */
+    readonly page?: ListPoolsPageParameter
+
+    /**
+     * Filters a collection of Pool Tournament Players.
+     * @type {ListPoolTournamentPlayersFilterParameter}
+     * @memberof PoolTournamentApiListPoolTournamentPlayers
+     */
+    readonly filter?: ListPoolTournamentPlayersFilterParameter
+}
+
+/**
+ * Request parameters for listPoolTournamentUsers operation in PoolTournamentApi.
+ * @export
+ * @interface PoolTournamentApiListPoolTournamentUsersRequest
+ */
+export interface PoolTournamentApiListPoolTournamentUsersRequest {
+    /**
+     * Pool ID
+     * @type {string}
+     * @memberof PoolTournamentApiListPoolTournamentUsers
+     */
+    readonly poolId: string
+
+    /**
+     * Pool Tournament ID
+     * @type {string}
+     * @memberof PoolTournamentApiListPoolTournamentUsers
+     */
+    readonly poolTournamentId: string
+
+    /**
+     * 
+     * @type {ListPoolsPageParameter}
+     * @memberof PoolTournamentApiListPoolTournamentUsers
+     */
+    readonly page?: ListPoolsPageParameter
+}
+
+/**
+ * Request parameters for listPoolTournaments operation in PoolTournamentApi.
+ * @export
+ * @interface PoolTournamentApiListPoolTournamentsRequest
+ */
+export interface PoolTournamentApiListPoolTournamentsRequest {
+    /**
+     * Pool ID
+     * @type {string}
+     * @memberof PoolTournamentApiListPoolTournaments
+     */
+    readonly poolId: string
+
+    /**
+     * 
+     * @type {ListPoolsPageParameter}
+     * @memberof PoolTournamentApiListPoolTournaments
+     */
+    readonly page?: ListPoolsPageParameter
+
+    /**
+     * Filters a collection of PGA Tournaments.
+     * @type {ListPoolTournamentsFilterParameter}
+     * @memberof PoolTournamentApiListPoolTournaments
+     */
+    readonly filter?: ListPoolTournamentsFilterParameter
 }
 
 /**
@@ -1880,6 +2707,30 @@ export class PoolTournamentApi extends BaseAPI {
     }
 
     /**
+     * Fetches a pool tournament by ID
+     * @summary Fetches a pool tournament by ID
+     * @param {PoolTournamentApiGetPoolTournamentRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PoolTournamentApi
+     */
+    public getPoolTournament(requestParameters: PoolTournamentApiGetPoolTournamentRequest, options?: RawAxiosRequestConfig) {
+        return PoolTournamentApiFp(this.configuration).getPoolTournament(requestParameters.poolId, requestParameters.poolTournamentId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Fetches the tiered player field for a given pool tournament
+     * @summary Fetches the player field for a given pool tournament
+     * @param {PoolTournamentApiGetPoolTournamentFieldRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PoolTournamentApi
+     */
+    public getPoolTournamentField(requestParameters: PoolTournamentApiGetPoolTournamentFieldRequest, options?: RawAxiosRequestConfig) {
+        return PoolTournamentApiFp(this.configuration).getPoolTournamentField(requestParameters.poolId, requestParameters.poolTournamentId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Returns the tournament field for the current week (Sunday 2AM EST to Sunday 2AM EST). Returns 404 if no tournament is scheduled this week. Returns 200 with player_tiers: null if tournament exists but field data is not yet available. 
      * @summary Fetches the player field for the current week\'s tournament
      * @param {*} [options] Override http request option.
@@ -1899,6 +2750,370 @@ export class PoolTournamentApi extends BaseAPI {
      */
     public list(options?: RawAxiosRequestConfig) {
         return PoolTournamentApiFp(this.configuration).list(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Lists players for a given pool tournament
+     * @summary Lists players for a given pool tournament
+     * @param {PoolTournamentApiListPoolTournamentPlayersRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PoolTournamentApi
+     */
+    public listPoolTournamentPlayers(requestParameters: PoolTournamentApiListPoolTournamentPlayersRequest, options?: RawAxiosRequestConfig) {
+        return PoolTournamentApiFp(this.configuration).listPoolTournamentPlayers(requestParameters.poolId, requestParameters.poolTournamentId, requestParameters.page, requestParameters.filter, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Lists users for a given pool tournament
+     * @summary Lists users for a given pool tournament
+     * @param {PoolTournamentApiListPoolTournamentUsersRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PoolTournamentApi
+     */
+    public listPoolTournamentUsers(requestParameters: PoolTournamentApiListPoolTournamentUsersRequest, options?: RawAxiosRequestConfig) {
+        return PoolTournamentApiFp(this.configuration).listPoolTournamentUsers(requestParameters.poolId, requestParameters.poolTournamentId, requestParameters.page, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Returns all pool tournaments for a pool
+     * @summary Lists pool tournaments
+     * @param {PoolTournamentApiListPoolTournamentsRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PoolTournamentApi
+     */
+    public listPoolTournaments(requestParameters: PoolTournamentApiListPoolTournamentsRequest, options?: RawAxiosRequestConfig) {
+        return PoolTournamentApiFp(this.configuration).listPoolTournaments(requestParameters.poolId, requestParameters.page, requestParameters.filter, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * PoolsApi - axios parameter creator
+ * @export
+ */
+export const PoolsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Fetches a pool by ID
+         * @summary Fetches a pool by ID
+         * @param {string} poolId Pool ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPool: async (poolId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'poolId' is not null or undefined
+            assertParamExists('getPool', 'poolId', poolId)
+            const localVarPath = `/pools/{poolId}`
+                .replace(`{${"poolId"}}`, encodeURIComponent(String(poolId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Lists users for a given pool
+         * @summary Lists users for a given pool
+         * @param {string} poolId Pool ID
+         * @param {ListPoolsPageParameter} [page] 
+         * @param {ListPoolUsersFilterParameter} [filter] Filters a collection of Pool Users.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPoolUsers: async (poolId: string, page?: ListPoolsPageParameter, filter?: ListPoolUsersFilterParameter, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'poolId' is not null or undefined
+            assertParamExists('listPoolUsers', 'poolId', poolId)
+            const localVarPath = `/pools/{poolId}/users`
+                .replace(`{${"poolId"}}`, encodeURIComponent(String(poolId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Lists Pools
+         * @summary Lists Pools
+         * @param {ListPoolsPageParameter} [page] 
+         * @param {ListPoolsFilterParameter} [filter] Filters a collection of Pools.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPools: async (page?: ListPoolsPageParameter, filter?: ListPoolsFilterParameter, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/pools`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * PoolsApi - functional programming interface
+ * @export
+ */
+export const PoolsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = PoolsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Fetches a pool by ID
+         * @summary Fetches a pool by ID
+         * @param {string} poolId Pool ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getPool(poolId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Pool>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getPool(poolId, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PoolsApi.getPool']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
+         * Lists users for a given pool
+         * @summary Lists users for a given pool
+         * @param {string} poolId Pool ID
+         * @param {ListPoolsPageParameter} [page] 
+         * @param {ListPoolUsersFilterParameter} [filter] Filters a collection of Pool Users.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listPoolUsers(poolId: string, page?: ListPoolsPageParameter, filter?: ListPoolUsersFilterParameter, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPoolUsers200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listPoolUsers(poolId, page, filter, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PoolsApi.listPoolUsers']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
+         * Lists Pools
+         * @summary Lists Pools
+         * @param {ListPoolsPageParameter} [page] 
+         * @param {ListPoolsFilterParameter} [filter] Filters a collection of Pools.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listPools(page?: ListPoolsPageParameter, filter?: ListPoolsFilterParameter, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListPools200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listPools(page, filter, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PoolsApi.listPools']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * PoolsApi - factory interface
+ * @export
+ */
+export const PoolsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = PoolsApiFp(configuration)
+    return {
+        /**
+         * Fetches a pool by ID
+         * @summary Fetches a pool by ID
+         * @param {PoolsApiGetPoolRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPool(requestParameters: PoolsApiGetPoolRequest, options?: RawAxiosRequestConfig): AxiosPromise<Pool> {
+            return localVarFp.getPool(requestParameters.poolId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Lists users for a given pool
+         * @summary Lists users for a given pool
+         * @param {PoolsApiListPoolUsersRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPoolUsers(requestParameters: PoolsApiListPoolUsersRequest, options?: RawAxiosRequestConfig): AxiosPromise<ListPoolUsers200Response> {
+            return localVarFp.listPoolUsers(requestParameters.poolId, requestParameters.page, requestParameters.filter, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Lists Pools
+         * @summary Lists Pools
+         * @param {PoolsApiListPoolsRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPools(requestParameters: PoolsApiListPoolsRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<ListPools200Response> {
+            return localVarFp.listPools(requestParameters.page, requestParameters.filter, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * Request parameters for getPool operation in PoolsApi.
+ * @export
+ * @interface PoolsApiGetPoolRequest
+ */
+export interface PoolsApiGetPoolRequest {
+    /**
+     * Pool ID
+     * @type {string}
+     * @memberof PoolsApiGetPool
+     */
+    readonly poolId: string
+}
+
+/**
+ * Request parameters for listPoolUsers operation in PoolsApi.
+ * @export
+ * @interface PoolsApiListPoolUsersRequest
+ */
+export interface PoolsApiListPoolUsersRequest {
+    /**
+     * Pool ID
+     * @type {string}
+     * @memberof PoolsApiListPoolUsers
+     */
+    readonly poolId: string
+
+    /**
+     * 
+     * @type {ListPoolsPageParameter}
+     * @memberof PoolsApiListPoolUsers
+     */
+    readonly page?: ListPoolsPageParameter
+
+    /**
+     * Filters a collection of Pool Users.
+     * @type {ListPoolUsersFilterParameter}
+     * @memberof PoolsApiListPoolUsers
+     */
+    readonly filter?: ListPoolUsersFilterParameter
+}
+
+/**
+ * Request parameters for listPools operation in PoolsApi.
+ * @export
+ * @interface PoolsApiListPoolsRequest
+ */
+export interface PoolsApiListPoolsRequest {
+    /**
+     * 
+     * @type {ListPoolsPageParameter}
+     * @memberof PoolsApiListPools
+     */
+    readonly page?: ListPoolsPageParameter
+
+    /**
+     * Filters a collection of Pools.
+     * @type {ListPoolsFilterParameter}
+     * @memberof PoolsApiListPools
+     */
+    readonly filter?: ListPoolsFilterParameter
+}
+
+/**
+ * PoolsApi - object-oriented interface
+ * @export
+ * @class PoolsApi
+ * @extends {BaseAPI}
+ */
+export class PoolsApi extends BaseAPI {
+    /**
+     * Fetches a pool by ID
+     * @summary Fetches a pool by ID
+     * @param {PoolsApiGetPoolRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PoolsApi
+     */
+    public getPool(requestParameters: PoolsApiGetPoolRequest, options?: RawAxiosRequestConfig) {
+        return PoolsApiFp(this.configuration).getPool(requestParameters.poolId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Lists users for a given pool
+     * @summary Lists users for a given pool
+     * @param {PoolsApiListPoolUsersRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PoolsApi
+     */
+    public listPoolUsers(requestParameters: PoolsApiListPoolUsersRequest, options?: RawAxiosRequestConfig) {
+        return PoolsApiFp(this.configuration).listPoolUsers(requestParameters.poolId, requestParameters.page, requestParameters.filter, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Lists Pools
+     * @summary Lists Pools
+     * @param {PoolsApiListPoolsRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PoolsApi
+     */
+    public listPools(requestParameters: PoolsApiListPoolsRequest = {}, options?: RawAxiosRequestConfig) {
+        return PoolsApiFp(this.configuration).listPools(requestParameters.page, requestParameters.filter, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

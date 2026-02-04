@@ -1,13 +1,12 @@
 import { PgaTournamentDto } from '../../pga-tournament/api/pga-tournament.dto';
 import { PoolDto } from '../../pool/lib/pool.dto';
-import { PoolTournamentUserDto } from '../../pool-tournament-user/api/pool-tournament-user.dto';
 import { PoolTournament } from '../lib/pool-tournament.entity';
 
 export class PoolTournamentDto {
   id: string;
   pga_tournament: PgaTournamentDto;
   pool: PoolDto;
-  pool_tournament_users: PoolTournamentUserDto[] = [];
+  scores_are_official: boolean;
 
   static fromEntity(t: PoolTournament): PoolTournamentDto {
     const dto = new PoolTournamentDto();
@@ -15,7 +14,7 @@ export class PoolTournamentDto {
     dto.id = t.id;
     dto.pga_tournament = PgaTournamentDto.fromEntity(t.pga_tournament);
     dto.pool = PoolDto.fromEntity(t.pool);
-    dto.pool_tournament_users = t.pool_tournament_users.map(PoolTournamentUserDto.fromEntity);
+    dto.scores_are_official = t.scores_are_official;
 
     return dto;
   }

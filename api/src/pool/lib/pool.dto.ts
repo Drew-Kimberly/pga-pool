@@ -1,5 +1,3 @@
-import { LeagueDto } from '../../league/lib/league.dto';
-
 import { Pool } from './pool.entity';
 import { PoolSettings, PoolType } from './pool.interface';
 
@@ -9,7 +7,6 @@ export class PoolDto {
   name: string;
   type: PoolType;
   settings: PoolSettings;
-  league: LeagueDto;
   created_at: string;
   updated_at: string;
 
@@ -21,7 +18,6 @@ export class PoolDto {
     dto.name = p.name;
     dto.type = p.type;
     dto.settings = p.settings;
-    dto.league = LeagueDto.fromEntity(p.league);
     dto.created_at = p.created_at.toISOString();
     dto.updated_at = p.updated_at.toISOString();
 

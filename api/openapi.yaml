@@ -12,11 +12,201 @@ servers:
   - url: 'http://localhost:3000'
     description: Local Dev URL
 tags:
+  - name: Pools
   - name: PGA Players
   - name: PGA Tournaments
   - name: PGA Tournament Players
   - name: PoolTournament
 paths:
+  /pools:
+    get:
+      summary: Lists Pools
+      description: Lists Pools
+      operationId: listPools
+      parameters:
+        - $ref: '#/components/parameters/LimitOffsetPaginationParam'
+        - $ref: '#/components/parameters/PoolFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListPoolsResponse'
+      tags:
+        - Pools
+  /pools/{poolId}:
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: poolId
+        in: path
+        required: true
+        description: Pool ID
+    get:
+      summary: Fetches a pool by ID
+      description: Fetches a pool by ID
+      operationId: getPool
+      responses:
+        '200':
+          $ref: '#/components/responses/PoolResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+        - Pools
+  /pools/{poolId}/tournaments:
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: poolId
+        in: path
+        required: true
+        description: Pool ID
+    get:
+      summary: Lists pool tournaments
+      description: Returns all pool tournaments for a pool
+      operationId: listPoolTournaments
+      parameters:
+        - $ref: '#/components/parameters/LimitOffsetPaginationParam'
+        - $ref: '#/components/parameters/PgaTournamentFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/PoolTournamentsResponse'
+      tags:
+        - PoolTournament
+  /pools/{poolId}/tournaments/{poolTournamentId}:
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: poolId
+        in: path
+        required: true
+        description: Pool ID
+      - schema:
+          type: string
+          example: d32d905a-ed33-46a3-a093-d8f536af9a8a
+          format: uuid
+        name: poolTournamentId
+        in: path
+        required: true
+        description: Pool Tournament ID
+    get:
+      summary: Fetches a pool tournament by ID
+      description: Fetches a pool tournament by ID
+      operationId: getPoolTournament
+      responses:
+        '200':
+          $ref: '#/components/responses/PoolTournamentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+        - PoolTournament
+  /pools/{poolId}/tournaments/{poolTournamentId}/field:
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: poolId
+        in: path
+        required: true
+        description: Pool ID
+      - schema:
+          type: string
+          format: uuid
+        name: poolTournamentId
+        in: path
+        required: true
+        description: Pool Tournament ID
+    get:
+      summary: Fetches the player field for a given pool tournament
+      description: Fetches the tiered player field for a given pool tournament
+      operationId: getPoolTournamentField
+      responses:
+        '200':
+          $ref: '#/components/responses/PoolTournamentFieldResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+        - PoolTournament
+  /pools/{poolId}/tournaments/{poolTournamentId}/players:
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: poolId
+        in: path
+        required: true
+        description: Pool ID
+      - schema:
+          type: string
+          format: uuid
+        name: poolTournamentId
+        in: path
+        required: true
+        description: Pool Tournament ID
+    get:
+      summary: Lists players for a given pool tournament
+      description: Lists players for a given pool tournament
+      operationId: listPoolTournamentPlayers
+      parameters:
+        - $ref: '#/components/parameters/LimitOffsetPaginationParam'
+        - $ref: '#/components/parameters/PoolTournamentPlayerFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListPoolTournamentPlayersResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+        - PoolTournament
+  /pools/{poolId}/tournaments/{poolTournamentId}/users:
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: poolId
+        in: path
+        required: true
+        description: Pool ID
+      - schema:
+          type: string
+          format: uuid
+        name: poolTournamentId
+        in: path
+        required: true
+        description: Pool Tournament ID
+    get:
+      summary: Lists users for a given pool tournament
+      description: Lists users for a given pool tournament
+      operationId: listPoolTournamentUsers
+      parameters:
+        - $ref: '#/components/parameters/LimitOffsetPaginationParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListPoolTournamentUsersResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+        - PoolTournament
+  /pools/{poolId}/users:
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: poolId
+        in: path
+        required: true
+        description: Pool ID
+    get:
+      summary: Lists users for a given pool
+      description: Lists users for a given pool
+      operationId: listPoolUsers
+      parameters:
+        - $ref: '#/components/parameters/LimitOffsetPaginationParam'
+        - $ref: '#/components/parameters/PoolUserFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListPoolUsersResponse'
+      tags:
+        - Pools
   /pga-players:
     get:
       summary: Lists PGA Players
@@ -147,6 +337,86 @@ paths:
         - PoolTournament
 components:
   responses:
+    ListPoolsResponse:
+      description: Response containing paginated collection of Pools
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              meta:
+                $ref: '#/components/schemas/LimitOffsetResponseMeta'
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pool'
+            required:
+              - meta
+              - data
+    PoolResponse:
+      description: Response containing a Pool
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Pool'
+    PoolTournamentFieldResponse:
+      description: Response containing pool tournament field data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PoolTournamentField'
+    ListPoolTournamentUsersResponse:
+      description: Response containing paginated collection of Pool Tournament Users
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              meta:
+                $ref: '#/components/schemas/LimitOffsetResponseMeta'
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PoolTournamentUser'
+            required:
+              - meta
+              - data
+    ListPoolUsersResponse:
+      description: Response containing paginated collection of Pool Users
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              meta:
+                $ref: '#/components/schemas/LimitOffsetResponseMeta'
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PoolUser'
+            required:
+              - meta
+              - data
+    ListPoolTournamentPlayersResponse:
+      description: Response containing paginated collection of Pool Tournament Players
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              meta:
+                $ref: '#/components/schemas/LimitOffsetResponseMeta'
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PoolTournamentPlayer'
+            required:
+              - meta
+              - data
     ListPgaPlayersResponse:
       description: Response containing paginated collection of PGA Players
       content:
@@ -254,6 +524,55 @@ components:
               - message
               - details
   parameters:
+    PoolFilter:
+      name: filter
+      description: Filters a collection of Pools.
+      required: false
+      in: query
+      schema:
+        type: object
+        additionalProperties: false
+        properties:
+          year:
+            $ref: '#/components/schemas/NumberFieldFilter'
+          type:
+            $ref: '#/components/schemas/StringEqNeqFieldFilter'
+          name:
+            $ref: '#/components/schemas/StringFieldFilter'
+    PoolTournamentPlayerFilter:
+      name: filter
+      description: Filters a collection of Pool Tournament Players.
+      required: false
+      in: query
+      schema:
+        type: object
+        additionalProperties: false
+        properties:
+          tier:
+            $ref: '#/components/schemas/NumberFieldFilter'
+          pga_player_id:
+            $ref: '#/components/schemas/NumberFieldFilter'
+          status:
+            $ref: '#/components/schemas/StringEqNeqFieldFilter'
+          active:
+            $ref: '#/components/schemas/BooleanFieldFilter'
+    PoolUserFilter:
+      name: filter
+      description: Filters a collection of Pool Users.
+      required: false
+      in: query
+      schema:
+        type: object
+        additionalProperties: false
+        properties:
+          user.id:
+            $ref: '#/components/schemas/StringEqNeqFieldFilter'
+          user.name:
+            $ref: '#/components/schemas/StringFieldFilter'
+          user.nickname:
+            $ref: '#/components/schemas/StringFieldFilter'
+          pool_score:
+            $ref: '#/components/schemas/NumberFieldFilter'
     PgaPlayerFilter:
       name: filter
       description: Filters a collection of PGA Players.
@@ -396,20 +715,103 @@ components:
         id:
           type: string
           format: uuid
-        active:
+        scores_are_official:
           type: boolean
-          description: Whether the pool tournament is currently live
         pga_tournament:
           $ref: '#/components/schemas/PgaTournament'
-        pool_users:
-          type: array
-          items:
-            $ref: '#/components/schemas/PoolUser'
+        pool:
+          $ref: '#/components/schemas/Pool'
       required:
         - id
-        - active
+        - scores_are_official
         - pga_tournament
-        - pool_users
+        - pool
+    PoolTournamentPlayer:
+      description: Defines a pool tournament player
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        tier:
+          type: number
+        pga_tournament_player:
+          $ref: '#/components/schemas/PgaTournamentPlayer'
+      required:
+        - id
+        - tier
+        - pga_tournament_player
+    PoolTournamentField:
+      description: The pool tournament player field divided into tiers.
+      type: object
+      additionalProperties: false
+      properties:
+        pool_tournament:
+          $ref: '#/components/schemas/PoolTournament'
+        created_at:
+          type: string
+          format: date-time
+        player_tiers:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/PoolTournamentPlayer'
+      required:
+        - pool_tournament
+        - created_at
+        - player_tiers
+    Pool:
+      description: Defines a pool
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        year:
+          type: number
+          example: 2026
+        name:
+          type: string
+          example: '2026'
+        type:
+          type: string
+          enum:
+            - single_tournament
+            - season
+        settings:
+          $ref: '#/components/schemas/PoolSettings'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - year
+        - name
+        - type
+        - settings
+        - created_at
+        - updated_at
+    PoolSettings:
+      description: Pool configuration settings
+      type: object
+      additionalProperties: false
+      properties:
+        scoring_format:
+          type: string
+          enum:
+            - strokes
+            - fedex_cup_points
+        include_LIV:
+          type: boolean
+          nullable: true
+      required:
+        - scoring_format
     PgaTournament:
       description: Defines a PGA tournament event
       type: object
@@ -690,24 +1092,65 @@ components:
         id:
           type: string
           format: uuid
+        pool_id:
+          type: string
+          format: uuid
+        pool_score:
+          type: number
+          example: 120.5
+        user:
+          $ref: '#/components/schemas/User'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - pool_id
+        - pool_score
+        - user
+        - created_at
+        - updated_at
+    PoolTournamentUser:
+      description: Defines a pool tournament user
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
         score:
           type: number
-          example: -21
-        projected_fedex_cup_points:
+          nullable: true
+        fedex_cup_points:
           type: number
           nullable: true
-          example: 730.57
         user:
           $ref: '#/components/schemas/User'
         picks:
           type: array
           items:
-            $ref: '#/components/schemas/PgaTournamentPlayer'
+            $ref: '#/components/schemas/PoolTournamentUserPick'
       required:
         - id
         - score
+        - fedex_cup_points
         - user
         - picks
+    PoolTournamentUserPick:
+      description: Defines a pool tournament user pick
+      type: object
+      additionalProperties: false
+      properties:
+        tier:
+          type: number
+        pga_tournament_player:
+          $ref: '#/components/schemas/PgaTournamentPlayer'
+      required:
+        - tier
+        - pga_tournament_player
     User:
       description: Defines a user (i.e. contestant who competes in pools)
       type: object
