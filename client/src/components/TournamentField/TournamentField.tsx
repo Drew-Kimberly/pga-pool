@@ -6,10 +6,7 @@ import { pgaPoolApi } from '../../api/pga-pool';
 import { Spinner } from '../Spinner';
 import { TournamentFieldDisplay } from '../TournamentFieldDisplay';
 
-import {
-  PgaTournamentField,
-  PgaTournamentFieldPlayerTiersValueInner,
-} from '@drewkimberly/pga-pool-api';
+import { PgaTournamentField, TournamentFieldPlayer } from '@drewkimberly/pga-pool-api';
 
 export interface TournamentFieldProps {
   pgaTournamentId: string;
@@ -26,16 +23,13 @@ export function TournamentField(props: TournamentFieldProps) {
       setFetchError(undefined);
 
       try {
-        const res = await pgaPoolApi.pgaTournaments.getField({
+        const res = await pgaPoolApi.pgaTournamentField.getField({
           pgaTournamentId: props.pgaTournamentId,
         });
 
         Object.keys(res.data.player_tiers).forEach((tier) => {
-          res.data.player_tiers[tier].sort(
-            (
-              a: PgaTournamentFieldPlayerTiersValueInner,
-              b: PgaTournamentFieldPlayerTiersValueInner
-            ) => (a.name <= b.name ? -1 : 1)
+          res.data.player_tiers[tier].sort((a: TournamentFieldPlayer, b: TournamentFieldPlayer) =>
+            a.name <= b.name ? -1 : 1
           );
         });
 

@@ -23,7 +23,7 @@ export function WeeklyTournamentField() {
       setNoTournamentThisWeek(false);
 
       try {
-        const res = await pgaPoolApi.pgaTournaments.getWeeklyField();
+        const res = await pgaPoolApi.pgaTournamentField.getWeeklyField();
 
         if (!res.headers['content-type']?.startsWith('application/json')) {
           throw new Error(`Unexpected response type: ${res.headers['content-type']}`);
