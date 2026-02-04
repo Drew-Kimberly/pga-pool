@@ -4,6 +4,7 @@ import {
   PgaTournament,
   PgaTournamentPlayer,
   PgaTournamentPlayerStatusEnum as PlayerStatus,
+  PgaTournamentRoundStatusEnum as TournamentRoundStatus,
 } from '@drewkimberly/pga-pool-api';
 
 export type RoundStatus<T extends 'not_started' | 'in_progress' | 'complete'> =
@@ -23,6 +24,13 @@ export function getRoundStatus(
   picks: PgaTournamentPlayer[],
   tournament: PgaTournament
 ): RoundStatus<'not_started' | 'in_progress' | 'complete'> {
+  if (
+    tournament.round_status === TournamentRoundStatus.Complete ||
+    tournament.round_status === TournamentRoundStatus.Official
+  ) {
+    return { status: 'complete' };
+  }
+
   let totalHolesCompleted = 0;
   let activePlayersHolesCompleted = 0;
   const teetimes: DateTime[] = [];
@@ -37,16 +45,16 @@ export function getRoundStatus(
     }
   }
 
+  if (totalHolesCompleted === picks.length * HOLES_PER_ROUND) {
+    return { status: 'complete' };
+  }
+
   if (activePlayersHolesCompleted === 0) {
     teetimes.sort((t1, t2) => t1.toUnixInteger() - t2.toUnixInteger());
     return {
       status: 'not_started',
       teetimes,
     };
-  }
-
-  if (totalHolesCompleted === picks.length * HOLES_PER_ROUND) {
-    return { status: 'complete' };
   }
 
   return {

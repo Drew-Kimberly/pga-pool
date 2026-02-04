@@ -1,5 +1,6 @@
 import { FindOptionsWhere, Repository } from 'typeorm';
 
+import { defaultListParams, IListParams, TypeOrmListService } from '../../common/api/list';
 import { PoolTournamentUserPick } from '../../pool-tournament-user-pick/lib/pool-tournament-user-pick.entity';
 
 import { PoolTournamentUser } from './pool-tournament-user.entity';
@@ -12,12 +13,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class PoolTournamentUserService {
   constructor(
     @InjectRepository(PoolTournamentUser)
-    private readonly poolTournamentUserRepo: Repository<PoolTournamentUser>
+    private readonly poolTournamentUserRepo: Repository<PoolTournamentUser>,
+    private readonly listService: TypeOrmListService<PoolTournamentUser>
   ) {}
 
   list(
     filter: PoolTournamentUserFilter = {},
-    repo: Repository<PoolTournamentUser> = this.poolTournamentUserRepo
+    repo: Repository<PoolTournamentUser> = this.poolTournamentUserRepo,
+    scoreOrder: 'ASC' | 'DESC' = 'DESC',
+    scoreField: 'tournament_score' | 'fedex_cup_points' = 'tournament_score'
   ): Promise<PoolTournamentUser[]> {
     const findOptions: FindOptionsWhere<PoolTournamentUser> = {
       ...(filter.pgaTournamentId
@@ -37,12 +41,41 @@ export class PoolTournamentUserService {
         'pool_user.user',
       ],
       order: {
+        [scoreField]: scoreOrder,
         picks: {
           pool_tournament_player: {
-            pga_tournament_player: { pga_tournament: { year: 'DESC', start_date: 'DESC' } },
+            tier: 'ASC',
           },
         },
-        tournament_score: 'ASC',
+      },
+    });
+  }
+
+  listPaginated(
+    poolTournamentId: string,
+    params: IListParams = defaultListParams,
+    scoreOrder: 'ASC' | 'DESC' = 'DESC',
+    scoreField: 'tournament_score' | 'fedex_cup_points' = 'tournament_score'
+  ) {
+    return this.listService.list(params, {
+      entityType: PoolTournamentUser,
+      onFindOptions: (opts) => {
+        opts.where = { ...opts?.where, pool_tournament: { id: poolTournamentId } };
+        opts.relations = [
+          'picks',
+          'picks.pool_tournament_player',
+          'picks.pool_tournament_player.pga_tournament_player',
+          'pool_user',
+          'pool_user.user',
+        ];
+        opts.order = {
+          [scoreField]: scoreOrder,
+          picks: {
+            pool_tournament_player: {
+              tier: 'ASC',
+            },
+          },
+        };
       },
     });
   }

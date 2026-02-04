@@ -57,8 +57,7 @@ export class TypeOrmListService<T extends ObjectLiteral = ObjectLiteral> impleme
       const field = (unmapped in fieldMap ? fieldMap[unmapped] : unmapped) as keyof T;
       const operator = this.buildOperator(field, unmapped, value);
 
-      // @ts-expect-error mapped field exists in entity
-      where[field] = operator;
+      this.setNestedWhere(where, String(field), operator);
     });
 
     const findOptions: FindManyOptions<T> = {
@@ -170,5 +169,30 @@ export class TypeOrmListService<T extends ObjectLiteral = ObjectLiteral> impleme
           `Unexpected operator for field ${String(field)} (mapped from ${unmapped}): ${operator}`
         );
     }
+  }
+
+  private setNestedWhere(
+    target: FindOptionsWhere<T>,
+    fieldPath: string,
+    operator: FindOperator<unknown>
+  ) {
+    const parts = fieldPath.split('.');
+    if (parts.length === 1) {
+      // @ts-expect-error mapped field exists in entity
+      target[parts[0]] = operator;
+      return;
+    }
+
+    let cursor: Record<string, unknown> = target as Record<string, unknown>;
+    for (let i = 0; i < parts.length - 1; i += 1) {
+      const part = parts[i];
+      const existing = cursor[part];
+      if (!existing || typeof existing !== 'object' || existing instanceof FindOperator) {
+        cursor[part] = {};
+      }
+      cursor = cursor[part] as Record<string, unknown>;
+    }
+
+    cursor[parts[parts.length - 1]] = operator;
   }
 }

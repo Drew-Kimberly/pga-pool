@@ -1,5 +1,7 @@
 import { FindOptionsWhere, Repository } from 'typeorm';
 
+import { defaultListParams, IListParams, TypeOrmListService } from '../../common/api/list';
+
 import { PoolTournamentPlayer } from './pool-tournament-player.entity';
 import { PoolTournamentPlayerFilter } from './pool-tournament-player.interface';
 
@@ -10,7 +12,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class PoolTournamentPlayerService {
   constructor(
     @InjectRepository(PoolTournamentPlayer)
-    private readonly poolTournamentPlayerRepo: Repository<PoolTournamentPlayer>
+    private readonly poolTournamentPlayerRepo: Repository<PoolTournamentPlayer>,
+    private readonly listService: TypeOrmListService<PoolTournamentPlayer>
   ) {}
 
   list(
@@ -33,11 +36,27 @@ export class PoolTournamentPlayerService {
       where: findOptions,
       relations: ['pga_tournament_player'],
       order: {
-        pga_tournament_player: {
-          pga_tournament: { year: 'DESC', start_date: 'DESC' },
-          score_total: 'DESC',
-        },
         tier: 'ASC',
+      },
+    });
+  }
+
+  listPaginated(
+    poolTournamentId: string,
+    params: IListParams = defaultListParams,
+    fieldMap: Record<string, string> = {}
+  ) {
+    return this.listService.list(params, {
+      entityType: PoolTournamentPlayer,
+      fieldMap,
+      onFindOptions: (opts) => {
+        opts.where = { ...opts?.where, pool_tournament: { id: poolTournamentId } };
+        opts.order = {
+          pga_tournament_player: {
+            score_total: 'ASC',
+            pga_player: { name: 'ASC' },
+          },
+        };
       },
     });
   }

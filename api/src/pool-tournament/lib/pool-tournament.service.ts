@@ -24,13 +24,9 @@ export class PoolTournamentService {
       entityType: PoolTournament,
       fieldMap,
       onFindOptions: (opts) => {
-        opts.where = { ...opts?.where, id: poolId };
+        opts.where = { ...opts?.where, pool_id: poolId };
         opts.order = {
-          pga_tournament: { year: 'DESC', start_date: 'DESC' },
-          pool_tournament_users: {
-            tournament_score: 'ASC',
-            picks: { pool_tournament_player: { tier: 'ASC' } },
-          },
+          pga_tournament: { start_date: 'ASC' },
         };
       },
     });
@@ -38,16 +34,14 @@ export class PoolTournamentService {
 
   get(
     poolTournamentId: string,
+    poolId?: string,
     repo: Repository<PoolTournament> = this.poolTournamentRepo
   ): Promise<PoolTournament | null> {
     return repo.findOne({
-      where: { id: poolTournamentId },
-      relations: [
-        'pool_tournament_users',
-        'pool_tournament_users.picks',
-        'pool_tournament_users.picks.pool_tournament_player',
-        'pool_tournament_users.picks.pool_tournament_player.pga_tournament_player',
-      ],
+      where: {
+        id: poolTournamentId,
+        ...(poolId ? { pool_id: poolId } : {}),
+      },
     });
   }
 

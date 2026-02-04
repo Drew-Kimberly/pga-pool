@@ -23,7 +23,13 @@ export class PoolTournamentController extends ControllerBase {
 
   @List({
     filter: {
-      'pga_tournament.id': FieldFilterSchema.uuid(),
+      name: FieldFilterSchema.string(),
+      'date.year': FieldFilterSchema.numeric(),
+      'date.start': FieldFilterSchema.timestamp(),
+      'date.end': FieldFilterSchema.timestamp(),
+      fedex_cup_event: FieldFilterSchema.boolean(),
+      scoring_format: FieldFilterSchema.string(),
+      tournament_status: FieldFilterSchema.string(),
     },
   })
   async listTournaments(
@@ -33,7 +39,15 @@ export class PoolTournamentController extends ControllerBase {
     let result: PaginatedCollection<PoolTournament>;
 
     try {
-      result = await this.poolTournamentService.list(poolId, params);
+      result = await this.poolTournamentService.list(poolId, params, {
+        name: 'pga_tournament.name',
+        'date.year': 'pga_tournament.year',
+        'date.start': 'pga_tournament.start_date',
+        'date.end': 'pga_tournament.end_date',
+        fedex_cup_event: 'pga_tournament.fedex_cup_event',
+        scoring_format: 'pga_tournament.scoring_format',
+        tournament_status: 'pga_tournament.tournament_status',
+      });
     } catch (e) {
       this.logErrorSkipping4xx(e, `Error listing tournaments for pool (ID: ${poolId}): ${e}`);
       throw e;
@@ -43,11 +57,14 @@ export class PoolTournamentController extends ControllerBase {
   }
 
   @Get('/:poolTournamentId')
-  async getTournament(@Param('poolTournamentId') poolTournamentId: string) {
+  async getTournament(
+    @UUIDValidationPipe('poolId') poolId: string,
+    @Param('poolTournamentId') poolTournamentId: string
+  ) {
     let poolTournament: PoolTournament | null;
 
     try {
-      poolTournament = await this.poolTournamentService.get(poolTournamentId);
+      poolTournament = await this.poolTournamentService.get(poolTournamentId, poolId);
     } catch (e) {
       this.logErrorSkipping4xx(e, `Error fetching pool tournament (ID: ${poolTournamentId}): ${e}`);
       throw e;
