@@ -259,11 +259,6 @@ async function resolveCurrentTournament(poolId: string): Promise<PoolTournament 
     return null;
   }
 
-  const forcedTournament = tournaments.find((entry) => entry.pga_tournament.id === 'R2026004');
-  if (forcedTournament) {
-    return forcedTournament;
-  }
-
   const inProgress = tournaments.find(
     (entry) =>
       entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.InProgress
