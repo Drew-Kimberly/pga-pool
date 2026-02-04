@@ -75,7 +75,7 @@ export function TournamentLeaderboard() {
         setTournament(currentTournament ?? undefined);
 
         if (currentTournament) {
-          const usersResponse = await pgaPoolApi.poolTournaments.listPoolTournamentUsers({
+          const usersResponse = await pgaPoolApi.poolTournamentUsers.listPoolTournamentUsers({
             poolId: resolvedPool.id,
             poolTournamentId: currentTournament.id,
             page: { number: 1, size: 200 },
@@ -103,7 +103,7 @@ export function TournamentLeaderboard() {
     }
 
     try {
-      const usersResponse = await pgaPoolApi.poolTournaments.listPoolTournamentUsers({
+      const usersResponse = await pgaPoolApi.poolTournamentUsers.listPoolTournamentUsers({
         poolId,
         poolTournamentId: tournament.id,
         page: { number: 1, size: 200 },
@@ -254,13 +254,13 @@ async function resolveCurrentTournament(poolId: string): Promise<PoolTournament 
     poolId,
     page: { number: 1, size: 100 },
   });
-  const tournaments = tournamentsResponse.data.data;
+  const tournaments: PoolTournament[] = tournamentsResponse.data.data;
   if (!tournaments.length) {
     return null;
   }
 
   const inProgress = tournaments.find(
-    (entry) =>
+    (entry: PoolTournament) =>
       entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.InProgress
   );
   if (inProgress) {
@@ -268,7 +268,7 @@ async function resolveCurrentTournament(poolId: string): Promise<PoolTournament 
   }
 
   const upcoming = tournaments.find(
-    (entry) =>
+    (entry: PoolTournament) =>
       entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.NotStarted
   );
   if (upcoming) {

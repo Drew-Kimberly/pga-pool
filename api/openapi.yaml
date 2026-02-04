@@ -13,10 +13,15 @@ servers:
     description: Local Dev URL
 tags:
   - name: Pools
+  - name: Pool Users
+  - name: Pool Tournaments
+  - name: Pool Tournament Field
+  - name: Pool Tournament Players
+  - name: Pool Tournament Users
   - name: PGA Players
   - name: PGA Tournaments
+  - name: PGA Tournament Field
   - name: PGA Tournament Players
-  - name: PoolTournament
 paths:
   /pools:
     get:
@@ -33,13 +38,7 @@ paths:
         - Pools
   /pools/{poolId}:
     parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: poolId
-        in: path
-        required: true
-        description: Pool ID
+      - $ref: '#/components/parameters/PoolId'
     get:
       summary: Fetches a pool by ID
       description: Fetches a pool by ID
@@ -53,13 +52,7 @@ paths:
         - Pools
   /pools/{poolId}/tournaments:
     parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: poolId
-        in: path
-        required: true
-        description: Pool ID
+      - $ref: '#/components/parameters/PoolId'
     get:
       summary: Lists pool tournaments
       description: Returns all pool tournaments for a pool
@@ -71,24 +64,11 @@ paths:
         '200':
           $ref: '#/components/responses/PoolTournamentsResponse'
       tags:
-        - PoolTournament
+        - Pool Tournaments
   /pools/{poolId}/tournaments/{poolTournamentId}:
     parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: poolId
-        in: path
-        required: true
-        description: Pool ID
-      - schema:
-          type: string
-          example: d32d905a-ed33-46a3-a093-d8f536af9a8a
-          format: uuid
-        name: poolTournamentId
-        in: path
-        required: true
-        description: Pool Tournament ID
+      - $ref: '#/components/parameters/PoolId'
+      - $ref: '#/components/parameters/PoolTournamentId'
     get:
       summary: Fetches a pool tournament by ID
       description: Fetches a pool tournament by ID
@@ -99,23 +79,11 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
       tags:
-        - PoolTournament
+        - Pool Tournaments
   /pools/{poolId}/tournaments/{poolTournamentId}/field:
     parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: poolId
-        in: path
-        required: true
-        description: Pool ID
-      - schema:
-          type: string
-          format: uuid
-        name: poolTournamentId
-        in: path
-        required: true
-        description: Pool Tournament ID
+      - $ref: '#/components/parameters/PoolId'
+      - $ref: '#/components/parameters/PoolTournamentId'
     get:
       summary: Fetches the player field for a given pool tournament
       description: Fetches the tiered player field for a given pool tournament
@@ -126,23 +94,11 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
       tags:
-        - PoolTournament
+        - Pool Tournament Field
   /pools/{poolId}/tournaments/{poolTournamentId}/players:
     parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: poolId
-        in: path
-        required: true
-        description: Pool ID
-      - schema:
-          type: string
-          format: uuid
-        name: poolTournamentId
-        in: path
-        required: true
-        description: Pool Tournament ID
+      - $ref: '#/components/parameters/PoolId'
+      - $ref: '#/components/parameters/PoolTournamentId'
     get:
       summary: Lists players for a given pool tournament
       description: Lists players for a given pool tournament
@@ -156,23 +112,11 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
       tags:
-        - PoolTournament
+        - Pool Tournament Players
   /pools/{poolId}/tournaments/{poolTournamentId}/users:
     parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: poolId
-        in: path
-        required: true
-        description: Pool ID
-      - schema:
-          type: string
-          format: uuid
-        name: poolTournamentId
-        in: path
-        required: true
-        description: Pool Tournament ID
+      - $ref: '#/components/parameters/PoolId'
+      - $ref: '#/components/parameters/PoolTournamentId'
     get:
       summary: Lists users for a given pool tournament
       description: Lists users for a given pool tournament
@@ -185,16 +129,10 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
       tags:
-        - PoolTournament
+        - Pool Tournament Users
   /pools/{poolId}/users:
     parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: poolId
-        in: path
-        required: true
-        description: Pool ID
+      - $ref: '#/components/parameters/PoolId'
     get:
       summary: Lists users for a given pool
       description: Lists users for a given pool
@@ -206,7 +144,7 @@ paths:
         '200':
           $ref: '#/components/responses/ListPoolUsersResponse'
       tags:
-        - Pools
+        - Pool Users
   /pga-players:
     get:
       summary: Lists PGA Players
@@ -248,16 +186,10 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
         - PGA Tournaments
-        - PoolTournament
+        - PGA Tournament Field
   /pga-tournaments/{pgaTournamentId}/field:
     parameters:
-      - schema:
-          type: string
-          example: '002-2023'
-          description: The PGA Tournament ID
-        name: pgaTournamentId
-        in: path
-        required: true
+      - $ref: '#/components/parameters/PgaTournamentId'
     get:
       summary: Fetches the player field for a given PGA Tournament
       description: Fetches the tiered player field for a given PGA Tournament
@@ -268,17 +200,10 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
       tags:
-        - PGA Tournaments
-        - PoolTournament
+        - PGA Tournament Field
   /pga-tournaments/{pgaTournamentId}/players:
     parameters:
-      - schema:
-          type: string
-          example: '002-2023'
-          description: The PGA Tournament ID
-        name: pgaTournamentId
-        in: path
-        required: true
+      - $ref: '#/components/parameters/PgaTournamentId'
     get:
       summary: Lists players for a given PGA Tournament
       description: Lists players for a given PGA Tournament
@@ -292,49 +217,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
         - PGA Tournament Players
-  /pool/tournaments:
-    get:
-      summary: List pool tournaments
-      description: Returns all pool tournaments
-      operationId: list
-      responses:
-        '200':
-          $ref: '#/components/responses/PoolTournamentsResponse'
-      tags:
-        - PoolTournament
-  /pool/tournaments/current:
-    get:
-      summary: Fetches the current in-progress pool tournament
-      description: Fetches the current in-progress pool tournament. Responds with 404 if no tournaments are current.
-      operationId: getCurrent
-      responses:
-        '200':
-          $ref: '#/components/responses/PoolTournamentResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-        - PoolTournament
-  /pool/tournaments/{poolTournamentId}:
-    parameters:
-      - schema:
-          type: string
-          example: d32d905a-ed33-46a3-a093-d8f536af9a8a
-          format: uuid
-        name: poolTournamentId
-        in: path
-        required: true
-        description: Pool Tournament ID
-    get:
-      summary: Fetches a pool tournament by ID
-      description: Fetches a pool tournament by ID
-      operationId: get
-      responses:
-        '200':
-          $ref: '#/components/responses/PoolTournamentResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-        - PoolTournament
 components:
   responses:
     ListPoolsResponse:
@@ -522,13 +404,40 @@ components:
             required:
               - status
               - message
-              - details
+              - detail
   parameters:
+    PoolId:
+      name: poolId
+      in: path
+      required: true
+      description: Pool ID
+      schema:
+        type: string
+        format: uuid
+    PoolTournamentId:
+      name: poolTournamentId
+      in: path
+      required: true
+      description: Pool Tournament ID
+      schema:
+        type: string
+        format: uuid
+        example: d32d905a-ed33-46a3-a093-d8f536af9a8a
+    PgaTournamentId:
+      name: pgaTournamentId
+      in: path
+      required: true
+      description: The PGA Tournament ID
+      schema:
+        type: string
+        example: '002-2023'
     PoolFilter:
       name: filter
       description: Filters a collection of Pools.
       required: false
       in: query
+      style: deepObject
+      explode: true
       schema:
         type: object
         additionalProperties: false
@@ -544,6 +453,8 @@ components:
       description: Filters a collection of Pool Tournament Players.
       required: false
       in: query
+      style: deepObject
+      explode: true
       schema:
         type: object
         additionalProperties: false
@@ -561,6 +472,8 @@ components:
       description: Filters a collection of Pool Users.
       required: false
       in: query
+      style: deepObject
+      explode: true
       schema:
         type: object
         additionalProperties: false
@@ -578,6 +491,8 @@ components:
       description: Filters a collection of PGA Players.
       required: false
       in: query
+      style: deepObject
+      explode: true
       schema:
         type: object
         additionalProperties: false
@@ -593,6 +508,8 @@ components:
       description: Filters a collection of PGA Tournaments.
       required: false
       in: query
+      style: deepObject
+      explode: true
       schema:
         type: object
         additionalProperties: false
@@ -615,6 +532,8 @@ components:
       name: page
       required: false
       in: query
+      style: deepObject
+      explode: true
       schema:
         type: object
         additionalProperties: false
@@ -1027,22 +946,7 @@ components:
           additionalProperties:
             type: array
             items:
-              type: object
-              additionalProperties: false
-              properties:
-                player_id:
-                  type: number
-                  example: 27644
-                name:
-                  type: string
-                  example: 'Tiger Woods'
-                odds:
-                  type: string
-                  example: '+3000'
-              required:
-                - player_id
-                - name
-                - odds
+              $ref: '#/components/schemas/TournamentFieldPlayer'
       required:
         - pga_tournament
         - created_at
@@ -1064,26 +968,29 @@ components:
           additionalProperties:
             type: array
             items:
-              type: object
-              additionalProperties: false
-              properties:
-                player_id:
-                  type: number
-                  example: 27644
-                name:
-                  type: string
-                  example: 'Tiger Woods'
-                odds:
-                  type: string
-                  example: '+3000'
-              required:
-                - player_id
-                - name
-                - odds
+              $ref: '#/components/schemas/TournamentFieldPlayer'
       required:
         - pga_tournament
         - created_at
         - player_tiers
+    TournamentFieldPlayer:
+      description: Defines a player entry in a tournament field tier.
+      type: object
+      additionalProperties: false
+      properties:
+        player_id:
+          type: number
+          example: 27644
+        name:
+          type: string
+          example: 'Tiger Woods'
+        odds:
+          type: string
+          example: '+3000'
+      required:
+        - player_id
+        - name
+        - odds
     PoolUser:
       description: Defines a pool user
       type: object
