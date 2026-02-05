@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@auth0/auth0-react": "2.3.0",
-    "@drewkimberly/pga-pool-api": "file:./sdk",
+    "@drewkimberly/pga-pool-api": "link:./sdk",
     "@testing-library/jest-dom": "6.2.0",
     "@testing-library/react": "14.1.2",
     "@testing-library/user-event": "14.5.2",
@@ -67,5 +67,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
