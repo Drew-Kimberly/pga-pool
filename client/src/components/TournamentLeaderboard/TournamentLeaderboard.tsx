@@ -216,7 +216,10 @@ export function TournamentLeaderboard() {
                       {rankType === 'score'
                         ? toScoreString(pick.pga_tournament_player.score_total)
                         : toFedexCupPointsString(
-                            getEffectiveFedexCupPoints(pick.pga_tournament_player)
+                            getEffectiveFedexCupPoints(
+                              pick.pga_tournament_player.pga_tournament,
+                              pick.pga_tournament_player
+                            )
                           )}
                     </Text>
                   </Box>

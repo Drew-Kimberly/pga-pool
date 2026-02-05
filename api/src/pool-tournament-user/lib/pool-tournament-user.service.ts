@@ -105,7 +105,7 @@ export class PoolTournamentUserService {
           {
             ...user,
             tournament_score: this.aggregateScore(user.picks),
-            fedex_cup_points: this.aggregateProjectedFedexPoints(user.picks),
+            fedex_cup_points: this.aggregateFedexPoints(user.picks),
           },
           repo
         );
@@ -123,10 +123,14 @@ export class PoolTournamentUserService {
     }, null);
   }
 
-  private aggregateProjectedFedexPoints(picks: PoolTournamentUserPick[]): number {
+  private aggregateFedexPoints(picks: PoolTournamentUserPick[]): number {
     return picks.reduce<number>((total, pick) => {
       const player = pick.pool_tournament_player.pga_tournament_player;
-      const points = player.official_fedex_cup_points ?? player.projected_fedex_cup_points;
+      const points = pick.pool_tournament_player.pga_tournament_player.pga_tournament
+        .official_fedex_cup_points_calculated
+        ? player.official_fedex_cup_points!
+        : player.projected_fedex_cup_points;
+
       return total + points;
     }, 0);
   }
