@@ -21,7 +21,12 @@ import { TournamentHeader } from '../TournamentHeader';
 import { PgaPlayerName } from './PgaPlayerName';
 import { PoolUserPanel } from './PoolUserPanel';
 import { RankType } from './types';
-import { getEffectiveFedexCupPoints, toFedexCupPointsString, toScoreString } from './utils';
+import {
+  formatTeeTimeLocal,
+  getEffectiveFedexCupPoints,
+  toFedexCupPointsString,
+  toScoreString,
+} from './utils';
 
 import {
   PgaTournamentTournamentStatusEnum,
@@ -209,21 +214,52 @@ export function TournamentLeaderboard() {
                 tournamentRound={round ?? undefined}
                 rankType={rankType}
               >
-                {user.picks.map((pick) => (
-                  <Box key={pick.pga_tournament_player.id} pad="small" direction="row">
-                    <PgaPlayerName player={pick.pga_tournament_player} />
-                    <Text weight={'bold'}>
-                      {rankType === 'score'
-                        ? toScoreString(pick.pga_tournament_player.score_total)
-                        : toFedexCupPointsString(
-                            getEffectiveFedexCupPoints(
-                              pick.pga_tournament_player.pga_tournament,
-                              pick.pga_tournament_player
-                            )
+                {user.picks.map((pick) => {
+                  const player = pick.pga_tournament_player;
+                  const tournamentRound =
+                    round ?? tournament.pga_tournament.current_round ?? player.current_round ?? 1;
+                  const isRoundOne = tournamentRound === 1;
+                  const isActive =
+                    player.active ||
+                    player.status === 'complete' ||
+                    player.is_round_complete ||
+                    (player.score_thru ?? 0) > 0;
+                  const isCutOrWithdrawn =
+                    player.withdrawn ||
+                    player.current_position === 'CUT' ||
+                    player.status === 'cut' ||
+                    player.status === 'wd';
+                  const shouldShowScore = !isRoundOne || isActive;
+                  const shouldShowTeeTime = !isActive && !isCutOrWithdrawn && !!player.tee_time;
+                  const teeTimeLabel =
+                    shouldShowTeeTime && player.tee_time
+                      ? formatTeeTimeLocal(player.tee_time, tournament.pga_tournament.date.timezone)
+                      : null;
+
+                  return (
+                    <Box key={player.id} pad="small" direction="row" align="center" gap="small">
+                      <Box direction="column" gap="xxsmall" flex>
+                        <Box direction="row" align="baseline" gap="xsmall" wrap>
+                          <PgaPlayerName player={player} />
+                          {shouldShowScore && (
+                            <Text weight={'bold'}>
+                              {rankType === 'score'
+                                ? toScoreString(player.score_total)
+                                : toFedexCupPointsString(
+                                    getEffectiveFedexCupPoints(player.pga_tournament, player)
+                                  )}
+                            </Text>
                           )}
-                    </Text>
-                  </Box>
-                ))}
+                        </Box>
+                        {teeTimeLabel && (
+                          <Text size="xsmall" color="dark-4" weight="bold">
+                            {`Tees off at ${teeTimeLabel}`}
+                          </Text>
+                        )}
+                      </Box>
+                    </Box>
+                  );
+                })}
               </PoolUserPanel>
             ))}
           </Accordion>
