@@ -2,7 +2,9 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import { ErrorPage } from './components/ErrorPage';
 import { AuthErrorPage } from './pages/AuthErrorPage';
+import { DataDeletionPage } from './pages/DataDeletionPage';
 import { PostLoginPage } from './pages/PostLoginPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TournamentFieldPage } from './pages/TournamentFieldPage';
 import { WeeklyTournamentFieldPage } from './pages/WeeklyTournamentFieldPage';
 import { TournamentLeaderboardPage } from './pages';
@@ -31,6 +33,14 @@ export const router = createBrowserRouter([
   {
     path: '/error',
     element: <ErrorPage />,
+  },
+  {
+    path: '/privacy',
+    element: <PrivacyPolicyPage />,
+  },
+  {
+    path: '/data-deletion',
+    element: <DataDeletionPage />,
   },
   {
     path: '*',
