@@ -26,7 +26,15 @@ export class PoolUserService {
       fieldMap,
       onFindOptions: (opts) => {
         opts.where = { ...opts?.where, pool_id: poolId };
-        opts.order = { pool_score: scoreOrder };
+        opts.order = {
+          pool_score: scoreOrder,
+          user: {
+            nickname: 'ASC',
+            name: 'ASC',
+            id: 'ASC',
+          },
+          id: 'ASC',
+        };
       },
     });
   }
