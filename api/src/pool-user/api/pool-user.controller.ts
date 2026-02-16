@@ -4,6 +4,7 @@ import { FieldFilterSchema } from '../../common/api/list/schema';
 import { UUIDValidationPipe } from '../../common/api/validation';
 import { PoolScoringFormat } from '../../pool/lib/pool.interface';
 import { PoolService } from '../../pool/lib/pool.service';
+import { PoolUser } from '../lib/pool-user.entity';
 import { PoolUserService } from '../lib/pool-user.service';
 
 import { PoolUserDto } from './pool-user.dto';
@@ -49,6 +50,20 @@ export class PoolUserController extends ControllerBase {
       scoreOrder
     );
 
-    return { ...result, data: result.data.map(PoolUserDto.fromEntity) };
+    return { ...result, data: toRankedDtos(result.data) };
   }
+}
+
+function toRankedDtos(users: PoolUser[]): PoolUserDto[] {
+  let previousScore: number | null = null;
+  let rank = 0;
+
+  return users.map((user, idx) => {
+    if (previousScore === null || user.pool_score !== previousScore) {
+      rank = idx + 1;
+      previousScore = user.pool_score;
+    }
+
+    return PoolUserDto.fromEntity(user, rank);
+  });
 }

@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import { ErrorPage } from './components/ErrorPage';
 import { AuthErrorPage } from './pages/AuthErrorPage';
+import { PoolStandingsAliasPage } from './pages/PoolStandingsAliasPage';
+import { PoolStandingsPage } from './pages/PoolStandingsPage';
 import { PostLoginPage } from './pages/PostLoginPage';
 import { TournamentFieldPage } from './pages/TournamentFieldPage';
 import { WeeklyTournamentFieldPage } from './pages/WeeklyTournamentFieldPage';
@@ -19,6 +21,14 @@ export const router = createBrowserRouter([
   {
     path: 'pga-tournaments/:pgaTournamentId/field',
     element: <TournamentFieldPage />,
+  },
+  {
+    path: 'pools/:poolId/standings',
+    element: <PoolStandingsPage />,
+  },
+  {
+    path: 'pool-standings',
+    element: <PoolStandingsAliasPage />,
   },
   {
     path: '/post-login',
