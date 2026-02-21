@@ -1,15 +1,17 @@
 import { Box, PageContent, Text } from 'grommet';
 import { CircleInformation } from 'grommet-icons';
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 
 import { pgaPoolApi } from '../api/pga-pool';
-import { resolveActivePoolId } from '../components/PoolStandings';
 import { Spinner } from '../components/Spinner';
+import { resolveDefaultTournament } from '../components/TournamentLeaderboard/resolveTournament';
 
 import { withPageLayout } from './withPageLayout';
 
-function _PoolStandingsAliasPage() {
+function _PoolLeaderboardAliasPage() {
+  const params = useParams();
+  const poolId = params.poolId;
   const [redirectPath, setRedirectPath] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | undefined>(undefined);
@@ -17,22 +19,30 @@ function _PoolStandingsAliasPage() {
   React.useEffect(() => {
     let isMounted = true;
 
-    async function resolveActivePool() {
+    async function resolveTournamentRedirect() {
+      if (!poolId) {
+        setError(new Error('A pool ID is required for this page.'));
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       setError(undefined);
 
       try {
-        const activePoolId = await resolveActivePoolId();
+        const tournament = await resolveDefaultTournament(poolId);
         if (!isMounted) {
           return;
         }
 
-        if (!activePoolId) {
-          setError(new Error('No pools are available.'));
+        if (!tournament) {
+          setError(
+            new Error('No PGA Tournament event is currently active! Please check back later')
+          );
           return;
         }
 
-        setRedirectPath(`/pools/${activePoolId}/standings`);
+        setRedirectPath(`/pools/${poolId}/tournaments/${tournament.id}/leaderboard`);
       } catch (e) {
         if (!isMounted) {
           return;
@@ -42,7 +52,7 @@ function _PoolStandingsAliasPage() {
           console.error(e);
           setError(e as Error);
         } else {
-          setError(new Error('No pools are available.'));
+          setError(new Error('Pool not found.'));
         }
       } finally {
         if (isMounted) {
@@ -51,12 +61,12 @@ function _PoolStandingsAliasPage() {
       }
     }
 
-    resolveActivePool();
+    resolveTournamentRedirect();
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [poolId]);
 
   if (redirectPath) {
     return <Navigate to={redirectPath} replace />;
@@ -73,7 +83,7 @@ function _PoolStandingsAliasPage() {
   if (error) {
     return (
       <PageContent>
-        <Box height="medium" round="small" align="center" justify="center" gap="small">
+        <Box height="medium" round="small" align="center" justify="center">
           <CircleInformation size="large" />
           <Text size="large" textAlign="center" margin="small">
             {error.message}
@@ -85,14 +95,14 @@ function _PoolStandingsAliasPage() {
 
   return (
     <PageContent>
-      <Box height="medium" round="small" align="center" justify="center" gap="small">
+      <Box height="medium" round="small" align="center" justify="center">
         <CircleInformation size="large" />
         <Text size="large" textAlign="center" margin="small">
-          No pools are available.
+          No PGA Tournament event is currently active! Please check back later
         </Text>
       </Box>
     </PageContent>
   );
 }
 
-export const PoolStandingsAliasPage = withPageLayout(_PoolStandingsAliasPage);
+export const PoolLeaderboardAliasPage = withPageLayout(_PoolLeaderboardAliasPage);
