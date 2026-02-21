@@ -4,12 +4,22 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 
 import { pgaPoolApi } from '../api/pga-pool';
-import { resolveActivePoolId } from '../components/PoolStandings';
+import { SessionStorage } from '../api/storage';
 import { Spinner } from '../components/Spinner';
+import {
+  POOL_ID_STORAGE_KEY,
+  resolvePoolForLeaderboard,
+} from '../components/TournamentLeaderboard/resolveTournament';
+import { usePersistedState } from '../hooks';
 
 import { withPageLayout } from './withPageLayout';
 
-function _PoolStandingsAliasPage() {
+function _LeaderboardAliasPage() {
+  const [poolId, setPoolId] = usePersistedState<string | null>(
+    null,
+    POOL_ID_STORAGE_KEY,
+    new SessionStorage()
+  );
   const [redirectPath, setRedirectPath] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | undefined>(undefined);
@@ -17,22 +27,22 @@ function _PoolStandingsAliasPage() {
   React.useEffect(() => {
     let isMounted = true;
 
-    async function resolveActivePool() {
+    async function resolvePoolRedirect() {
       setIsLoading(true);
       setError(undefined);
 
       try {
-        const activePoolId = await resolveActivePoolId();
+        const resolvedPool = await resolvePoolForLeaderboard(poolId, setPoolId);
         if (!isMounted) {
           return;
         }
 
-        if (!activePoolId) {
+        if (!resolvedPool) {
           setError(new Error('No pools are available.'));
           return;
         }
 
-        setRedirectPath(`/pools/${activePoolId}/standings`);
+        setRedirectPath(`/pools/${resolvedPool.id}/leaderboard`);
       } catch (e) {
         if (!isMounted) {
           return;
@@ -51,12 +61,12 @@ function _PoolStandingsAliasPage() {
       }
     }
 
-    resolveActivePool();
+    resolvePoolRedirect();
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [poolId, setPoolId]);
 
   if (redirectPath) {
     return <Navigate to={redirectPath} replace />;
@@ -95,4 +105,4 @@ function _PoolStandingsAliasPage() {
   );
 }
 
-export const PoolStandingsAliasPage = withPageLayout(_PoolStandingsAliasPage);
+export const LeaderboardAliasPage = withPageLayout(_LeaderboardAliasPage);

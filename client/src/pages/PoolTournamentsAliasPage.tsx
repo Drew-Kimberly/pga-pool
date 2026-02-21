@@ -9,7 +9,7 @@ import { Spinner } from '../components/Spinner';
 
 import { withPageLayout } from './withPageLayout';
 
-function _PoolStandingsAliasPage() {
+function _PoolTournamentsAliasPage() {
   const [redirectPath, setRedirectPath] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | undefined>(undefined);
@@ -32,7 +32,7 @@ function _PoolStandingsAliasPage() {
           return;
         }
 
-        setRedirectPath(`/pools/${activePoolId}/standings`);
+        setRedirectPath(`/pools/${activePoolId}/tournaments`);
       } catch (e) {
         if (!isMounted) {
           return;
@@ -95,4 +95,4 @@ function _PoolStandingsAliasPage() {
   );
 }
 
-export const PoolStandingsAliasPage = withPageLayout(_PoolStandingsAliasPage);
+export const PoolTournamentsAliasPage = withPageLayout(_PoolTournamentsAliasPage);

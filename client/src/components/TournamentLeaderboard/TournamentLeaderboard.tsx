@@ -20,6 +20,11 @@ import { TournamentHeader } from '../TournamentHeader';
 
 import { PgaPlayerName } from './PgaPlayerName';
 import { PoolUserPanel } from './PoolUserPanel';
+import {
+  POOL_ID_STORAGE_KEY,
+  resolveDefaultTournament,
+  resolvePoolForLeaderboard,
+} from './resolveTournament';
 import { RankType } from './types';
 import {
   formatTeeTimeLocal,
@@ -28,23 +33,22 @@ import {
   toScoreString,
 } from './utils';
 
-import {
-  PgaTournamentTournamentStatusEnum,
-  Pool,
-  PoolTournament,
-  PoolTournamentUser,
-} from '@drewkimberly/pga-pool-api';
+import { PoolTournament, PoolTournamentUser } from '@drewkimberly/pga-pool-api';
 
 const USERS_POLL_INTERVAL = 30 * 1000; // 30s
 const TOURNAMENT_POLL_INTERVAL = 5 * 60 * 1000; // 5 min
-const POOL_ID_STORAGE_KEY = 'pga-pool-id';
+export interface TournamentLeaderboardProps {
+  poolId?: string;
+  poolTournamentId?: string;
+}
 
-export function TournamentLeaderboard() {
-  const [poolId, setPoolId] = usePersistedState<string | null>(
+export function TournamentLeaderboard({ poolId, poolTournamentId }: TournamentLeaderboardProps) {
+  const [persistedPoolId, setPersistedPoolId] = usePersistedState<string | null>(
     null,
     POOL_ID_STORAGE_KEY,
     new SessionStorage()
   );
+  const [resolvedPoolId, setResolvedPoolId] = React.useState<string | null>(poolId ?? null);
   const [tournament, setTournament] = React.useState<PoolTournament | undefined>(undefined);
   const [poolUsers, setPoolUsers] = React.useState<PoolTournamentUser[]>([]);
   const [rankType, setRankType] = usePersistedState<RankType>('score', `rank-type-selection`);
@@ -57,14 +61,20 @@ export function TournamentLeaderboard() {
     async function fetchPoolAndTournament() {
       setIsLoading(true);
       setInitialFetchError(undefined);
+      setPollErrorCount(0);
 
       try {
-        const resolvedPool = await resolvePool(poolId, setPoolId);
+        const resolvedPool = await resolvePoolForLeaderboard(
+          poolId ?? persistedPoolId,
+          poolId ? undefined : setPersistedPoolId
+        );
         if (!resolvedPool) {
+          setResolvedPoolId(null);
           setTournament(undefined);
           setPoolUsers([]);
           return;
         }
+        setResolvedPoolId(resolvedPool.id);
 
         const rankTypeStorage = new LocalStorage();
         const storedRankType = rankTypeStorage.get<RankType>('rank-type-selection');
@@ -76,7 +86,14 @@ export function TournamentLeaderboard() {
           setRankType(defaultRankType);
         }
 
-        const currentTournament = await resolveCurrentTournament(resolvedPool.id);
+        const currentTournament = poolTournamentId
+          ? (
+              await pgaPoolApi.poolTournaments.getPoolTournament({
+                poolId: resolvedPool.id,
+                poolTournamentId,
+              })
+            ).data
+          : await resolveDefaultTournament(resolvedPool.id);
         setTournament(currentTournament ?? undefined);
 
         if (currentTournament) {
@@ -100,16 +117,16 @@ export function TournamentLeaderboard() {
     }
 
     fetchPoolAndTournament();
-  }, []);
+  }, [persistedPoolId, poolId, poolTournamentId, setPersistedPoolId, setRankType]);
 
   useInterval(async () => {
-    if (!poolId || !tournament?.id) {
+    if (!resolvedPoolId || !tournament?.id) {
       return;
     }
 
     try {
       const usersResponse = await pgaPoolApi.poolTournamentUsers.listPoolTournamentUsers({
-        poolId,
+        poolId: resolvedPoolId,
         poolTournamentId: tournament.id,
         page: { number: 1, size: 200 },
       });
@@ -124,13 +141,13 @@ export function TournamentLeaderboard() {
   }, USERS_POLL_INTERVAL);
 
   useInterval(async () => {
-    if (!poolId || !tournament?.id) {
+    if (!resolvedPoolId || !tournament?.id) {
       return;
     }
 
     try {
       const tournamentResponse = await pgaPoolApi.poolTournaments.getPoolTournament({
-        poolId,
+        poolId: resolvedPoolId,
         poolTournamentId: tournament.id,
       });
       setPollErrorCount(0);
@@ -267,61 +284,4 @@ export function TournamentLeaderboard() {
       )}
     </PageContent>
   );
-}
-
-async function resolvePool(
-  poolId: string | null,
-  setPoolId: (value: string | null) => void
-): Promise<Pool | null> {
-  if (poolId) {
-    const poolResponse = await pgaPoolApi.pools.getPool({ poolId });
-    return poolResponse.data;
-  }
-
-  const poolResponse = await pgaPoolApi.pools.listPools({ page: { number: 1, size: 1 } });
-  const firstPool = poolResponse.data.data[0];
-  if (firstPool) {
-    setPoolId(firstPool.id);
-    return firstPool;
-  }
-
-  return null;
-}
-
-async function resolveCurrentTournament(poolId: string): Promise<PoolTournament | null> {
-  const tournamentsResponse = await pgaPoolApi.poolTournaments.listPoolTournaments({
-    poolId,
-    page: { number: 1, size: 100 },
-  });
-  const tournaments: PoolTournament[] = tournamentsResponse.data.data;
-  if (!tournaments.length) {
-    return null;
-  }
-
-  const inProgress = tournaments.find(
-    (entry: PoolTournament) =>
-      entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.InProgress
-  );
-  if (inProgress) {
-    return inProgress;
-  }
-
-  const upcoming = tournaments.find(
-    (entry: PoolTournament) =>
-      entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.NotStarted
-  );
-  if (upcoming) {
-    return upcoming;
-  }
-
-  for (let i = tournaments.length - 1; i >= 0; i -= 1) {
-    if (
-      tournaments[i].pga_tournament.tournament_status ===
-      PgaTournamentTournamentStatusEnum.Completed
-    ) {
-      return tournaments[i];
-    }
-  }
-
-  return tournaments[0];
 }

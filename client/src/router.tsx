@@ -2,17 +2,33 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import { ErrorPage } from './components/ErrorPage';
 import { AuthErrorPage } from './pages/AuthErrorPage';
+import { LeaderboardAliasPage } from './pages/LeaderboardAliasPage';
+import { PoolLeaderboardAliasPage } from './pages/PoolLeaderboardAliasPage';
 import { PoolStandingsAliasPage } from './pages/PoolStandingsAliasPage';
 import { PoolStandingsPage } from './pages/PoolStandingsPage';
+import { PoolTournamentLeaderboardPage } from './pages/PoolTournamentLeaderboardPage';
+import { PoolTournamentsAliasPage } from './pages/PoolTournamentsAliasPage';
+import { PoolTournamentsPage } from './pages/PoolTournamentsPage';
 import { PostLoginPage } from './pages/PostLoginPage';
 import { TournamentFieldPage } from './pages/TournamentFieldPage';
 import { WeeklyTournamentFieldPage } from './pages/WeeklyTournamentFieldPage';
-import { TournamentLeaderboardPage } from './pages';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <TournamentLeaderboardPage />,
+    element: <LeaderboardAliasPage />,
+  },
+  {
+    path: 'leaderboard',
+    element: <LeaderboardAliasPage />,
+  },
+  {
+    path: 'pools/:poolId/leaderboard',
+    element: <PoolLeaderboardAliasPage />,
+  },
+  {
+    path: 'pools/:poolId/tournaments/:poolTournamentId/leaderboard',
+    element: <PoolTournamentLeaderboardPage />,
   },
   {
     path: 'pga-tournaments/weekly-field',
@@ -27,8 +43,16 @@ export const router = createBrowserRouter([
     element: <PoolStandingsPage />,
   },
   {
+    path: 'pools/:poolId/tournaments',
+    element: <PoolTournamentsPage />,
+  },
+  {
     path: 'pool-standings',
     element: <PoolStandingsAliasPage />,
+  },
+  {
+    path: 'pool-tournaments',
+    element: <PoolTournamentsAliasPage />,
   },
   {
     path: '/post-login',
