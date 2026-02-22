@@ -161,20 +161,6 @@ export function TournamentLeaderboard({ poolId, poolTournamentId }: TournamentLe
     }
   }, TOURNAMENT_POLL_INTERVAL);
 
-  React.useMemo(() => {
-    poolUsers.sort((a, b) => {
-      if (rankType === 'score') {
-        return (a.score ?? 0) - (b.score ?? 0);
-      } else if (rankType === 'fedex_cup_points') {
-        const aPoints = a.fedex_cup_points ?? 0;
-        const bPoints = b.fedex_cup_points ?? 0;
-        return bPoints - aPoints;
-      } else {
-        throw new Error(`Unsupported leaderboard rank type: ${rankType}`);
-      }
-    });
-  }, [rankType, poolUsers]);
-
   const round = poolUsers[0]?.picks[0]?.pga_tournament_player?.current_round ?? undefined;
 
   return (
@@ -239,6 +225,7 @@ export function TournamentLeaderboard({ poolId, poolTournamentId }: TournamentLe
             {poolUsers.map((user, index) => (
               <PoolUserPanel
                 key={user.id}
+                rank={user.rank}
                 user={user}
                 pgaTournament={tournament.pga_tournament}
                 tournamentRound={round ?? undefined}

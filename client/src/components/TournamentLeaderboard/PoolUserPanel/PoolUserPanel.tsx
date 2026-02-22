@@ -17,6 +17,7 @@ export interface PoolUserPanelProps extends ParentComponentProps {
   tournamentRound?: number;
   rankType: RankType;
   isOpen?: boolean;
+  rank: string;
 }
 
 /**
@@ -28,6 +29,7 @@ function _PoolUserPanel({
   pgaTournament,
   rankType,
   isOpen,
+  rank,
 }: Omit<PoolUserPanelProps, 'children'>) {
   const size = useContext(ResponsiveContext);
   const roundStatus = getRoundStatus(
@@ -37,6 +39,21 @@ function _PoolUserPanel({
 
   return (
     <Box direction="row" height="100%">
+      <Box
+        width="32px"
+        height="32px"
+        round="full"
+        background="rank-badge"
+        align="center"
+        justify="center"
+        flex={false}
+        alignSelf="center"
+        margin={{ left: 'small' }}
+      >
+        <Text size="xsmall" color="white" weight="bold">
+          {rank}
+        </Text>
+      </Box>
       <Box pad="small" alignSelf="center" fill="horizontal">
         <Text weight="bold" size="medium">
           {user.user.nickname}

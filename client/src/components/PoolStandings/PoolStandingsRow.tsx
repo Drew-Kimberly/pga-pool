@@ -29,7 +29,7 @@ export function PoolStandingsRow(props: PoolStandingsRowProps) {
           width="40px"
           height="40px"
           round="full"
-          background="brand"
+          background="rank-badge"
           align="center"
           justify="center"
           flex={false}
