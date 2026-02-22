@@ -26,7 +26,9 @@ export function AppBar({ authEnabled, darkMode, setDarkMode }: AppBarProps) {
           navigate('/');
         }}
       >
-        <Text size="large">PGA Pool</Text>
+        <Box pad={{ vertical: 'xsmall' }} justify="center" style={{ minHeight: '44px' }}>
+          <Text size="large">PGA Pool</Text>
+        </Box>
       </Button>
       <Box direction="row" align="center" gap="small">
         <Button
