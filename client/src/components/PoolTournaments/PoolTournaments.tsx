@@ -1,5 +1,5 @@
 import { Box, Button, Notification, PageContent, ResponsiveContext, Text } from 'grommet';
-import { CircleInformation } from 'grommet-icons';
+import { CircleInformation, FormNext } from 'grommet-icons';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -289,9 +289,12 @@ function TournamentCard({ tournament, canNavigate, statusLabel, onNavigate }: To
         )}`}</Text>
       </Box>
       {canNavigate && (
-        <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
-          View leaderboard →
-        </Text>
+        <Box direction="row" align="center" gap="xsmall">
+          <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
+            View leaderboard
+          </Text>
+          <FormNext size="small" />
+        </Box>
       )}
     </Box>
   );
