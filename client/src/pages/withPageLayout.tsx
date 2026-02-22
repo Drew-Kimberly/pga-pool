@@ -15,7 +15,7 @@ export function withPageLayout<TProps extends object>(PageContents: React.Compon
       <>
         <AppBar authEnabled={authEnabled} darkMode={darkMode} setDarkMode={setDarkMode} />
         {navModel && size !== 'small' && <PoolNav model={navModel} mobile={false} />}
-        <Page>
+        <Page style={{ maxWidth: '960px', margin: '0 auto', width: '100%' }}>
           <PageContents {...props} />
         </Page>
         {navModel && size === 'small' && <PoolNav model={navModel} mobile={true} />}
