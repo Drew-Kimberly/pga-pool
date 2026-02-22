@@ -289,8 +289,8 @@ function TournamentCard({ tournament, canNavigate, statusLabel, onNavigate }: To
         )}`}</Text>
       </Box>
       {canNavigate && (
-        <Text size="small" weight="bold" color="brand">
-          View leaderboard
+        <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
+          View leaderboard →
         </Text>
       )}
     </Box>
