@@ -1,5 +1,5 @@
 import { AccordionPanel, Box, Meter, ResponsiveContext, Text, Tip } from 'grommet';
-import { FormCheckmark } from 'grommet-icons';
+import { FormCheckmark, FormDown } from 'grommet-icons';
 import { useContext } from 'react';
 
 import { ParentComponentProps } from '../../types';
@@ -16,13 +16,19 @@ export interface PoolUserPanelProps extends ParentComponentProps {
   pgaTournament: PgaTournament;
   tournamentRound?: number;
   rankType: RankType;
+  isOpen?: boolean;
 }
 
 /**
  * @TODO
  * - Score trends
  */
-function _PoolUserPanel({ user, pgaTournament, rankType }: Omit<PoolUserPanelProps, 'children'>) {
+function _PoolUserPanel({
+  user,
+  pgaTournament,
+  rankType,
+  isOpen,
+}: Omit<PoolUserPanelProps, 'children'>) {
   const size = useContext(ResponsiveContext);
   const roundStatus = getRoundStatus(
     user.picks.map((pick) => pick.pga_tournament_player),
@@ -94,6 +100,17 @@ function _PoolUserPanel({ user, pgaTournament, rankType }: Omit<PoolUserPanelPro
             ? toScoreString(user.score)
             : toFedexCupPointsString(user.fedex_cup_points)
         }`}</Text>
+      </Box>
+      <Box
+        alignSelf="center"
+        flex={false}
+        pad={{ right: 'small' }}
+        style={{
+          transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+          transition: 'transform 0.2s ease',
+        }}
+      >
+        <FormDown size="medium" color="text-weak" />
       </Box>
     </Box>
   );
