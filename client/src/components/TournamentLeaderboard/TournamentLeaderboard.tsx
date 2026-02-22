@@ -211,15 +211,23 @@ export function TournamentLeaderboard({ poolId, poolTournamentId }: TournamentLe
           <Box
             fill="horizontal"
             align={size === 'small' ? 'start' : 'end'}
-            pad={size === 'small' ? { top: 'large', bottom: 'medium' } : undefined}
+            pad={size === 'small' ? { top: 'medium', bottom: 'small' } : undefined}
           >
-            <Toggle
-              label={
-                <Text size="small">{size !== 'small' ? 'FedEx Cup Points' : 'FedEx Points'}</Text>
-              }
-              checked={rankType === 'fedex_cup_points'}
-              onChange={(event) => setRankType(event.target.checked ? 'fedex_cup_points' : 'score')}
-            />
+            <Box
+              pad={{ vertical: 'small', horizontal: 'small' }}
+              style={{ minHeight: '44px' }}
+              justify="center"
+            >
+              <Toggle
+                label={
+                  <Text size="small">{size !== 'small' ? 'FedEx Cup Points' : 'FedEx Points'}</Text>
+                }
+                checked={rankType === 'fedex_cup_points'}
+                onChange={(event) =>
+                  setRankType(event.target.checked ? 'fedex_cup_points' : 'score')
+                }
+              />
+            </Box>
           </Box>
 
           <Accordion margin={{ bottom: 'medium', top: 'medium' }}>
