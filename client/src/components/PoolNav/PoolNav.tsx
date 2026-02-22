@@ -32,11 +32,7 @@ export function PoolNav({ model, mobile }: PoolNavProps) {
   const navItems = items.map((item) => {
     const active = model.activeSection === item.key;
     return (
-      <Box
-        key={item.key}
-        flex
-        pad={mobile ? { horizontal: 'xsmall', vertical: 'xxsmall' } : undefined}
-      >
+      <Box key={item.key} flex pad={mobile ? { horizontal: 'xsmall' } : undefined}>
         <Button
           plain
           a11yTitle={item.label}
@@ -98,7 +94,7 @@ export function PoolNav({ model, mobile }: PoolNavProps) {
         direction="row"
         justify="between"
         align="center"
-        pad={{ horizontal: 'xsmall', vertical: 'xxsmall' }}
+        pad={{ horizontal: 'xsmall', vertical: 'xsmall' }}
         background="background"
         border={{ side: 'top', color: 'border', size: 'xsmall' }}
         style={{
