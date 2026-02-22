@@ -55,6 +55,7 @@ export function TournamentLeaderboard({ poolId, poolTournamentId }: TournamentLe
   const [isLoading, setIsLoading] = React.useState(true);
   const [initialFetchError, setInitialFetchError] = React.useState<Error | undefined>(undefined);
   const [pollErrorCount, setPollErrorCount] = React.useState(0);
+  const [activeIndices, setActiveIndices] = React.useState<number[]>([]);
   const size = React.useContext(ResponsiveContext);
 
   React.useEffect(() => {
@@ -230,14 +231,19 @@ export function TournamentLeaderboard({ poolId, poolTournamentId }: TournamentLe
             </Box>
           </Box>
 
-          <Accordion margin={{ bottom: 'medium', top: 'medium' }}>
-            {poolUsers.map((user) => (
+          <Accordion
+            margin={{ bottom: 'medium', top: 'medium' }}
+            activeIndex={activeIndices}
+            onActive={setActiveIndices}
+          >
+            {poolUsers.map((user, index) => (
               <PoolUserPanel
                 key={user.id}
                 user={user}
                 pgaTournament={tournament.pga_tournament}
                 tournamentRound={round ?? undefined}
                 rankType={rankType}
+                isOpen={activeIndices.includes(index)}
               >
                 <Box
                   background="background-contrast"
