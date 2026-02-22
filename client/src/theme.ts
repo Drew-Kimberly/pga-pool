@@ -14,6 +14,7 @@ export const theme: ThemeType = deepMerge(grommet, {
   global: {
     colors: {
       brand: '#161B22',
+      'rank-badge': { light: '#161B22', dark: '#6B7280' },
       'toggle-knob': '#F9F9F9',
       'toggle-bg': '#E5E5E5',
     },

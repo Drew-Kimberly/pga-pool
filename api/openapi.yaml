@@ -1028,6 +1028,8 @@ components:
         id:
           type: string
           format: uuid
+        rank:
+          type: string
         score:
           type: number
           nullable: true
@@ -1042,6 +1044,7 @@ components:
             $ref: '#/components/schemas/PoolTournamentUserPick'
       required:
         - id
+        - rank
         - score
         - fedex_cup_points
         - user

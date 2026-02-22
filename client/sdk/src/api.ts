@@ -1023,6 +1023,12 @@ export interface PoolTournamentUser {
     'id': string;
     /**
      * 
+     * @type {string}
+     * @memberof PoolTournamentUser
+     */
+    'rank': string;
+    /**
+     * 
      * @type {number}
      * @memberof PoolTournamentUser
      */

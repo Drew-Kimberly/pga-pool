@@ -3,6 +3,7 @@ import { IListParams, List, ListParams, PaginatedCollection } from '../../common
 import { UUIDValidationPipe } from '../../common/api/validation';
 import { PoolScoringFormat } from '../../pool/lib/pool.interface';
 import { PoolTournamentService } from '../../pool-tournament/lib/pool-tournament.service';
+import { PoolTournamentUser } from '../lib/pool-tournament-user.entity';
 import { PoolTournamentUserService } from '../lib/pool-tournament-user.service';
 
 import { PoolTournamentUserDto } from './pool-tournament-user.dto';
@@ -40,6 +41,33 @@ export class PoolTournamentUserController extends ControllerBase {
       scoreOrder,
       scoreField
     );
-    return { ...result, data: result.data.map(PoolTournamentUserDto.fromEntity) };
+    return { ...result, data: toRankedDtos(result.data, scoreField) };
   }
+}
+
+function toRankedDtos(
+  users: PoolTournamentUser[],
+  scoreField: 'tournament_score' | 'fedex_cup_points'
+): PoolTournamentUserDto[] {
+  let previousScore: number | null = null;
+  let rank = 0;
+  const numericRanks: number[] = [];
+
+  for (let i = 0; i < users.length; i++) {
+    const score = users[i][scoreField];
+    if (previousScore === null || score !== previousScore) {
+      rank = i + 1;
+      previousScore = score;
+    }
+    numericRanks.push(rank);
+  }
+
+  const ranks = numericRanks.map((r, i) => {
+    const isTied =
+      (i > 0 && numericRanks[i - 1] === r) ||
+      (i < numericRanks.length - 1 && numericRanks[i + 1] === r);
+    return isTied ? `T${r}` : `${r}`;
+  });
+
+  return users.map((user, idx) => PoolTournamentUserDto.fromEntity(user, ranks[idx]));
 }
