@@ -16,8 +16,8 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
         {tournament.logo_url && (
           <Box
             flex={false}
-            width="130px"
-            height="130px"
+            width="116px"
+            height="116px"
             round="full"
             overflow="hidden"
             border={{ size: 'xsmall', color: 'light-4' }}
