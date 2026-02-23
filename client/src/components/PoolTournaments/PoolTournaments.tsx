@@ -4,6 +4,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { pgaPoolApi } from '../../api/pga-pool';
+import { useThemeContext } from '../../contexts/ThemeContext';
 import { Spinner } from '../Spinner';
 import { resolveDefaultTournamentFromList } from '../TournamentLeaderboard/resolveTournament';
 
@@ -12,6 +13,8 @@ import {
   Pool,
   PoolTournament,
 } from '@drewkimberly/pga-pool-api';
+
+type SectionTab = 'results' | 'upcoming';
 
 const CURRENCY = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -31,6 +34,7 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
   const [fetchError, setFetchError] = React.useState<Error | undefined>(undefined);
   const size = React.useContext(ResponsiveContext);
   const navigate = useNavigate();
+  const { darkMode } = useThemeContext();
 
   React.useEffect(() => {
     let isMounted = true;
@@ -156,6 +160,14 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
       });
   }, [currentTournamentIds, tournaments]);
 
+  const defaultTab: SectionTab = officialTournaments.length > 0 ? 'results' : 'upcoming';
+  const [activeTab, setActiveTab] = React.useState<SectionTab>(defaultTab);
+
+  // Update default tab when data loads
+  React.useEffect(() => {
+    setActiveTab(officialTournaments.length > 0 ? 'results' : 'upcoming');
+  }, [officialTournaments.length]);
+
   if (isLoading) {
     return (
       <PageContent>
@@ -230,28 +242,34 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
           )}
         </Section>
 
-        <Section title="Official Results">
-          {officialTournaments.length === 0 ? (
-            <EmptySectionMessage message="Official results will appear here after scores are finalized." />
-          ) : (
-            <Box gap="small">
-              {officialTournaments.map((entry) => (
-                <TournamentCard
-                  key={entry.id}
-                  tournament={entry}
-                  canNavigate={true}
-                  onNavigate={() =>
-                    navigate(`/pools/${pool.id}/tournaments/${entry.id}/leaderboard`)
-                  }
-                  statusLabel="Official"
-                />
-              ))}
-            </Box>
-          )}
-        </Section>
+        <Box gap="small">
+          <SegmentedControl
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            darkMode={darkMode}
+            resultsCount={officialTournaments.length}
+            upcomingCount={upcomingTournaments.length}
+          />
 
-        <Section title="Upcoming">
-          {upcomingTournaments.length === 0 ? (
+          {activeTab === 'results' ? (
+            officialTournaments.length === 0 ? (
+              <EmptySectionMessage message="Official results will appear here after scores are finalized." />
+            ) : (
+              <Box gap="small">
+                {officialTournaments.map((entry) => (
+                  <TournamentCard
+                    key={entry.id}
+                    tournament={entry}
+                    canNavigate={true}
+                    onNavigate={() =>
+                      navigate(`/pools/${pool.id}/tournaments/${entry.id}/leaderboard`)
+                    }
+                    statusLabel="Official"
+                  />
+                ))}
+              </Box>
+            )
+          ) : upcomingTournaments.length === 0 ? (
             <EmptySectionMessage message="No additional upcoming tournaments are available." />
           ) : (
             <Box gap="small">
@@ -265,7 +283,7 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
               ))}
             </Box>
           )}
-        </Section>
+        </Box>
       </Box>
     </PageContent>
   );
@@ -283,6 +301,73 @@ function Section({ title, children }: SectionProps) {
         {title.toUpperCase()}
       </Text>
       {children}
+    </Box>
+  );
+}
+
+interface SegmentedControlProps {
+  activeTab: SectionTab;
+  onTabChange: (tab: SectionTab) => void;
+  darkMode: boolean;
+  resultsCount: number;
+  upcomingCount: number;
+}
+
+function SegmentedControl({
+  activeTab,
+  onTabChange,
+  darkMode,
+  resultsCount,
+  upcomingCount,
+}: SegmentedControlProps) {
+  const activeBg = darkMode ? '#2b62c8' : 'brand';
+  const activeBorder = darkMode ? '#8eb3ff' : '#273344';
+  const inactiveText = darkMode ? 'light-3' : 'text-weak';
+
+  const tabs: { key: SectionTab; label: string; count: number }[] = [
+    { key: 'results', label: 'Official Results', count: resultsCount },
+    { key: 'upcoming', label: 'Upcoming', count: upcomingCount },
+  ];
+
+  return (
+    <Box
+      direction="row"
+      round="small"
+      border={{ size: 'xsmall', color: 'border' }}
+      background="background-front"
+      overflow="hidden"
+    >
+      {tabs.map((tab) => {
+        const isActive = activeTab === tab.key;
+        return (
+          <Button key={tab.key} plain onClick={() => onTabChange(tab.key)} style={{ flex: 1 }}>
+            <Box
+              pad={{ vertical: 'small', horizontal: 'xsmall' }}
+              align="center"
+              background={isActive ? activeBg : undefined}
+              border={isActive ? { size: 'xsmall', color: activeBorder } : undefined}
+              round={isActive ? 'small' : undefined}
+              style={
+                isActive && darkMode
+                  ? {
+                      boxShadow:
+                        '0 0 0 1px rgba(142, 179, 255, 0.35), 0 4px 12px rgba(43, 98, 200, 0.3)',
+                    }
+                  : undefined
+              }
+            >
+              <Text
+                size="small"
+                weight={isActive ? 'bold' : undefined}
+                color={isActive ? 'white' : inactiveText}
+              >
+                {tab.label}
+                {tab.count > 0 ? ` (${tab.count})` : ''}
+              </Text>
+            </Box>
+          </Button>
+        );
+      })}
     </Box>
   );
 }
