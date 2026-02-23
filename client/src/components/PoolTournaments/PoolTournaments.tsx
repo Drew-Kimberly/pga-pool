@@ -261,10 +261,9 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                     key={entry.id}
                     tournament={entry}
                     canNavigate={true}
-                    onNavigate={() =>
-                      navigate(`/pools/${pool.id}/tournaments/${entry.id}/leaderboard`)
-                    }
+                    onNavigate={() => navigate(`/pools/${pool.id}/tournaments/${entry.id}/results`)}
                     statusLabel="Official"
+                    navigateLabel="View results"
                   />
                 ))}
               </Box>
@@ -377,9 +376,16 @@ interface TournamentCardProps {
   canNavigate: boolean;
   statusLabel: string;
   onNavigate?: () => void;
+  navigateLabel?: string;
 }
 
-function TournamentCard({ tournament, canNavigate, statusLabel, onNavigate }: TournamentCardProps) {
+function TournamentCard({
+  tournament,
+  canNavigate,
+  statusLabel,
+  onNavigate,
+  navigateLabel = 'View leaderboard',
+}: TournamentCardProps) {
   const content = (
     <Box
       pad={{ horizontal: 'medium', vertical: 'medium' }}
@@ -411,7 +417,7 @@ function TournamentCard({ tournament, canNavigate, statusLabel, onNavigate }: To
       {canNavigate && (
         <Box direction="row" align="center" gap="xsmall">
           <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
-            View leaderboard
+            {navigateLabel}
           </Text>
           <FormNext size="small" />
         </Box>

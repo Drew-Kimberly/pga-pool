@@ -7,6 +7,7 @@ import { PoolLeaderboardAliasPage } from './pages/PoolLeaderboardAliasPage';
 import { PoolStandingsAliasPage } from './pages/PoolStandingsAliasPage';
 import { PoolStandingsPage } from './pages/PoolStandingsPage';
 import { PoolTournamentLeaderboardPage } from './pages/PoolTournamentLeaderboardPage';
+import { PoolTournamentResultsPage } from './pages/PoolTournamentResultsPage';
 import { PoolTournamentsAliasPage } from './pages/PoolTournamentsAliasPage';
 import { PoolTournamentsPage } from './pages/PoolTournamentsPage';
 import { PostLoginPage } from './pages/PostLoginPage';
@@ -29,6 +30,10 @@ export const router = createBrowserRouter([
   {
     path: 'pools/:poolId/tournaments/:poolTournamentId/leaderboard',
     element: <PoolTournamentLeaderboardPage />,
+  },
+  {
+    path: 'pools/:poolId/tournaments/:poolTournamentId/results',
+    element: <PoolTournamentResultsPage />,
   },
   {
     path: 'pga-tournaments/weekly-field',
