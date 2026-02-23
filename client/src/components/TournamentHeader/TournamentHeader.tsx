@@ -1,4 +1,5 @@
-import { Box, Text } from 'grommet';
+import { Box, ResponsiveContext, Text } from 'grommet';
+import React from 'react';
 
 import { PgaTournament } from '@drewkimberly/pga-pool-api';
 
@@ -8,7 +9,11 @@ export interface TournamentHeaderProps {
 }
 
 export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
+  const size = React.useContext(ResponsiveContext);
+  const isDesktop = size !== 'small';
   const roundText = typeof round === 'number' ? `Round ${round}` : null;
+  const circleSize = isDesktop ? '116px' : '90px';
+  const imgSize = isDesktop ? '110px' : '78px';
 
   return (
     <Box gap="xsmall" pad={{ vertical: 'small' }}>
@@ -16,8 +21,8 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
         {tournament.logo_url && (
           <Box
             flex={false}
-            width="116px"
-            height="116px"
+            width={circleSize}
+            height={circleSize}
             round="full"
             overflow="hidden"
             border={{ size: 'xsmall', color: 'light-4' }}
@@ -30,8 +35,8 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
               src={tournament.logo_url}
               alt=""
               style={{
-                width: '110px',
-                height: '110px',
+                width: imgSize,
+                height: imgSize,
                 objectFit: 'contain',
               }}
             />
