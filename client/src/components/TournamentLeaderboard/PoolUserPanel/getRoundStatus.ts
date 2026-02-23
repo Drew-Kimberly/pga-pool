@@ -41,7 +41,10 @@ export function getRoundStatus(
     activePlayersHolesCompleted += pick.status === PlayerStatus.Active ? completedHoles : 0;
 
     if (pick.tee_time) {
-      teetimes.push(teeTimeToDate(pick.tee_time, tournament.date.timezone));
+      const parsed = teeTimeToDate(pick.tee_time, tournament.date.timezone);
+      if (parsed) {
+        teetimes.push(parsed);
+      }
     }
   }
 
@@ -64,14 +67,32 @@ export function getRoundStatus(
   };
 }
 
-function teeTimeToDate(teetime: string, tz: string): DateTime {
+export function teeTimeToDate(teetime: string, tz: string): DateTime | null {
+  const trimmed = teetime.trim();
+
+  if (/^\d+$/.test(trimmed)) {
+    const numeric = Number(trimmed);
+    if (!Number.isNaN(numeric) && numeric > 0) {
+      const fromEpoch =
+        trimmed.length <= 10 ? DateTime.fromSeconds(numeric) : DateTime.fromMillis(numeric);
+      if (fromEpoch.isValid) {
+        return fromEpoch.toLocal();
+      }
+    }
+    return null;
+  }
+
   const normalizedTeetime =
-    (teetime.endsWith('*')
-      ? teetime.substring(0, teetime.length - 1).toUpperCase()
-      : teetime.toUpperCase()) +
+    (trimmed.endsWith('*')
+      ? trimmed.substring(0, trimmed.length - 1).toUpperCase()
+      : trimmed.toUpperCase()) +
     ' ' +
     tz;
 
   const datetime = DateTime.fromFormat(normalizedTeetime, 'h:mma z');
+  if (!datetime.isValid) {
+    return null;
+  }
+
   return datetime.toLocal();
 }
