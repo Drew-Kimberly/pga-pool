@@ -47,6 +47,21 @@ export function usePoolNavModel(): PoolNavModel | null {
     };
   }
 
+  const resultsDetailMatch = matchPath(
+    { path: '/pools/:poolId/tournaments/:poolTournamentId/results', end: true },
+    pathname
+  );
+  if (resultsDetailMatch?.params.poolId) {
+    const poolId = resultsDetailMatch.params.poolId;
+    return {
+      poolId,
+      activeSection: 'tournaments',
+      leaderboardPath: `/pools/${poolId}/leaderboard`,
+      tournamentsPath: `/pools/${poolId}/tournaments`,
+      standingsPath: `/pools/${poolId}/standings`,
+    };
+  }
+
   const tournamentsMatch = matchPath({ path: '/pools/:poolId/tournaments', end: true }, pathname);
   if (tournamentsMatch?.params.poolId) {
     const poolId = tournamentsMatch.params.poolId;

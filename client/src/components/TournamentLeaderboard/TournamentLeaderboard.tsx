@@ -3,13 +3,15 @@ import {
   Accordion,
   Anchor,
   Box,
+  Button,
   Notification,
   PageContent,
   ResponsiveContext,
   Text,
 } from 'grommet';
-import { CircleInformation } from 'grommet-icons';
+import { CircleInformation, FormPrevious } from 'grommet-icons';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { pgaPoolApi } from '../../api/pga-pool';
 import { LocalStorage, SessionStorage } from '../../api/storage';
@@ -40,9 +42,15 @@ const TOURNAMENT_POLL_INTERVAL = 5 * 60 * 1000; // 5 min
 export interface TournamentLeaderboardProps {
   poolId?: string;
   poolTournamentId?: string;
+  backTo?: 'tournaments';
 }
 
-export function TournamentLeaderboard({ poolId, poolTournamentId }: TournamentLeaderboardProps) {
+export function TournamentLeaderboard({
+  poolId,
+  poolTournamentId,
+  backTo,
+}: TournamentLeaderboardProps) {
+  const navigate = useNavigate();
   const [persistedPoolId, setPersistedPoolId] = usePersistedState<string | null>(
     null,
     POOL_ID_STORAGE_KEY,
@@ -163,6 +171,24 @@ export function TournamentLeaderboard({ poolId, poolTournamentId }: TournamentLe
 
   const round = poolUsers[0]?.picks[0]?.pga_tournament_player?.current_round ?? undefined;
 
+  const backLink =
+    backTo === 'tournaments' && resolvedPoolId ? (
+      <Box pad={{ top: 'small' }}>
+        <Button
+          plain
+          onClick={() => navigate(`/pools/${resolvedPoolId}/tournaments`)}
+          style={{ alignSelf: 'flex-start' }}
+        >
+          <Box direction="row" align="center" gap="xxsmall">
+            <FormPrevious size="small" />
+            <Text size="small" color="text-weak">
+              All tournaments
+            </Text>
+          </Box>
+        </Button>
+      </Box>
+    ) : null;
+
   return (
     <PageContent>
       {isLoading && <Spinner />}
@@ -177,6 +203,7 @@ export function TournamentLeaderboard({ poolId, poolTournamentId }: TournamentLe
       )}
       {!isLoading && !initialFetchError && tournament && poolUsers.length === 0 && (
         <>
+          {backLink}
           <TournamentHeader tournament={tournament.pga_tournament} round={round} />
           <Box height="medium" round="small" align="center" justify="center">
             <CircleInformation size="large" />
@@ -189,6 +216,7 @@ export function TournamentLeaderboard({ poolId, poolTournamentId }: TournamentLe
       )}
       {!isLoading && !initialFetchError && tournament && poolUsers.length > 0 && (
         <>
+          {backLink}
           <TournamentHeader tournament={tournament.pga_tournament} round={round} />
 
           {pollErrorCount >= 2 && (
