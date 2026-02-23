@@ -386,42 +386,104 @@ function TournamentCard({
   onNavigate,
   navigateLabel = 'View leaderboard',
 }: TournamentCardProps) {
+  const logoUrl = tournament.pga_tournament.logo_url;
+  const size = React.useContext(ResponsiveContext);
+  const isDesktop = size !== 'small';
+
   const content = (
     <Box
       pad={{ horizontal: 'medium', vertical: 'medium' }}
       round="small"
       border={{ size: 'xsmall', color: 'border' }}
       background="background-front"
-      gap="small"
-      style={{ minHeight: '84px' }}
     >
-      <Box direction="row" justify="between" align="start" gap="small">
-        <Box gap="xxsmall" flex>
-          <Text size="medium" weight="bold">
-            {tournament.pga_tournament.name}
-          </Text>
-          <Text size="small" color="text-weak">
-            {tournament.pga_tournament.date.display}
-          </Text>
+      <Box direction="row" gap="medium">
+        {/* Left: all text content */}
+        <Box flex gap="small" justify="center">
+          <Box gap="xxsmall">
+            <Box direction="row" align="center" gap="small">
+              <Text
+                size="xsmall"
+                color="text-weak"
+                weight="bold"
+                style={{ letterSpacing: '0.04em' }}
+              >
+                {tournament.pga_tournament.date.display_short}
+              </Text>
+              <StatusPill label={statusLabel} />
+            </Box>
+            <Text size="medium" weight="bold">
+              {tournament.pga_tournament.name}
+            </Text>
+            <Text size="small" color="text-weak">
+              {tournament.pga_tournament.course_name}
+            </Text>
+          </Box>
+
+          <Box direction="row" gap={isDesktop ? 'large' : 'medium'} wrap>
+            <Box gap="xxsmall">
+              <Text
+                size="xsmall"
+                color="text-weak"
+                style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}
+              >
+                Purse
+              </Text>
+              <Text size="small" weight="bold">
+                {CURRENCY.format(tournament.pga_tournament.purse)}
+              </Text>
+            </Box>
+            <Box gap="xxsmall">
+              <Text
+                size="xsmall"
+                color="text-weak"
+                style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}
+              >
+                FedEx Cup
+              </Text>
+              <Text size="small" weight="bold">
+                {toFedexCupLabel(tournament.pga_tournament.fedex_cup_points)}
+              </Text>
+            </Box>
+          </Box>
+
+          {canNavigate && (
+            <Box direction="row" align="center" gap="xsmall">
+              <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
+                {navigateLabel}
+              </Text>
+              <FormNext size="small" />
+            </Box>
+          )}
         </Box>
-        <StatusPill label={statusLabel} />
+
+        {/* Right: logo centered */}
+        {logoUrl && (
+          <Box flex={false} align="center" justify="center">
+            <Box
+              width={isDesktop ? '130px' : '110px'}
+              height={isDesktop ? '130px' : '110px'}
+              round="full"
+              overflow="hidden"
+              border={{ size: 'xsmall', color: 'light-4' }}
+              background="white"
+              align="center"
+              justify="center"
+              style={{ flexShrink: 0 }}
+            >
+              <img
+                src={logoUrl}
+                alt=""
+                style={{
+                  width: isDesktop ? '110px' : '92px',
+                  height: isDesktop ? '110px' : '92px',
+                  objectFit: 'contain',
+                }}
+              />
+            </Box>
+          </Box>
+        )}
       </Box>
-      <Box direction="row" justify="between" wrap gap="small">
-        <Text size="small" color="text-weak">{`FedEx Cup: ${toFedexCupLabel(
-          tournament.pga_tournament.fedex_cup_points
-        )}`}</Text>
-        <Text size="small" color="text-weak">{`Purse: ${CURRENCY.format(
-          tournament.pga_tournament.purse
-        )}`}</Text>
-      </Box>
-      {canNavigate && (
-        <Box direction="row" align="center" gap="xsmall">
-          <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
-            {navigateLabel}
-          </Text>
-          <FormNext size="small" />
-        </Box>
-      )}
     </Box>
   );
 
