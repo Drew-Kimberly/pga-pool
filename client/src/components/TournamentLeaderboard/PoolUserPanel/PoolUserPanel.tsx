@@ -61,7 +61,7 @@ function _PoolUserPanel({
       </Box>
       {roundStatus.status === 'not_started' && (
         <Box direction="row" fill="horizontal" align="center" pad={{ left: 'small' }}>
-          <StartDuration time={roundStatus.teetimes[0]} size="small" />
+          <StartDuration time={roundStatus.teetimes[0] ?? null} size="small" />
         </Box>
       )}
       {roundStatus.status === 'complete' && (
