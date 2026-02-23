@@ -89,42 +89,72 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
     };
   }, [poolId]);
 
-  const currentTournament = React.useMemo(() => {
+  const currentTournaments = React.useMemo(() => {
     if (!tournaments.length) {
-      return null;
+      return [];
     }
+
+    const current: PoolTournament[] = [];
 
     if (weeklyTournamentId) {
       const weekly = tournaments.find((entry) => entry.pga_tournament.id === weeklyTournamentId);
       if (weekly) {
-        return weekly;
+        current.push(weekly);
       }
     }
 
-    return resolveDefaultTournamentFromList(tournaments);
+    if (!current.length) {
+      const resolved = resolveDefaultTournamentFromList(tournaments);
+      if (resolved) {
+        current.push(resolved);
+      }
+    }
+
+    // Completed tournaments with pending official scores belong in Current Week
+    const currentIds = new Set(current.map((t) => t.id));
+    tournaments
+      .filter(
+        (entry) =>
+          !currentIds.has(entry.id) &&
+          !entry.scores_are_official &&
+          entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed
+      )
+      .forEach((entry) => current.push(entry));
+
+    return current;
   }, [tournaments, weeklyTournamentId]);
+
+  const currentTournamentIds = React.useMemo(
+    () => new Set(currentTournaments.map((t) => t.id)),
+    [currentTournaments]
+  );
 
   const officialTournaments = React.useMemo(() => {
     return tournaments
-      .filter((entry) => entry.scores_are_official && entry.id !== currentTournament?.id)
+      .filter((entry) => entry.scores_are_official && !currentTournamentIds.has(entry.id))
       .sort((a, b) => {
         return (
           new Date(b.pga_tournament.date.start).getTime() -
           new Date(a.pga_tournament.date.start).getTime()
         );
       });
-  }, [currentTournament?.id, tournaments]);
+  }, [currentTournamentIds, tournaments]);
 
   const upcomingTournaments = React.useMemo(() => {
     return tournaments
-      .filter((entry) => !entry.scores_are_official && entry.id !== currentTournament?.id)
+      .filter(
+        (entry) =>
+          !entry.scores_are_official &&
+          !currentTournamentIds.has(entry.id) &&
+          entry.pga_tournament.tournament_status !== PgaTournamentTournamentStatusEnum.Completed
+      )
       .sort((a, b) => {
         return (
           new Date(a.pga_tournament.date.start).getTime() -
           new Date(b.pga_tournament.date.start).getTime()
         );
       });
-  }, [currentTournament?.id, tournaments]);
+  }, [currentTournamentIds, tournaments]);
 
   if (isLoading) {
     return (
@@ -181,17 +211,22 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
         </Box>
 
         <Section title="Current Week">
-          {currentTournament ? (
-            <TournamentCard
-              tournament={currentTournament}
-              canNavigate={true}
-              onNavigate={() =>
-                navigate(`/pools/${pool.id}/tournaments/${currentTournament.id}/leaderboard`)
-              }
-              statusLabel={toCurrentStatusLabel(currentTournament)}
-            />
-          ) : (
+          {currentTournaments.length === 0 ? (
             <EmptySectionMessage message="No tournament has been scheduled for this pool yet." />
+          ) : (
+            <Box gap="small">
+              {currentTournaments.map((entry) => (
+                <TournamentCard
+                  key={entry.id}
+                  tournament={entry}
+                  canNavigate={true}
+                  onNavigate={() =>
+                    navigate(`/pools/${pool.id}/tournaments/${entry.id}/leaderboard`)
+                  }
+                  statusLabel={toCurrentStatusLabel(entry)}
+                />
+              ))}
+            </Box>
           )}
         </Section>
 
