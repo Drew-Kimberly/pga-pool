@@ -24,4 +24,10 @@ export class PgaPlayer {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   headshot_url: string | null;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  country: string | null;
+
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  country_flag: string | null;
 }

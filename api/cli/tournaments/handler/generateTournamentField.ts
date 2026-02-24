@@ -1,4 +1,7 @@
 import fs from 'fs';
+import readline from 'readline';
+
+import { In } from 'typeorm';
 
 import { tournamentMap } from '../../../src/metabet-api/lib/metabet-api.constants';
 import { OddsLocation, OddsProvider } from '../../../src/metabet-api/lib/metabet-api.interface';
@@ -7,12 +10,17 @@ import { PgaPlayerService } from '../../../src/pga-player/lib/pga-player.service
 import { PgaTourApiService } from '../../../src/pga-tour-api/lib/v2/pga-tour-api.service';
 import { PgaTournamentService } from '../../../src/pga-tournament/lib/pga-tournament.service';
 import { PgaTournamentField } from '../../../src/pga-tournament-field/lib/pga-tournament-field.interface';
+import { PgaTournamentPlayer } from '../../../src/pga-tournament-player/lib/pga-tournament-player.entity';
+import { PlayerStatus } from '../../../src/pga-tournament-player/lib/pga-tournament-player.interface';
+import { PoolTournamentPlayer } from '../../../src/pool-tournament-player/lib/pool-tournament-player.entity';
+import { PoolTournamentService } from '../../../src/pool-tournament/lib/pool-tournament.service';
 import { SeedDataService } from '../../../src/seed-data/lib/seed-data.service';
 import { PgaPoolCliModule } from '../../cli.module';
 import { Maths, outputJson } from '../../utils';
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { getDataSourceToken } from '@nestjs/typeorm';
 
 export async function generateTournamentField(pgaTournamentId: string, tierCutoffs?: number[]) {
   const ctx = await NestFactory.createApplicationContext(PgaPoolCliModule, {
@@ -165,11 +173,6 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
     }
   }
 
-  const seedDir = `${seedDataService.getSeedDirPath()}/${pgaTournament.id}`;
-  fs.mkdirSync(seedDir, { recursive: true });
-  fs.writeFileSync(`${seedDir}/field.json`, JSON.stringify(field, null, 4));
-
-  logger.log(`Writing the following to ${seedDir}/field.json`);
   outputJson(field);
 
   playersNotFound.forEach((p) => {
@@ -186,7 +189,157 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
     }
   });
 
+  const seedDir = `${seedDataService.getSeedDirPath()}/${pgaTournament.id}`;
+  fs.mkdirSync(seedDir, { recursive: true });
+  fs.writeFileSync(`${seedDir}/field.json`, JSON.stringify(field, null, 4));
+  logger.log(`Wrote field seed to ${seedDir}/field.json`);
+
+  const confirmed = await promptConfirm('\nSeed pool tournament players to the database?');
+  if (!confirmed) {
+    logger.log('Skipped database seeding.');
+    await ctx.close();
+    return;
+  }
+
+  await seedPoolTournamentPlayers(ctx, field, logger);
+
   await ctx.close();
+}
+
+function promptConfirm(question: string): Promise<boolean> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(`${question} (y/N) `, (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase() === 'y');
+    });
+  });
+}
+
+async function seedPoolTournamentPlayers(
+  ctx: Awaited<ReturnType<typeof NestFactory.createApplicationContext>>,
+  field: PgaTournamentField,
+  logger: Logger
+) {
+  const poolTournamentService = ctx.get(PoolTournamentService);
+  const db = ctx.get(getDataSourceToken());
+
+  const poolTournaments = await poolTournamentService.listByPgaTournamentId(
+    field.pga_tournament_id
+  );
+  if (poolTournaments.length === 0) {
+    logger.warn(
+      `No pool tournaments found for PGA Tournament ${field.pga_tournament_id}. Skipping pool tournament player creation.`
+    );
+    return;
+  }
+
+  const tierEntries = Object.entries(field.player_tiers);
+  const fieldPlayerIds = [
+    ...new Set(tierEntries.flatMap(([, players]) => Object.keys(players).map(Number))),
+  ];
+
+  if (fieldPlayerIds.length === 0) {
+    logger.warn('No players in field. Skipping pool tournament player creation.');
+    return;
+  }
+
+  await db.transaction('READ COMMITTED', async (txManager) => {
+    const pgaTournamentPlayerRepo = txManager.getRepository(PgaTournamentPlayer);
+    const poolTournamentPlayerRepo = txManager.getRepository(PoolTournamentPlayer);
+
+    // Ensure pga_tournament_player rows exist for all field players
+    const existingTournamentPlayers = await pgaTournamentPlayerRepo.find({
+      where: {
+        pga_tournament: { id: field.pga_tournament_id },
+        pga_player: { id: In(fieldPlayerIds) },
+      },
+      relations: ['pga_player', 'pga_tournament'],
+    });
+    const existingPlayerIdSet = new Set(
+      existingTournamentPlayers.map((p) => p.pga_player.id)
+    );
+
+    const missingPlayerIds = fieldPlayerIds.filter((id) => !existingPlayerIdSet.has(id));
+    if (missingPlayerIds.length > 0) {
+      const stubs = missingPlayerIds.map((playerId) => ({
+        id: `${playerId}-${field.pga_tournament_id}`,
+        pga_player: { id: playerId },
+        pga_tournament: { id: field.pga_tournament_id },
+        active: true,
+        status: PlayerStatus.Active,
+        is_round_complete: false,
+        current_round: null,
+        current_hole: null,
+        starting_hole: 1,
+        tee_time: null,
+        score_total: 0,
+        score_thru: null,
+        current_position: null,
+        projected_fedex_cup_points: 0,
+        official_fedex_cup_points: null,
+      }));
+
+      await pgaTournamentPlayerRepo.upsert(stubs, ['id']);
+      logger.log(`Created ${stubs.length} stub pga_tournament_player rows`);
+    }
+
+    // Re-fetch all tournament players so we have full entities
+    const allTournamentPlayers = await pgaTournamentPlayerRepo.find({
+      where: {
+        pga_tournament: { id: field.pga_tournament_id },
+        pga_player: { id: In(fieldPlayerIds) },
+      },
+      relations: ['pga_player', 'pga_tournament'],
+    });
+    const tournamentPlayerByPlayerId = new Map(
+      allTournamentPlayers.map((p) => [p.pga_player.id, p])
+    );
+
+    for (const poolTournament of poolTournaments) {
+      const existingPoolPlayers = await poolTournamentPlayerRepo.find({
+        where: { pool_tournament: { id: poolTournament.id } },
+        relations: ['pga_tournament_player'],
+      });
+      const existingByTourneyPlayerId = new Map(
+        existingPoolPlayers.map((p) => [p.pga_tournament_player.id, p])
+      );
+
+      const toSave: PoolTournamentPlayer[] = [];
+      for (const [tierStr, tierPlayers] of tierEntries) {
+        const tier = Number(tierStr);
+        for (const playerIdStr of Object.keys(tierPlayers)) {
+          const tournamentPlayer = tournamentPlayerByPlayerId.get(Number(playerIdStr));
+          if (!tournamentPlayer) {
+            continue;
+          }
+
+          const existing = existingByTourneyPlayerId.get(tournamentPlayer.id);
+          if (existing) {
+            if (existing.tier !== tier) {
+              toSave.push({ ...existing, tier });
+            }
+          } else {
+            toSave.push(
+              poolTournamentPlayerRepo.create({
+                tier,
+                pga_tournament_player: tournamentPlayer,
+                pool_tournament: poolTournament,
+              })
+            );
+          }
+        }
+      }
+
+      if (toSave.length > 0) {
+        await poolTournamentPlayerRepo.save(toSave);
+      }
+
+      logger.log(
+        `Pool tournament ${poolTournament.id}: ${toSave.length} pool_tournament_player rows saved`
+      );
+    }
+  });
 }
 
 function toOddsString(odds: number) {

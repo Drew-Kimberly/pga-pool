@@ -8,6 +8,9 @@ export class PgaPlayerDto {
   last_name: string;
   active: boolean;
   headshot_url: string | null;
+  country: string | null;
+  country_flag: string | null;
+  country_flag_url: string | null;
 
   static fromEntity(p: PgaPlayer): PgaPlayerDto {
     const dto = new PgaPlayerDto();
@@ -19,6 +22,11 @@ export class PgaPlayerDto {
     dto.last_name = p.last_name;
     dto.active = p.active;
     dto.headshot_url = p.headshot_url;
+    dto.country = p.country;
+    dto.country_flag = p.country_flag;
+    dto.country_flag_url = p.country_flag
+      ? `https://res.cloudinary.com/pgatour-prod/flags/${p.country_flag}.svg`
+      : null;
 
     return dto;
   }

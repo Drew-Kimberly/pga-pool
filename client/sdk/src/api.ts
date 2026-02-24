@@ -534,6 +534,24 @@ export interface PgaPlayer {
      * @memberof PgaPlayer
      */
     'headshot_url': string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof PgaPlayer
+     */
+    'country': string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof PgaPlayer
+     */
+    'country_flag': string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof PgaPlayer
+     */
+    'country_flag_url': string | null;
 }
 /**
  * Defines a PGA tournament event
