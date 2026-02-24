@@ -6,13 +6,14 @@ import { LeaderboardAliasPage } from './pages/LeaderboardAliasPage';
 import { PoolLeaderboardAliasPage } from './pages/PoolLeaderboardAliasPage';
 import { PoolStandingsAliasPage } from './pages/PoolStandingsAliasPage';
 import { PoolStandingsPage } from './pages/PoolStandingsPage';
+import { PoolTournamentFieldAliasPage } from './pages/PoolTournamentFieldAliasPage';
+import { PoolTournamentFieldPage } from './pages/PoolTournamentFieldPage';
 import { PoolTournamentLeaderboardPage } from './pages/PoolTournamentLeaderboardPage';
 import { PoolTournamentResultsPage } from './pages/PoolTournamentResultsPage';
 import { PoolTournamentsAliasPage } from './pages/PoolTournamentsAliasPage';
 import { PoolTournamentsPage } from './pages/PoolTournamentsPage';
 import { PostLoginPage } from './pages/PostLoginPage';
 import { TournamentFieldPage } from './pages/TournamentFieldPage';
-import { WeeklyTournamentFieldPage } from './pages/WeeklyTournamentFieldPage';
 
 export const router = createBrowserRouter([
   {
@@ -36,8 +37,16 @@ export const router = createBrowserRouter([
     element: <PoolTournamentResultsPage />,
   },
   {
+    path: 'pools/:poolId/tournaments/:poolTournamentId/field',
+    element: <PoolTournamentFieldPage />,
+  },
+  {
     path: 'pga-tournaments/weekly-field',
-    element: <WeeklyTournamentFieldPage />,
+    element: <PoolTournamentFieldAliasPage />,
+  },
+  {
+    path: 'pool-tournament-field',
+    element: <PoolTournamentFieldAliasPage />,
   },
   {
     path: 'pga-tournaments/:pgaTournamentId/field',
