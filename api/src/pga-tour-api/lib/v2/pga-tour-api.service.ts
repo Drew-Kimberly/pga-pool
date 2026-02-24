@@ -1,20 +1,17 @@
 import { gunzipSync, inflateSync, unzipSync } from 'zlib';
 
-import { gql, GraphQLClient } from 'graphql-request';
+import { GraphQLClient } from 'graphql-request';
 import { lastValueFrom } from 'rxjs';
 
+import { getSdk, ScheduleQuery, Sdk, TournamentsQuery } from './generated/graphql';
 import { InjectPgaTourApiConfig, PgaTourApiConfig } from './pga-tour-api.config';
 import {
   PgaApiPlayer,
   PgaApiPlayerSeasonResultsResponse,
   PgaApiPlayersResponse,
   PgaApiProjectedFedexCupPointsResponse,
-  PgaApiTournament,
   PgaApiTournamentLeaderboardResponse,
   PgaApiTournamentLeaderboardRow,
-  PgaApiTournamentSchedule,
-  PgaApiTournamentScheduleResponse,
-  PgaApiTournamentsResponse,
 } from './pga-tour-api.interface';
 
 import { HttpService } from '@nestjs/axios';
@@ -22,18 +19,20 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class PgaTourApiService {
-  private gqlClient: GraphQLClient;
+  private sdk: Sdk;
 
   constructor(
     private readonly httpClient: HttpService,
     @InjectPgaTourApiConfig()
     private readonly pgaTourApiConfig: PgaTourApiConfig
   ) {
-    this.gqlClient = new GraphQLClient(this.pgaTourApiConfig.PGA_TOUR_API_GQL_URL, {
+    const gqlClient = new GraphQLClient(this.pgaTourApiConfig.PGA_TOUR_API_GQL_URL, {
       headers: {
         'X-Api-Key': this.pgaTourApiConfig.PGA_TOUR_API_GQL_API_KEY,
+        'x-pgat-platform': 'web',
       },
     });
+    this.sdk = getSdk(gqlClient);
   }
 
   async getPlayers(onlyActive: boolean): Promise<PgaApiPlayer[]> {
@@ -55,124 +54,17 @@ export class PgaTourApiService {
     return await lastValueFrom(response$).then((res) => res.data);
   }
 
-  async getTournamentSchedule(year: number): Promise<PgaApiTournamentSchedule> {
-    const query = gql`
-      query Schedule($tourCode: String!, $year: String, $filter: TournamentCategory) {
-        schedule(tourCode: $tourCode, year: $year, filter: $filter) {
-          completed {
-            month
-            year
-            monthSort
-            ...ScheduleTournament
-          }
-          filters {
-            type
-            name
-          }
-          seasonYear
-          tour
-          upcoming {
-            month
-            year
-            monthSort
-            ...ScheduleTournament
-          }
-        }
-      }
-
-      fragment ScheduleTournament on ScheduleMonth {
-        tournaments {
-          tournamentName
-          id
-          beautyImage
-          champion
-          championEarnings
-          championId
-          city
-          country
-          countryCode
-          courseName
-          date
-          dateAccessibilityText
-          purse
-          startDate
-          state
-          stateCode
-          tournamentLogo
-          tourStandingHeading
-          tourStandingValue
-        }
-      }
-    `;
-
-    const response = await this.gqlClient.request<PgaApiTournamentScheduleResponse>(query, {
+  async getTournamentSchedule(year: number): Promise<ScheduleQuery['schedule']> {
+    const response = await this.sdk.Schedule({
       tourCode: 'R',
-      year,
+      year: String(year),
     });
 
     return response.schedule;
   }
 
-  async getTournaments(tournamentIds: string[]): Promise<PgaApiTournament[]> {
-    const query = gql`
-      query Tournaments($ids: [ID!]) {
-        tournaments(ids: $ids) {
-          ...TournamentFragment
-        }
-      }
-
-      fragment TournamentFragment on Tournament {
-        id
-        tournamentName
-        tournamentLogo
-        tournamentLocation
-        tournamentStatus
-        roundStatusDisplay
-        roundDisplay
-        roundStatus
-        roundStatusColor
-        currentRound
-        timezone
-        seasonYear
-        displayDate
-        country
-        state
-        city
-        scoredLevel
-        infoPath
-        events {
-          id
-          eventName
-          leaderboardId
-        }
-        courses {
-          id
-          courseName
-          courseCode
-          hostCourse
-          scoringLevel
-        }
-        weather {
-          logo
-          logoDark
-          logoAccessibility
-          tempF
-          tempC
-          condition
-          windDirection
-          windSpeedMPH
-          windSpeedKPH
-          precipitation
-          humidity
-        }
-        formatType
-        features
-      }
-    `;
-
-    const response = await this.gqlClient.request<PgaApiTournamentsResponse>(query, {
-      ids: tournamentIds,
-    });
+  async getTournaments(tournamentIds: string[]): Promise<TournamentsQuery['tournaments']> {
+    const response = await this.sdk.Tournaments({ ids: tournamentIds });
 
     return response.tournaments;
   }
@@ -182,37 +74,11 @@ export class PgaTourApiService {
     tournamentId: string
   ): Promise<PgaApiTournamentLeaderboardResponse> {
     const leaderboardId = `R${year}${tournamentId}`;
-    const query = gql`
-      query LeaderboardCompressedV3($leaderboardCompressedV3Id: ID!) {
-        leaderboardCompressedV3(id: $leaderboardCompressedV3Id) {
-          id
-          payload
-        }
-      }
-    `;
+    const response = await this.sdk.LeaderboardCompressedV3({
+      leaderboardCompressedV3Id: leaderboardId,
+    });
 
-    const response$ = this.httpClient.post(
-      this.pgaTourApiConfig.PGA_TOUR_API_GQL_URL,
-      {
-        query,
-        variables: { leaderboardCompressedV3Id: leaderboardId },
-      },
-      {
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-          'x-api-key': this.pgaTourApiConfig.PGA_TOUR_API_GQL_API_KEY,
-          'x-pgat-platform': 'web',
-        },
-      }
-    );
-
-    const res = await lastValueFrom(response$).then((result) => result.data);
-    if (res?.errors?.length) {
-      throw new Error(`PGA Tour GraphQL errors: ${JSON.stringify(res.errors)}`);
-    }
-
-    const payload = res?.data?.leaderboardCompressedV3?.payload;
+    const payload = response.leaderboardCompressedV3?.payload;
     if (!payload) {
       throw new Error(`Missing leaderboard payload for ${leaderboardId}`);
     }
@@ -238,81 +104,35 @@ export class PgaTourApiService {
     year: number,
     tournamentId: string
   ): Promise<PgaApiProjectedFedexCupPointsResponse> {
-    const query = gql`
-      query TourCupSplit(
-        $tourCode: TourCode!
-        $id: String
-        $year: Int
-        $eventQuery: StatDetailEventQuery
-      ) {
-        tourCupSplit(tourCode: $tourCode, id: $id, year: $year, eventQuery: $eventQuery) {
-          projectedPlayers {
-            __typename
-            ... on TourCupCombinedPlayer {
-              id
-              firstName
-              lastName
-              pointData {
-                event
-              }
-            }
-          }
-        }
-      }
-    `;
+    const response = await this.sdk.TourCupSplit({
+      tourCode: 'R',
+      id: '02671',
+      year,
+      eventQuery: null,
+    });
 
-    const response$ = this.httpClient.post(
-      this.pgaTourApiConfig.PGA_TOUR_API_GQL_URL,
-      {
-        query,
-        variables: {
-          tourCode: 'R',
-          id: '02671',
-          year,
-          eventQuery: null,
-        },
-      },
-      {
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-          'x-api-key': this.pgaTourApiConfig.PGA_TOUR_API_GQL_API_KEY,
-          'x-pgat-platform': 'web',
-        },
-      }
-    );
-
-    const res = await lastValueFrom(response$).then((result) => result.data);
-    if (res?.errors?.length) {
-      throw new Error(`PGA Tour GraphQL errors: ${JSON.stringify(res.errors)}`);
-    }
-
-    const projectedPlayers = res?.data?.tourCupSplit?.projectedPlayers ?? [];
+    const projectedPlayers = response.tourCupSplit?.projectedPlayers ?? [];
     const projectedTournamentId = `R${year}${tournamentId}`;
 
     return {
       seasonYear: year,
       lastUpdated: new Date().toISOString(),
       points: projectedPlayers
-        .filter((player: { __typename?: string }) => player.__typename === 'TourCupCombinedPlayer')
-        .map(
-          (player: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            pointData?: { event?: string };
-          }) => {
-            return {
-              playerId: player.id,
-              firstName: player.firstName,
-              lastName: player.lastName,
-              tournamentId: projectedTournamentId,
-              tournamentName: '',
-              playerPosition: '',
-              projectedEventPoints: player.pointData?.event ?? '0',
-            };
+        .filter((player) => player.__typename === 'TourCupCombinedPlayer')
+        .map((player) => {
+          if (player.__typename !== 'TourCupCombinedPlayer') {
+            throw new Error('Unexpected player type');
           }
-        ),
+          return {
+            playerId: player.id,
+            firstName: player.firstName,
+            lastName: player.lastName,
+            tournamentId: projectedTournamentId,
+            tournamentName: '',
+            playerPosition: '',
+            projectedEventPoints: player.pointData?.event ?? '0',
+          };
+        }),
     };
   }
 

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { strToNum } from '../../common/util';
-import { PgaApiTourScheduleTournament } from '../../pga-tour-api/lib/v2/pga-tour-api.interface';
+import { ScheduleQuery } from '../../pga-tour-api/lib/v2/generated/graphql';
 import { PgaTourApiService } from '../../pga-tour-api/lib/v2/pga-tour-api.service';
 
 import { PGA_TOURNAMENT_LENGTH_DAYS } from './pga-tournament.constants';
@@ -9,6 +9,8 @@ import { PgaTournamentFeatures, PgaTournamentRoundStatus, PgaTournamentScoringFo
 import { PgaTournamentService } from './pga-tournament.service';
 
 import { Injectable, Logger, LoggerService, Optional } from '@nestjs/common';
+
+type ScheduleTournament = ScheduleQuery['schedule']['completed'][number]['tournaments'][number];
 
 @Injectable()
 export class PgaTournamentIngestor {
@@ -26,7 +28,7 @@ export class PgaTournamentIngestor {
     const year = yearOverride ?? new Date(Date.now() + 40 * 24 * 60 * 60 * 1000).getFullYear();
     const tournamentsResponse = await this.pgaTourApi.getTournamentSchedule(year);
 
-    const scheduleTourneys: PgaApiTourScheduleTournament[] = []
+    const scheduleTourneys: ScheduleTournament[] = []
     const tourneysToIngest: Record<string, SavePgaTournament> = {};
     const tourneyIds: string[] = [];
 
@@ -41,12 +43,12 @@ export class PgaTournamentIngestor {
             tournament_id: t.id.substring(5),
             year,
             month: tourneys.month,
-            start_date: new Date(t.startDate),
+            start_date: new Date(t.startDate as number),
             // Set the end_date to 1 min before midnight on the 4th day (i.e. Sunday at 11:59pm)
-            end_date: new Date(t.startDate + (PGA_TOURNAMENT_LENGTH_DAYS * 24 * 60 * 60 * 1000) - (60 * 1000)),
+            end_date: new Date((t.startDate as number) + (PGA_TOURNAMENT_LENGTH_DAYS * 24 * 60 * 60 * 1000) - (60 * 1000)),
             display_date: t.dateAccessibilityText,
             display_date_short: t.date,
-            purse: strToNum(t.purse.substring(1).split(',').join('')) ?? 0,
+            purse: strToNum((t.purse ?? '').substring(1).split(',').join('')) ?? 0,
             fedex_cup_event: t.tourStandingHeading === 'FEDEXCUP',
             fedex_cup_points: t.tourStandingValue ? strToNum(t.tourStandingValue.split(' ')[0]) : null,
             course_name: t.courseName,
@@ -58,7 +60,7 @@ export class PgaTournamentIngestor {
             previous_champion: t.champion ?? null,
             previous_champion_id: Number(t.championId) ?? null,
             logo_url: t.tournamentLogo,
-            course_url: t.beautyImage,
+            course_url: t.beautyImage ?? '',
           } as PgaTournament;
         }
       }
@@ -74,7 +76,7 @@ export class PgaTournamentIngestor {
         tournament_status: t.tournamentStatus as PgaTournamentStatus,
         round_status: t.roundStatus as PgaTournamentRoundStatus,
         current_round: t.currentRound > 0 ? t.currentRound : null,
-        features: t.features as PgaTournamentFeatures[],
+        features: (t.features ?? []) as PgaTournamentFeatures[],
       }
     }
 

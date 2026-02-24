@@ -156,16 +156,25 @@ export class PgaTournamentPlayerService {
       const existing = await repo
         .createQueryBuilder('ptp')
         .select(['ptp.id', 'ptp.pga_player'])
+        .addSelect('ptp_pool.id', 'pool_ref_id')
+        .leftJoin('pool_tournament_player', 'ptp_pool', 'ptp_pool.pga_tournament_player = ptp.id')
         .where('ptp.pga_tournament = :tournamentId', { tournamentId: pgaTournament.id })
-        .getRawMany<{ ptp_id: string; ptp_pga_player: number }>();
+        .getRawMany<{ ptp_id: string; ptp_pga_player: number; pool_ref_id: string | null }>();
 
       const incomingIds = new Set(filteredLeaderboardPlayers.map((player) => Number(player.id)));
-      const idsToDelete = existing
-        .filter((row) => !incomingIds.has(Number(row.ptp_pga_player)))
-        .map((row) => row.ptp_id);
+      const staleRows = existing.filter((row) => !incomingIds.has(Number(row.ptp_pga_player)));
+
+      const idsToDelete = staleRows.filter((row) => !row.pool_ref_id).map((row) => row.ptp_id);
+      const idsToWithdraw = staleRows.filter((row) => row.pool_ref_id).map((row) => row.ptp_id);
 
       if (idsToDelete.length > 0) {
         await repo.delete(idsToDelete);
+      }
+      if (idsToWithdraw.length > 0) {
+        await repo.update(idsToWithdraw, {
+          active: false,
+          status: PlayerStatus.Withdrawn,
+        });
       }
     }
     await this.updateScoresWithLeaderboard(

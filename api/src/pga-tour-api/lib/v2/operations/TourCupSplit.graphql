@@ -1,0 +1,20 @@
+query TourCupSplit(
+  $tourCode: TourCode!
+  $id: String
+  $year: Int
+  $eventQuery: StatDetailEventQuery
+) {
+  tourCupSplit(tourCode: $tourCode, id: $id, year: $year, eventQuery: $eventQuery) {
+    projectedPlayers {
+      __typename
+      ... on TourCupCombinedPlayer {
+        id
+        firstName
+        lastName
+        pointData {
+          event
+        }
+      }
+    }
+  }
+}

@@ -25,7 +25,8 @@
     "sdk:generate": "yarn openapi-generator-cli generate --generator-key pga-pool-api --remove-operation-id-prefix",
     "sdk:generate:build": "yarn sdk:generate && yarn sdk:build",
     "async-worker": "ts-node src/async-worker/index.ts",
-    "start:async-worker": "cross-env ASYNC_WORKER_JITTER_MS=10000 ts-node src/async-worker/index.ts"
+    "start:async-worker": "cross-env ASYNC_WORKER_JITTER_MS=10000 ts-node src/async-worker/index.ts",
+    "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
     "@nestjs/axios": "3.0.1",
@@ -41,6 +42,7 @@
     "deepmerge": "4.3.1",
     "graphql": "16.8.1",
     "graphql-request": "6.1.0",
+    "graphql-tag": "2.12.6",
     "joi": "17.11.1",
     "jsonwebtoken": "9.0.2",
     "jwks-rsa": "3.2.0",
@@ -53,6 +55,10 @@
     "typeorm": "0.3.19"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "6.1.2",
+    "@graphql-codegen/typescript": "5.0.8",
+    "@graphql-codegen/typescript-graphql-request": "6.4.0",
+    "@graphql-codegen/typescript-operations": "5.0.8",
     "@nestjs/cli": "10.3.0",
     "@nestjs/schematics": "10.1.0",
     "@nestjs/testing": "10.3.0",

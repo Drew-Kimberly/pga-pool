@@ -1,0 +1,46 @@
+query Schedule($tourCode: String!, $year: String, $filter: TournamentCategory) {
+  schedule(tourCode: $tourCode, year: $year, filter: $filter) {
+    completed {
+      month
+      year
+      monthSort
+      ...ScheduleTournament
+    }
+    filters {
+      type
+      name
+    }
+    seasonYear
+    tour
+    upcoming {
+      month
+      year
+      monthSort
+      ...ScheduleTournament
+    }
+  }
+}
+
+fragment ScheduleTournament on ScheduleMonth {
+  tournaments {
+    tournamentName
+    id
+    beautyImage
+    champion
+    championEarnings
+    championId
+    city
+    country
+    countryCode
+    courseName
+    date
+    dateAccessibilityText
+    purse
+    startDate
+    state
+    stateCode
+    tournamentLogo
+    tourStandingHeading
+    tourStandingValue
+  }
+}
