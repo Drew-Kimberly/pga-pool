@@ -20,7 +20,7 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['.eslintrc.js'],
+  ignorePatterns: ['.eslintrc.js', 'src/**/generated/**'],
   rules: {
     "@typescript-eslint/no-unused-vars": "off",
     "@typescript-eslint/no-floating-promises": "error",
