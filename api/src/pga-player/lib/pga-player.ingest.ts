@@ -27,6 +27,8 @@ export class PgaPlayerIngestor {
         first_name: p.firstName,
         last_name: p.lastName,
         headshot_url: p.headshot ?? null,
+        country: p.country ?? null,
+        country_flag: p.countryFlag ?? null,
       }))
     );
   }

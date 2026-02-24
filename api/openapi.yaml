@@ -853,6 +853,18 @@ components:
           type: string
           nullable: true
           example: 'https://pga-tour-res.cloudinary.com/image/upload/c_fill,f_auto,h_256,w_256/headshots_46046.png'
+        country:
+          type: string
+          nullable: true
+          example: 'United States'
+        country_flag:
+          type: string
+          nullable: true
+          example: 'USA'
+        country_flag_url:
+          type: string
+          nullable: true
+          example: 'https://res.cloudinary.com/pgatour-prod/flags/USA.svg'
       required:
         - id
         - name
@@ -861,6 +873,9 @@ components:
         - last_name
         - active
         - headshot_url
+        - country
+        - country_flag
+        - country_flag_url
     PgaTournamentPlayer:
       description: Defines a PGA player participating in a PGA tournament
       type: object

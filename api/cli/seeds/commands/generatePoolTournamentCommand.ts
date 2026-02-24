@@ -5,7 +5,7 @@ import { generatePoolTournament } from '../handler/generatePoolTournament';
 
 const command = new Command('generate-pool-tournament')
   .description(
-    'Creates pool tournament data from seeds/<PGA_TOURNAMENT_ID>/field.json and picks.json'
+    'Creates pool tournament users and picks from seeds/<PGA_TOURNAMENT_ID>/picks.json'
   )
   .addHelpText('before', figlet.textSync('PGA Pool', { horizontalLayout: 'fitted' }))
   .addOption(
