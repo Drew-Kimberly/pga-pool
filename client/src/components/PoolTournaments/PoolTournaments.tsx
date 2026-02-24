@@ -235,6 +235,9 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                   onNavigate={() =>
                     navigate(`/pools/${pool.id}/tournaments/${entry.id}/leaderboard`)
                   }
+                  onFieldNavigate={() =>
+                    navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
+                  }
                   statusLabel={toCurrentStatusLabel(entry)}
                 />
               ))}
@@ -262,6 +265,9 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                     tournament={entry}
                     canNavigate={true}
                     onNavigate={() => navigate(`/pools/${pool.id}/tournaments/${entry.id}/results`)}
+                    onFieldNavigate={() =>
+                      navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
+                    }
                     statusLabel="Official"
                     navigateLabel="View results"
                   />
@@ -377,6 +383,7 @@ interface TournamentCardProps {
   statusLabel: string;
   onNavigate?: () => void;
   navigateLabel?: string;
+  onFieldNavigate?: () => void;
 }
 
 function TournamentCard({
@@ -385,6 +392,7 @@ function TournamentCard({
   statusLabel,
   onNavigate,
   navigateLabel = 'View leaderboard',
+  onFieldNavigate,
 }: TournamentCardProps) {
   const logoUrl = tournament.pga_tournament.logo_url;
   const size = React.useContext(ResponsiveContext);
@@ -447,14 +455,33 @@ function TournamentCard({
             </Box>
           </Box>
 
-          {canNavigate && (
-            <Box direction="row" align="center" gap="xsmall">
-              <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
-                {navigateLabel}
-              </Text>
-              <FormNext size="small" />
-            </Box>
-          )}
+          <Box direction="row" align="center" gap="medium">
+            {canNavigate && (
+              <Box direction="row" align="center" gap="xsmall">
+                <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
+                  {navigateLabel}
+                </Text>
+                <FormNext size="small" />
+              </Box>
+            )}
+            {onFieldNavigate && (
+              <Box
+                direction="row"
+                align="center"
+                gap="xsmall"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFieldNavigate();
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
+                  View field
+                </Text>
+                <FormNext size="small" />
+              </Box>
+            )}
+          </Box>
         </Box>
 
         {/* Right: logo centered */}

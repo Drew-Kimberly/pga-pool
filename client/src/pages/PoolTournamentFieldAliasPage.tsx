@@ -1,0 +1,102 @@
+import { Box, PageContent, Text } from 'grommet';
+import { CircleInformation } from 'grommet-icons';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+
+import { pgaPoolApi } from '../api/pga-pool';
+import { resolveActivePoolId } from '../components/PoolStandings';
+import { Spinner } from '../components/Spinner';
+import { resolveDefaultTournament } from '../components/TournamentLeaderboard/resolveTournament';
+
+import { withPageLayout } from './withPageLayout';
+
+function _PoolTournamentFieldAliasPage() {
+  const [redirectPath, setRedirectPath] = React.useState<string | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<Error | undefined>(undefined);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    async function resolve() {
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        const activePoolId = await resolveActivePoolId();
+        if (!isMounted) return;
+
+        if (!activePoolId) {
+          setError(new Error('No pools are available.'));
+          return;
+        }
+
+        const tournament = await resolveDefaultTournament(activePoolId);
+        if (!isMounted) return;
+
+        if (!tournament) {
+          setError(new Error('No tournaments are available.'));
+          return;
+        }
+
+        setRedirectPath(`/pools/${activePoolId}/tournaments/${tournament.id}/field`);
+      } catch (e) {
+        if (!isMounted) return;
+
+        if (!pgaPoolApi.is404Error(e as Error)) {
+          setError(e as Error);
+        } else {
+          setError(new Error('No pools are available.'));
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    resolve();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (redirectPath) {
+    return <Navigate to={redirectPath} replace />;
+  }
+
+  if (isLoading) {
+    return (
+      <PageContent>
+        <Spinner />
+      </PageContent>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageContent>
+        <Box height="medium" round="small" align="center" justify="center" gap="small">
+          <CircleInformation size="large" />
+          <Text size="large" textAlign="center" margin="small">
+            {error.message}
+          </Text>
+        </Box>
+      </PageContent>
+    );
+  }
+
+  return (
+    <PageContent>
+      <Box height="medium" round="small" align="center" justify="center" gap="small">
+        <CircleInformation size="large" />
+        <Text size="large" textAlign="center" margin="small">
+          No pools are available.
+        </Text>
+      </Box>
+    </PageContent>
+  );
+}
+
+export const PoolTournamentFieldAliasPage = withPageLayout(_PoolTournamentFieldAliasPage);
