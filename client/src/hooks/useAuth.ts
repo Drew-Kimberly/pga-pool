@@ -41,7 +41,7 @@ export const useAuth = () => {
   const selectLeague = async (leagueId: string) => {
     try {
       const token = await getAccessTokenSilently();
-      const response = await fetch(`${process.env.REACT_APP_PGA_POOL_API_URL}/auth/league`, {
+      const response = await fetch(`${import.meta.env.VITE_PGA_POOL_API_URL}/auth/league`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

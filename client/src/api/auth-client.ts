@@ -7,7 +7,7 @@ export const setAuth0TokenGetter = (tokenGetter: () => Promise<string>) => {
 };
 
 const authClient = axios.create({
-  baseURL: process.env.REACT_APP_PGA_POOL_API_URL,
+  baseURL: import.meta.env.VITE_PGA_POOL_API_URL,
 });
 
 // Add auth token to requests
