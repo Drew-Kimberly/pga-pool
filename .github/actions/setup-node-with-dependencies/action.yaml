@@ -19,7 +19,7 @@ runs:
     - name: Setup Node
       uses: actions/setup-node@v3
       with:
-        node-version: '20.10.0'
+        node-version: '24.14.0'
     - name: Get yarn.lock path
       id: yarn-lockfile-path
       shell: bash
@@ -30,7 +30,7 @@ runs:
       with:
         path: '${{ inputs.cwd }}/node_modules'
         # Hard-coded NodeJS version must manually be kept in-sync with setup-node.node-version as setup-node action does not output the version.
-        key: yarn-20.10.0-${{ runner.os }}-${{ hashFiles(steps.yarn-lockfile-path.outputs.path) }}
+        key: yarn-24.14.0-${{ runner.os }}-${{ hashFiles(steps.yarn-lockfile-path.outputs.path) }}
     - name: Install Dependencies
       if: ${{ inputs.force-install == 'true' || steps.dependency-cache.outputs.cache-hit != 'true' }}
       shell: bash
