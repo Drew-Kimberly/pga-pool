@@ -142,6 +142,7 @@ export async function generatePoolTournament(tournamentId: string) {
       )
     );
 
+    const desiredPickKeys = new Set<string>();
     const poolTournamentUserPickToSave: PoolTournamentUserPick[] = [];
     for (const [userId, userPicks] of pickEntries) {
       const poolUser = poolUserByUserId.get(userId);
@@ -172,6 +173,8 @@ export async function generatePoolTournament(tournamentId: string) {
         }
 
         const key = `${poolTournamentUser.id}:${poolTournamentPlayer.id}`;
+        desiredPickKeys.add(key);
+
         if (existingPickKey.has(key)) {
           return;
         }
@@ -182,8 +185,17 @@ export async function generatePoolTournament(tournamentId: string) {
             pool_tournament_player_id: poolTournamentPlayer.id,
           })
         );
-        existingPickKey.add(key);
       });
+    }
+
+    const picksToRemove = existingPicks.filter(
+      (pick) =>
+        !desiredPickKeys.has(`${pick.pool_tournamnet_user_id}:${pick.pool_tournament_player_id}`)
+    );
+
+    if (picksToRemove.length > 0) {
+      await poolTournamentUserPickRepo.remove(picksToRemove);
+      logger.log(`Removed ${picksToRemove.length} stale pick(s)`);
     }
 
     if (poolTournamentUserPickToSave.length > 0) {
