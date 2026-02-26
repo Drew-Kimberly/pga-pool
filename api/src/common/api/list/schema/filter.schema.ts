@@ -70,9 +70,9 @@ export const filterSchema: SchemaBuilder = {
   },
 };
 
-export class FilterSchemaBuilder<S extends AnySchema = AnySchema>
-  implements SchemaBuilder<AnySchema>
-{
+export class FilterSchemaBuilder<
+  S extends AnySchema = AnySchema,
+> implements SchemaBuilder<AnySchema> {
   constructor(
     protected schema: S,
     protected operators: string[] = [],

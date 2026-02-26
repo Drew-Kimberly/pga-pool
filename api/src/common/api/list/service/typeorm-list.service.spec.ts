@@ -1,14 +1,15 @@
 import { FindManyOptions } from 'typeorm';
+import { describe, expect, it, vi } from 'vitest';
 
 import { TypeOrmListService } from './typeorm-list.service';
 
 describe('TypeOrmListService', () => {
   it('applies operator filters when listing', async () => {
     const repo = {
-      findAndCount: jest.fn().mockResolvedValue([[], 0]),
+      findAndCount: vi.fn().mockResolvedValue([[], 0]),
     };
     const dataSource = {
-      getRepository: jest.fn().mockReturnValue(repo),
+      getRepository: vi.fn().mockReturnValue(repo),
     };
 
     const service = new TypeOrmListService(dataSource as never);

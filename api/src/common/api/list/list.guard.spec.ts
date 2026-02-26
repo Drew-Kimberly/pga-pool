@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { FieldFilterSchema } from './schema/filter.schema';
 import { SCHEMA_REGISTRY } from './schema/registry';
 import { mergeDefaultOptions } from './util/mergeDefaultOptions';
@@ -39,7 +41,7 @@ describe('ListGuard', () => {
     SCHEMA_REGISTRY.register('TestController', 'list', listOptions);
 
     const reflector = {
-      get: jest.fn().mockReturnValue(listOptions),
+      get: vi.fn().mockReturnValue(listOptions),
     } as unknown as Reflector;
 
     const guard = new ListGuard(reflector);
@@ -79,7 +81,7 @@ describe('ListGuard', () => {
     SCHEMA_REGISTRY.register('TestController', 'list', listOptions);
 
     const reflector = {
-      get: jest.fn().mockReturnValue(listOptions),
+      get: vi.fn().mockReturnValue(listOptions),
     } as unknown as Reflector;
 
     const guard = new ListGuard(reflector);
@@ -105,7 +107,7 @@ describe('ListGuard', () => {
     SCHEMA_REGISTRY.register('TestController', 'list', listOptions);
 
     const reflector = {
-      get: jest.fn().mockReturnValue(listOptions),
+      get: vi.fn().mockReturnValue(listOptions),
     } as unknown as Reflector;
 
     const guard = new ListGuard(reflector);
@@ -131,7 +133,7 @@ describe('ListGuard', () => {
     SCHEMA_REGISTRY.register('TestController', 'list', listOptions);
 
     const reflector = {
-      get: jest.fn().mockReturnValue(listOptions),
+      get: vi.fn().mockReturnValue(listOptions),
     } as unknown as Reflector;
 
     const guard = new ListGuard(reflector);
