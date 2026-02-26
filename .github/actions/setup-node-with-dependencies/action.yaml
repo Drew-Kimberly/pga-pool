@@ -30,7 +30,7 @@ runs:
       with:
         path: '${{ inputs.cwd }}/node_modules'
         # Hard-coded NodeJS version must manually be kept in-sync with setup-node.node-version as setup-node action does not output the version.
-        key: yarn-24.14.0-${{ runner.os }}-${{ hashFiles(steps.yarn-lockfile-path.outputs.path) }}
+        key: yarn-v2-24.14.0-${{ runner.os }}-${{ hashFiles(steps.yarn-lockfile-path.outputs.path) }}
     - name: Install Dependencies
       if: ${{ inputs.force-install == 'true' || steps.dependency-cache.outputs.cache-hit != 'true' }}
       shell: bash
