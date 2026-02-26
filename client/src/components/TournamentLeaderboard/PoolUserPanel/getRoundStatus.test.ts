@@ -130,10 +130,10 @@ describe('getRoundStatus', () => {
 
   it('returns in_progress when non-active players have completed their round', () => {
     const picks = [
-      makePick({ is_round_complete: true, status: PlayerStatus.Complete, tee_time: null }),
-      makePick({ is_round_complete: false, score_thru: 0, tee_time: '1740000000' }),
-      makePick({ is_round_complete: true, status: PlayerStatus.Complete, tee_time: null }),
-      makePick({ is_round_complete: false, score_thru: 0, tee_time: '1740003600' }),
+      makePick({ is_round_complete: true, active: false, status: PlayerStatus.Complete }),
+      makePick({ is_round_complete: false, active: false, score_thru: 0, tee_time: '1740000000' }),
+      makePick({ is_round_complete: true, active: false, status: PlayerStatus.Complete }),
+      makePick({ is_round_complete: false, active: false, score_thru: 0, tee_time: '1740003600' }),
     ];
 
     const result = getRoundStatus(picks, baseTournament);
@@ -141,6 +141,34 @@ describe('getRoundStatus', () => {
     if (result.status === 'in_progress') {
       expect(result.percentComplete).toBe(50); // 36 of 72 holes
       expect(result.playersActive).toHaveLength(0);
+    }
+  });
+
+  it('counts players with active=true and incomplete round as active', () => {
+    const picks = [
+      makePick({ id: '1', is_round_complete: true, active: false }),
+      makePick({ id: '2', is_round_complete: true, active: false }),
+      makePick({
+        id: '3',
+        is_round_complete: false,
+        active: false,
+        score_thru: 0,
+        tee_time: '9999999999999',
+      }),
+      makePick({
+        id: '4',
+        is_round_complete: false,
+        active: true,
+        score_thru: 0,
+        tee_time: '1740000000000',
+      }),
+    ];
+
+    const result = getRoundStatus(picks, baseTournament);
+    expect(result.status).toBe('in_progress');
+    if (result.status === 'in_progress') {
+      expect(result.playersActive).toHaveLength(1);
+      expect(result.playersActive[0].id).toBe('4');
     }
   });
 

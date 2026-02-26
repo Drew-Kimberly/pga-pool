@@ -60,7 +60,7 @@ export function getRoundStatus(
   return {
     status: 'in_progress',
     percentComplete: Math.round((totalHolesCompleted / (picks.length * HOLES_PER_ROUND)) * 100),
-    playersActive: picks.filter((p) => !p.is_round_complete && p.tee_time === null),
+    playersActive: picks.filter((p) => p.active && !p.is_round_complete),
   };
 }
 
