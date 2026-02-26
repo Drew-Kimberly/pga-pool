@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm';
+import { describe, expect, it, vi } from 'vitest';
 
 import { PgaPlayerService } from '../../pga-player/lib/pga-player.service';
 import {
@@ -19,22 +20,22 @@ describe('PgaTournamentPlayerService', () => {
   describe('updateScores', () => {
     it('upserts updated leaderboard data in bulk', async () => {
       const repo = {
-        upsert: jest.fn().mockResolvedValue({}),
+        upsert: vi.fn().mockResolvedValue({}),
       } as unknown as Repository<PgaTournamentPlayer>;
       const pgaTourApi = {
-        getTournamentLeaderboard: jest.fn(),
-        getProjectedFedexCupPoints: jest.fn(),
+        getTournamentLeaderboard: vi.fn(),
+        getProjectedFedexCupPoints: vi.fn(),
       } as unknown as PgaTourApiService;
       const pgaPlayerService = {
-        save: jest.fn(),
+        save: vi.fn(),
       } as unknown as PgaPlayerService;
       const pgaTournamentService = {
-        get: jest.fn(),
+        get: vi.fn(),
       } as unknown as PgaTournamentService;
       const logger = {
-        warn: jest.fn(),
-        error: jest.fn(),
-        log: jest.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+        log: vi.fn(),
       } as unknown as LoggerService;
 
       const service = new PgaTournamentPlayerService(
@@ -51,7 +52,7 @@ describe('PgaTournamentPlayerService', () => {
         name: 'Test Tournament',
         tournament_id: '006',
       };
-      jest.spyOn(pgaTournamentService, 'get').mockResolvedValue(tournament as PgaTournament);
+      vi.spyOn(pgaTournamentService, 'get').mockResolvedValue(tournament as PgaTournament);
 
       const leaderboardResponse: PgaApiTournamentLeaderboardResponse = {
         leaderboardId: 'R2023006',
@@ -90,7 +91,7 @@ describe('PgaTournamentPlayerService', () => {
           ],
         },
       };
-      jest.spyOn(pgaTourApi, 'getTournamentLeaderboard').mockResolvedValue(leaderboardResponse);
+      vi.spyOn(pgaTourApi, 'getTournamentLeaderboard').mockResolvedValue(leaderboardResponse);
 
       const projectedPointsResponse: PgaApiProjectedFedexCupPointsResponse = {
         seasonYear: 2023,
@@ -116,15 +117,13 @@ describe('PgaTournamentPlayerService', () => {
           },
         ],
       };
-      jest
-        .spyOn(pgaTourApi, 'getProjectedFedexCupPoints')
-        .mockResolvedValue(projectedPointsResponse);
+      vi.spyOn(pgaTourApi, 'getProjectedFedexCupPoints').mockResolvedValue(projectedPointsResponse);
 
       await service.updateScores(tournament.id!, repo);
 
       expect(repo.upsert).toHaveBeenCalledTimes(1);
       expect(pgaTourApi.getProjectedFedexCupPoints).toHaveBeenCalledWith(2023, '006');
-      const [updatesArg, conflict] = (repo.upsert as jest.Mock).mock.calls[0];
+      const [updatesArg, conflict] = (repo.upsert as ReturnType<typeof vi.fn>).mock.calls[0];
       expect(conflict).toEqual(['id']);
       expect(updatesArg).toEqual([
         {

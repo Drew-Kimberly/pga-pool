@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 import { ExecutionContext } from '@nestjs/common';
@@ -16,13 +18,13 @@ describe('JwtAuthGuard', () => {
         {
           provide: Reflector,
           useValue: {
-            getAllAndOverride: jest.fn(),
+            getAllAndOverride: vi.fn(),
           },
         },
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn(),
+            get: vi.fn(),
           },
         },
       ],
@@ -42,14 +44,14 @@ describe('JwtAuthGuard', () => {
           },
         }),
       }),
-      getHandler: () => jest.fn(),
-      getClass: () => jest.fn(),
+      getHandler: () => vi.fn(),
+      getClass: () => vi.fn(),
     } as unknown as ExecutionContext;
   };
 
   describe('canActivate', () => {
     it('should return true when AUTH_ENABLED is not true', () => {
-      jest.spyOn(configService, 'get').mockReturnValue('false');
+      vi.spyOn(configService, 'get').mockReturnValue('false');
       const context = createMockExecutionContext();
 
       const result = guard.canActivate(context);
@@ -59,8 +61,8 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should return true when route is marked as public', () => {
-      jest.spyOn(configService, 'get').mockReturnValue('true');
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(true);
+      vi.spyOn(configService, 'get').mockReturnValue('true');
+      vi.spyOn(reflector, 'getAllAndOverride').mockReturnValue(true);
       const context = createMockExecutionContext();
 
       const result = guard.canActivate(context);
@@ -73,12 +75,12 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should return true when AUTH_REQUIRED is not true and no auth header', () => {
-      jest.spyOn(configService, 'get').mockImplementation((key) => {
+      vi.spyOn(configService, 'get').mockImplementation((key) => {
         if (key === 'AUTH_ENABLED') return 'true';
         if (key === 'AUTH_REQUIRED') return 'false';
         return undefined;
       });
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+      vi.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
       const context = createMockExecutionContext();
 
       const result = guard.canActivate(context);
@@ -87,16 +89,16 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should call parent canActivate when AUTH_REQUIRED is not true but auth header exists', () => {
-      jest.spyOn(configService, 'get').mockImplementation((key) => {
+      vi.spyOn(configService, 'get').mockImplementation((key) => {
         if (key === 'AUTH_ENABLED') return 'true';
         if (key === 'AUTH_REQUIRED') return 'false';
         return undefined;
       });
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+      vi.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
       const context = createMockExecutionContext('Bearer token');
 
       // Mock the parent canActivate method
-      const parentCanActivate = jest.spyOn(
+      const parentCanActivate = vi.spyOn(
         Object.getPrototypeOf(Object.getPrototypeOf(guard)),
         'canActivate'
       );
@@ -109,16 +111,16 @@ describe('JwtAuthGuard', () => {
     });
 
     it('should call parent canActivate when AUTH_REQUIRED is true', () => {
-      jest.spyOn(configService, 'get').mockImplementation((key) => {
+      vi.spyOn(configService, 'get').mockImplementation((key) => {
         if (key === 'AUTH_ENABLED') return 'true';
         if (key === 'AUTH_REQUIRED') return 'true';
         return undefined;
       });
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+      vi.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
       const context = createMockExecutionContext('Bearer token');
 
       // Mock the parent canActivate method
-      const parentCanActivate = jest.spyOn(
+      const parentCanActivate = vi.spyOn(
         Object.getPrototypeOf(Object.getPrototypeOf(guard)),
         'canActivate'
       );

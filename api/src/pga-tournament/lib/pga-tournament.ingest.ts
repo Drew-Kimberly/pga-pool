@@ -58,7 +58,7 @@ export class PgaTournamentIngestor {
             state_code: t.stateCode,
             city: t.city,
             previous_champion: t.champion ?? null,
-            previous_champion_id: Number(t.championId) ?? null,
+            previous_champion_id: t.championId ? Number(t.championId) : null,
             logo_url: t.tournamentLogo,
             course_url: t.beautyImage ?? '',
           } as PgaTournament;
