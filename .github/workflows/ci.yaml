@@ -112,7 +112,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: '24.x'
       - name: Install SDK dependencies
         working-directory: client/sdk
         run: yarn install
@@ -242,7 +242,7 @@ jobs:
       - name: Setup NodeJS for Publishing
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
       - name: Install SDK dependencies
         working-directory: client/sdk
