@@ -3,7 +3,6 @@ import { DateTime } from 'luxon';
 import {
   PgaTournament,
   PgaTournamentPlayer,
-  PgaTournamentPlayerStatusEnum as PlayerStatus,
   PgaTournamentRoundStatusEnum as TournamentRoundStatus,
 } from '@drewkimberly/pga-pool-api';
 
