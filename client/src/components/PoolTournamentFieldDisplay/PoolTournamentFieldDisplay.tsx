@@ -356,7 +356,20 @@ function PlayerEntry({ player, showTier, isDesktop }: PlayerEntryProps) {
       )}
 
       <Text size="small" weight={500}>
-        {pgaPlayer.first_name} {pgaPlayer.last_name}
+        <Text
+          size="small"
+          weight={500}
+          style={
+            player.pga_tournament_player.withdrawn ? { textDecoration: 'line-through' } : undefined
+          }
+        >
+          {pgaPlayer.first_name} {pgaPlayer.last_name}
+        </Text>
+        {player.pga_tournament_player.withdrawn && (
+          <Text size="xsmall" margin={{ left: 'xxsmall' }} color="#FF003F">
+            WD
+          </Text>
+        )}
       </Text>
 
       {showTier && (
