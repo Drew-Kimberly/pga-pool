@@ -32,13 +32,11 @@ export function getRoundStatus(
   }
 
   let totalHolesCompleted = 0;
-  let activePlayersHolesCompleted = 0;
   const teetimes: DateTime[] = [];
 
   for (const pick of picks) {
     const completedHoles = pick.is_round_complete ? HOLES_PER_ROUND : pick.score_thru ?? 0;
     totalHolesCompleted += completedHoles;
-    activePlayersHolesCompleted += pick.status === PlayerStatus.Active ? completedHoles : 0;
 
     if (pick.tee_time) {
       const parsed = teeTimeToDate(pick.tee_time, tournament.date.timezone);
@@ -52,7 +50,7 @@ export function getRoundStatus(
     return { status: 'complete' };
   }
 
-  if (activePlayersHolesCompleted === 0) {
+  if (totalHolesCompleted === 0) {
     teetimes.sort((t1, t2) => t1.toUnixInteger() - t2.toUnixInteger());
     return {
       status: 'not_started',

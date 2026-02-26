@@ -128,6 +128,22 @@ describe('getRoundStatus', () => {
     expect(result.status).toBe('complete');
   });
 
+  it('returns in_progress when non-active players have completed their round', () => {
+    const picks = [
+      makePick({ is_round_complete: true, status: PlayerStatus.Complete, tee_time: null }),
+      makePick({ is_round_complete: false, score_thru: 0, tee_time: '1740000000' }),
+      makePick({ is_round_complete: true, status: PlayerStatus.Complete, tee_time: null }),
+      makePick({ is_round_complete: false, score_thru: 0, tee_time: '1740003600' }),
+    ];
+
+    const result = getRoundStatus(picks, baseTournament);
+    expect(result.status).toBe('in_progress');
+    if (result.status === 'in_progress') {
+      expect(result.percentComplete).toBe(50); // 36 of 72 holes
+      expect(result.playersActive).toHaveLength(0);
+    }
+  });
+
   it('returns in_progress with percentComplete when some holes are completed', () => {
     const picks = [
       makePick({ score_thru: 9, is_round_complete: false }),
