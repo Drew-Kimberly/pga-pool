@@ -1,7 +1,7 @@
 {
     "env": {
         "browser": true,
-        "jest": true
+        "node": true
     },
     "parserOptions": {
         "ecmaFeatures": {
@@ -72,5 +72,19 @@
                 "allowAnonymousFunction": true
             }
         ]
-    }
+    },
+    "overrides": [
+        {
+            "files": ["**/*.test.ts", "**/*.test.tsx", "**/*.test.js", "**/*.test.jsx"],
+            "globals": {
+                "describe": "readonly",
+                "it": "readonly",
+                "expect": "readonly",
+                "beforeEach": "readonly",
+                "afterEach": "readonly",
+                "beforeAll": "readonly",
+                "afterAll": "readonly"
+            }
+        }
+    ]
 }

@@ -8,7 +8,7 @@ import { useThemeContext } from '../contexts/ThemeContext';
 export function withPageLayout<TProps extends object>(PageContents: React.ComponentType<TProps>) {
   const PageComponent = (props: TProps) => {
     const { darkMode, setDarkMode } = useThemeContext();
-    const authEnabled = process.env.REACT_APP_AUTH_ENABLED === 'true';
+    const authEnabled = import.meta.env.VITE_AUTH_ENABLED === 'true';
     const size = React.useContext(ResponsiveContext);
     const navModel = usePoolNavModel();
     return (

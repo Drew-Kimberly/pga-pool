@@ -42,39 +42,24 @@
     "react-copy-to-clipboard": "5.1.0",
     "react-dom": "18.2.0",
     "react-router-dom": "6.21.1",
-    "react-scripts": "5.0.1",
     "styled-components": "5.3.5",
-    "typescript": "5.3.3",
-    "web-vitals": "3.5.1"
+    "typescript": "5.3.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "5.1.4",
+    "@vitest/coverage-v8": "4.0.18",
+    "eslint": "8.56.0",
+    "jsdom": "28.1.0",
+    "vite": "7.3.1",
+    "vitest": "4.0.18"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "vite",
+    "build": "vite build",
     "lint": "eslint \"src/**/*.{tsx,ts,jsx,js}\"",
     "lint:fix": "yarn lint --fix",
-    "test": "react-scripts test --passWithNoTests",
-    "eject": "react-scripts eject",
-    "install-vercel": "yarn --cwd sdk install --frozen-lockfile --ignore-optional && yarn --cwd sdk compile &&  yarn --frozen-lockfile --ignore-optional"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "jest": {
-    "moduleNameMapper": {
-      "^@drewkimberly/pga-pool-api$": "<rootDir>/sdk/src/index.ts"
-    },
-    "transformIgnorePatterns": [
-      "/node_modules/(?!axios).+\\.(js|jsx|mjs|cjs|ts|tsx|json)$"
-    ]
+    "test": "vitest --passWithNoTests",
+    "install-vercel": "yarn --cwd sdk install --frozen-lockfile --ignore-optional && yarn --cwd sdk compile && yarn --frozen-lockfile --ignore-optional"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
