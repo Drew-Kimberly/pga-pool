@@ -98,6 +98,9 @@ jobs:
         uses: ./.github/actions/setup-node-with-dependencies/
         with:
           cwd: client
+      - name: Install SDK dependencies
+        working-directory: client/sdk
+        run: yarn install
       - name: Test
         working-directory: client
         run: yarn test
