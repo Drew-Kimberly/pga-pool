@@ -172,6 +172,28 @@ describe('getRoundStatus', () => {
     }
   });
 
+  it('treats withdrawn players as round complete for progress calculation', () => {
+    const picks = [
+      makePick({
+        id: '1',
+        is_round_complete: false,
+        active: false,
+        score_thru: 0,
+        withdrawn: true,
+        status: PlayerStatus.Wd,
+      }),
+      makePick({ id: '2', is_round_complete: false, active: true, score_thru: 9 }),
+    ];
+
+    const result = getRoundStatus(picks, baseTournament);
+    expect(result.status).toBe('in_progress');
+    if (result.status === 'in_progress') {
+      expect(result.percentComplete).toBe(75); // (18 + 9) of 36 holes
+      expect(result.playersActive).toHaveLength(1);
+      expect(result.playersActive[0].id).toBe('2');
+    }
+  });
+
   it('returns in_progress with percentComplete when some holes are completed', () => {
     const picks = [
       makePick({ score_thru: 9, is_round_complete: false }),
