@@ -1,4 +1,4 @@
-import { FindOptionsOrder, FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere, In, Repository } from 'typeorm';
 
 import { IListParams, PaginatedCollection } from '../../common/api/list';
 import { DeepPartial } from '../../common/types';
@@ -226,6 +226,31 @@ export class PgaTournamentPlayerService {
       });
 
       await repo.upsert(updates, ['id']);
+    }
+
+    if (leaderboardPlayers.length > 0) {
+      const leaderboardPlayerIds = new Set(leaderboardPlayers.map((entry) => Number(entry.id)));
+
+      const activePlayers = await repo.find({
+        where: {
+          pga_tournament: { id: pgaTournament.id },
+          status: In([PlayerStatus.Active, PlayerStatus.Complete]),
+        },
+      });
+
+      const withdrawnIds = activePlayers
+        .filter((p) => !leaderboardPlayerIds.has(p.pga_player.id))
+        .map((p) => p.id);
+
+      if (withdrawnIds.length > 0) {
+        await repo.update(withdrawnIds, {
+          active: false,
+          status: PlayerStatus.Withdrawn,
+        });
+        this.logger.log(
+          `Marked ${withdrawnIds.length} player(s) as withdrawn for tournament ${pgaTournament.id}`
+        );
+      }
     }
   }
 
