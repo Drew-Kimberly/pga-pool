@@ -1,4 +1,3 @@
-/* eslint-disable no-unreachable */
 import {
   Accordion,
   Anchor,
@@ -11,7 +10,7 @@ import {
 } from 'grommet';
 import { CircleInformation, FormPrevious } from 'grommet-icons';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { pgaPoolApi } from '../../api/pga-pool';
 import { LocalStorage, SessionStorage } from '../../api/storage';

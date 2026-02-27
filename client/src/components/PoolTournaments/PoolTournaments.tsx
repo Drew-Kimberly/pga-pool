@@ -1,7 +1,7 @@
 import { Box, Button, Notification, PageContent, ResponsiveContext, Text } from 'grommet';
 import { CircleInformation, FormNext } from 'grommet-icons';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { pgaPoolApi } from '../../api/pga-pool';
 import { useThemeContext } from '../../contexts/ThemeContext';

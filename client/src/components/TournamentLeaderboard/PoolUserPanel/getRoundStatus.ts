@@ -34,7 +34,7 @@ export function getRoundStatus(
   const teetimes: DateTime[] = [];
 
   for (const pick of picks) {
-    const completedHoles = pick.is_round_complete ? HOLES_PER_ROUND : pick.score_thru ?? 0;
+    const completedHoles = pick.is_round_complete ? HOLES_PER_ROUND : (pick.score_thru ?? 0);
     totalHolesCompleted += completedHoles;
 
     if (pick.tee_time) {

@@ -1,5 +1,5 @@
 import { Alert } from 'grommet-icons';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 
 import { ErrorPage } from '../components/ErrorPage';
 

@@ -1,6 +1,6 @@
 import { Box, Button, Header, Text } from 'grommet';
 import { Moon, Sun } from 'grommet-icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { LoginButton } from '../LoginButton';
 
