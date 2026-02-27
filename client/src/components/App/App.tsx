@@ -1,6 +1,6 @@
 import { Grommet, GrommetExtendedProps } from 'grommet';
 import { useEffect } from 'react';
-import { RouterProvider } from 'react-router-dom';
+import { RouterProvider } from 'react-router';
 
 import { setAuth0TokenGetter } from '../../api/auth-client';
 import { ThemeContextProvider, useThemeContext } from '../../contexts/ThemeContext';

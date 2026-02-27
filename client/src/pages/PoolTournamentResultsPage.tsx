@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 import { ErrorPage } from '../components/ErrorPage';
 import { TournamentLeaderboard } from '../components/TournamentLeaderboard';

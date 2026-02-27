@@ -1,4 +1,4 @@
-import { matchPath, useLocation } from 'react-router-dom';
+import { matchPath, useLocation } from 'react-router';
 
 export type PoolNavSection = 'leaderboard' | 'tournaments' | 'standings';
 

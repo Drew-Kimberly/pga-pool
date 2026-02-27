@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router';
 
 import { ErrorPage } from './components/ErrorPage';
 import { AuthErrorPage } from './pages/AuthErrorPage';

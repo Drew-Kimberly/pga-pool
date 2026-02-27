@@ -1,7 +1,7 @@
 import { Box, PageContent, Text } from 'grommet';
 import { CircleInformation } from 'grommet-icons';
 import React from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router';
 
 import { pgaPoolApi } from '../api/pga-pool';
 import { Spinner } from '../components/Spinner';

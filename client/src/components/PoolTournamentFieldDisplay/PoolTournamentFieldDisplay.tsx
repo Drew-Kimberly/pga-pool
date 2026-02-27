@@ -10,7 +10,7 @@ import {
 } from 'grommet';
 import { FormPrevious, Search, User as UserIcon } from 'grommet-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { useThemeContext } from '../../contexts/ThemeContext';
 import { TournamentHeader } from '../TournamentHeader';

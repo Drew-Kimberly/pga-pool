@@ -1,6 +1,6 @@
 import { Box, Button, Text } from 'grommet';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { useThemeContext } from '../../contexts/ThemeContext';
 
