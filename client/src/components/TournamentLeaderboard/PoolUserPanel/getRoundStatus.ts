@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import {
   PgaTournament,
   PgaTournamentPlayer,
+  PgaTournamentPlayerStatusEnum as PlayerStatus,
   PgaTournamentRoundStatusEnum as TournamentRoundStatus,
 } from '@drewkimberly/pga-pool-api';
 
@@ -19,6 +20,15 @@ export type RoundStatus<T extends 'not_started' | 'in_progress' | 'complete'> =
 
 const HOLES_PER_ROUND = 18;
 
+function isCutOrWithdrawn(pick: PgaTournamentPlayer): boolean {
+  return (
+    pick.withdrawn ||
+    pick.current_position === 'CUT' ||
+    pick.status === PlayerStatus.Cut ||
+    pick.status === PlayerStatus.Wd
+  );
+}
+
 export function getRoundStatus(
   picks: PgaTournamentPlayer[],
   tournament: PgaTournament
@@ -30,27 +40,38 @@ export function getRoundStatus(
     return { status: 'complete' };
   }
 
-  let totalHolesCompleted = 0;
+  let cutWithdrawnCount = 0;
+  let activePlayersHolesCompleted = 0;
   const teetimes: DateTime[] = [];
 
   for (const pick of picks) {
-    const completedHoles =
-      pick.is_round_complete || pick.withdrawn ? HOLES_PER_ROUND : (pick.score_thru ?? 0);
-    totalHolesCompleted += completedHoles;
+    if (isCutOrWithdrawn(pick)) {
+      cutWithdrawnCount++;
+    } else {
+      activePlayersHolesCompleted += pick.is_round_complete
+        ? HOLES_PER_ROUND
+        : (pick.score_thru ?? 0);
 
-    if (pick.tee_time) {
-      const parsed = teeTimeToDate(pick.tee_time, tournament.date.timezone);
-      if (parsed) {
-        teetimes.push(parsed);
+      if (pick.tee_time) {
+        const parsed = teeTimeToDate(pick.tee_time, tournament.date.timezone);
+        if (parsed) {
+          teetimes.push(parsed);
+        }
       }
     }
+  }
+
+  const totalHolesCompleted = cutWithdrawnCount * HOLES_PER_ROUND + activePlayersHolesCompleted;
+
+  if (cutWithdrawnCount === picks.length) {
+    return { status: 'complete' };
   }
 
   if (totalHolesCompleted === picks.length * HOLES_PER_ROUND) {
     return { status: 'complete' };
   }
 
-  if (totalHolesCompleted === 0) {
+  if (activePlayersHolesCompleted === 0) {
     teetimes.sort((t1, t2) => t1.toUnixInteger() - t2.toUnixInteger());
     return {
       status: 'not_started',
@@ -61,7 +82,7 @@ export function getRoundStatus(
   return {
     status: 'in_progress',
     percentComplete: Math.round((totalHolesCompleted / (picks.length * HOLES_PER_ROUND)) * 100),
-    playersActive: picks.filter((p) => p.active && !p.is_round_complete),
+    playersActive: picks.filter((p) => p.active && !p.is_round_complete && !isCutOrWithdrawn(p)),
   };
 }
 

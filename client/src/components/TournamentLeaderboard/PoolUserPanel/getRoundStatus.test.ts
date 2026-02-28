@@ -194,6 +194,134 @@ describe('getRoundStatus', () => {
     }
   });
 
+  it('returns not_started when withdrawn player present but active player has not teed off', () => {
+    const picks = [
+      makePick({
+        id: '1',
+        is_round_complete: false,
+        active: false,
+        score_thru: 0,
+        withdrawn: true,
+        status: PlayerStatus.Wd,
+        tee_time: '1740000000',
+      }),
+      makePick({
+        id: '2',
+        is_round_complete: false,
+        active: true,
+        score_thru: 0,
+        tee_time: '1740003600',
+      }),
+    ];
+
+    const result = getRoundStatus(picks, baseTournament);
+    expect(result.status).toBe('not_started');
+    if (result.status === 'not_started') {
+      expect(result.teetimes).toHaveLength(1);
+      expect(result.teetimes[0].toUnixInteger()).toBe(1740003600);
+    }
+  });
+
+  it('returns not_started when 3/4 players are cut/withdrawn and 1 has not started', () => {
+    const picks = [
+      makePick({
+        id: '1',
+        withdrawn: true,
+        status: PlayerStatus.Wd,
+        active: false,
+        tee_time: '1740000000',
+      }),
+      makePick({
+        id: '2',
+        current_position: 'CUT',
+        status: PlayerStatus.Cut,
+        active: false,
+        tee_time: '1740001000',
+      }),
+      makePick({
+        id: '3',
+        status: PlayerStatus.Cut,
+        active: false,
+        tee_time: '1740002000',
+      }),
+      makePick({
+        id: '4',
+        active: true,
+        score_thru: 0,
+        tee_time: '1740005000',
+      }),
+    ];
+
+    const result = getRoundStatus(picks, baseTournament);
+    expect(result.status).toBe('not_started');
+    if (result.status === 'not_started') {
+      expect(result.teetimes).toHaveLength(1);
+      expect(result.teetimes[0].toUnixInteger()).toBe(1740005000);
+    }
+  });
+
+  it('returns in_progress at ~76% when 3/4 cut/withdrawn and 1 on hole 1', () => {
+    const picks = [
+      makePick({ id: '1', withdrawn: true, status: PlayerStatus.Wd, active: false }),
+      makePick({ id: '2', current_position: 'CUT', status: PlayerStatus.Cut, active: false }),
+      makePick({ id: '3', status: PlayerStatus.Cut, active: false }),
+      makePick({ id: '4', active: true, score_thru: 1 }),
+    ];
+
+    const result = getRoundStatus(picks, baseTournament);
+    expect(result.status).toBe('in_progress');
+    if (result.status === 'in_progress') {
+      // (18 + 18 + 18 + 1) / 72 = 55/72 ≈ 76%
+      expect(result.percentComplete).toBe(76);
+      expect(result.playersActive).toHaveLength(1);
+      expect(result.playersActive[0].id).toBe('4');
+    }
+  });
+
+  it('returns complete when all 4 picks are cut or withdrawn', () => {
+    const picks = [
+      makePick({ id: '1', current_position: 'CUT', active: false, tee_time: '1740000000' }),
+      makePick({
+        id: '2',
+        current_position: 'CUT',
+        status: PlayerStatus.Cut,
+        active: false,
+        tee_time: '1740001000',
+      }),
+      makePick({ id: '3', status: PlayerStatus.Cut, active: false, tee_time: '1740002000' }),
+      makePick({
+        id: '4',
+        withdrawn: true,
+        status: PlayerStatus.Wd,
+        active: false,
+        tee_time: '1740003000',
+      }),
+    ];
+
+    const result = getRoundStatus(picks, baseTournament);
+    expect(result.status).toBe('complete');
+  });
+
+  it('treats cut player the same as withdrawn for progress calculation', () => {
+    const picks = [
+      makePick({
+        id: '1',
+        current_position: 'CUT',
+        status: PlayerStatus.Cut,
+        active: false,
+      }),
+      makePick({ id: '2', active: true, score_thru: 9 }),
+    ];
+
+    const result = getRoundStatus(picks, baseTournament);
+    expect(result.status).toBe('in_progress');
+    if (result.status === 'in_progress') {
+      expect(result.percentComplete).toBe(75); // (18 + 9) of 36 holes
+      expect(result.playersActive).toHaveLength(1);
+      expect(result.playersActive[0].id).toBe('2');
+    }
+  });
+
   it('returns in_progress with percentComplete when some holes are completed', () => {
     const picks = [
       makePick({ score_thru: 9, is_round_complete: false }),
