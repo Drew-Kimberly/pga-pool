@@ -95,7 +95,6 @@ export class PoolTournamentUserService {
     poolTournamentId: string,
     repo: Repository<PoolTournamentUser> = this.poolTournamentUserRepo
   ) {
-    const updateBatchSize = 25;
     const users = await this.list({ poolTournamentId }, repo);
 
     for (const user of users) {
