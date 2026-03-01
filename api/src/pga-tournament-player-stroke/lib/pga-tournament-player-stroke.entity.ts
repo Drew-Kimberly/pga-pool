@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 import { CoerceNumericColumnTransformer } from '../../common/db';
+import { PgaTournamentPlayerHole } from '../../pga-tournament-player-hole/lib/pga-tournament-player-hole.entity';
 
-import { PgaTournamentPlayerHole } from './pga-tournament-player-hole.entity';
-import { StrokeType } from './pga-tournament-player-hole.interface';
+import { StrokeType } from './pga-tournament-player-stroke.interface';
 
 @Entity('pga_tournament_player_stroke')
 @Unique(['pga_tournament_player_hole_id', 'stroke_number'])

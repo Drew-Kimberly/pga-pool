@@ -3,11 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { PgaTourApiService } from '../../pga-tour-api/lib/v2/pga-tour-api.service';
 import { PgaTournamentPlayerService } from '../../pga-tournament-player/lib/pga-tournament-player.service';
+import { PgaTournamentPlayerStrokeService } from '../../pga-tournament-player-stroke/lib/pga-tournament-player-stroke.service';
 
 import { PgaTournamentPlayerHole } from './pga-tournament-player-hole.entity';
 import { HoleScoreStatus } from './pga-tournament-player-hole.interface';
 import { PgaTournamentPlayerHoleService } from './pga-tournament-player-hole.service';
-import { PgaTournamentPlayerStroke } from './pga-tournament-player-stroke.entity';
 
 import { LoggerService } from '@nestjs/common';
 
@@ -18,18 +18,17 @@ function createMocks() {
     createQueryBuilder: vi.fn(),
   } as unknown as Repository<PgaTournamentPlayerHole>;
 
-  const strokeRepo = {
-    upsert: vi.fn().mockResolvedValue({}),
-  } as unknown as Repository<PgaTournamentPlayerStroke>;
-
   const pgaTourApi = {
     getLeaderboardHoleByHole: vi.fn(),
-    getShotDetails: vi.fn(),
   } as unknown as PgaTourApiService;
 
   const pgaTournamentPlayerService = {
     list: vi.fn().mockResolvedValue([]),
   } as unknown as PgaTournamentPlayerService;
+
+  const strokeService = {
+    ingestStrokesForPlayer: vi.fn().mockResolvedValue(undefined),
+  } as unknown as PgaTournamentPlayerStrokeService;
 
   const logger = {
     log: vi.fn(),
@@ -39,13 +38,13 @@ function createMocks() {
 
   const service = new PgaTournamentPlayerHoleService(
     holeRepo,
-    strokeRepo,
     pgaTourApi,
     pgaTournamentPlayerService,
+    strokeService,
     logger
   );
 
-  return { holeRepo, strokeRepo, pgaTourApi, pgaTournamentPlayerService, logger, service };
+  return { holeRepo, pgaTourApi, pgaTournamentPlayerService, strokeService, logger, service };
 }
 
 describe('PgaTournamentPlayerHoleService', () => {
@@ -224,413 +223,6 @@ describe('PgaTournamentPlayerHoleService', () => {
       await service.ingestHolesForRound('R2025003', 1);
 
       expect(holeRepo.upsert).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('ingestStrokesForPlayer', () => {
-    it('upserts stroke data from shotDetailsV3 API response', async () => {
-      const { service, holeRepo, strokeRepo, pgaTourApi } = createMocks();
-
-      vi.spyOn(holeRepo, 'find').mockResolvedValue([
-        { id: 'hole-uuid-1', hole_number: 1, round_number: 1 } as PgaTournamentPlayerHole,
-      ]);
-
-      vi.spyOn(pgaTourApi, 'getShotDetails').mockResolvedValue({
-        __typename: 'ShotDetails',
-        id: 'test-id',
-        tournamentId: 'R2025003',
-        playerId: '46046',
-        round: 1,
-        displayType: 'ALL',
-        groupPlayers: [],
-        lineColor: '#000',
-        message: '',
-        holes: [
-          {
-            __typename: 'ShotDetailHole',
-            holeNumber: 1,
-            par: 4,
-            score: '3',
-            status: 'BIRDIE',
-            yardage: 432,
-            displayHoleNumber: '1',
-            green: false,
-            rank: null,
-            fairwayCenter: {
-              __typename: 'StrokeCoordinates',
-              x: 0,
-              y: 0,
-              enhancedX: 0,
-              enhancedY: 0,
-              tourcastX: 0,
-              tourcastY: 0,
-              tourcastZ: 0,
-            },
-            pinGreen: { __typename: 'PointOfInterestCoords', x: 0, y: 0, z: 0 },
-            pinOverview: { __typename: 'PointOfInterestCoords', x: 0, y: 0, z: 0 },
-            teeGreen: { __typename: 'PointOfInterestCoords', x: 0, y: 0, z: 0 },
-            teeOverview: { __typename: 'PointOfInterestCoords', x: 0, y: 0, z: 0 },
-            holePickleBottomToTop: '',
-            holePickleBottomToTopAsset: { __typename: 'ImageAsset', url: '' },
-            holePickleGreenBottomToTop: '',
-            holePickleGreenBottomToTopAsset: { __typename: 'ImageAsset', url: '' },
-            holePickleGreenLeftToRight: '',
-            holePickleGreenLeftToRightAsset: { __typename: 'ImageAsset', url: '' },
-            holePickleLeftToRight: '',
-            holePickleLeftToRightAsset: { __typename: 'ImageAsset', url: '' },
-            enhancedPickle: null,
-            strokes: [
-              {
-                __typename: 'HoleStroke',
-                strokeNumber: 1,
-                distance: '290 yds',
-                distanceRemaining: '142 yds',
-                fromLocation: 'Tee Box',
-                fromLocationCode: 'TB',
-                toLocation: 'Fairway',
-                toLocationCode: 'FW',
-                strokeType: 'STROKE',
-                playByPlay: 'Drive to fairway',
-                finalStroke: false,
-                radarData: {
-                  __typename: 'RadarData',
-                  ballSpeed: 175.2,
-                  clubSpeed: 120.1,
-                  smashFactor: 1.459,
-                  verticalLaunchAngle: 10.5,
-                  launchSpin: 2800.0,
-                  spinAxis: 5.2,
-                  apexHeight: 115.0,
-                  actualFlightTime: 0,
-                  apexRange: 0,
-                  apexSide: 0,
-                  horizontalLaunchAngle: 0,
-                  ballTrajectory: [],
-                  normalizedTrajectory: [],
-                  normalizedTrajectoryV2: [],
-                  ballImpactMeasured: null,
-                },
-                overview: {
-                  __typename: 'ShotLinkCoordWrapper',
-                  bottomToTopCoords: {
-                    __typename: 'ShotLinkCoordinates',
-                    fromCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 100.5,
-                      y: 200.3,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                    toCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 300.7,
-                      y: 400.9,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                  },
-                  leftToRightCoords: {
-                    __typename: 'ShotLinkCoordinates',
-                    fromCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                    toCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                  },
-                },
-                green: {
-                  __typename: 'ShotLinkCoordWrapper',
-                  bottomToTopCoords: {
-                    __typename: 'ShotLinkCoordinates',
-                    fromCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                    toCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                  },
-                  leftToRightCoords: {
-                    __typename: 'ShotLinkCoordinates',
-                    fromCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                    toCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                  },
-                },
-                groupShowMarker: false,
-                markerText: '',
-                showMarker: false,
-                ballPath: null,
-                player: null,
-                videoId: null,
-              },
-            ],
-          },
-        ],
-      });
-
-      await service.ingestStrokesForPlayer('R2025003', '46046', 1);
-
-      expect(strokeRepo.upsert).toHaveBeenCalledTimes(1);
-
-      const [rows, options] = (strokeRepo.upsert as ReturnType<typeof vi.fn>).mock.calls[0];
-      expect(options).toEqual({
-        conflictPaths: ['pga_tournament_player_hole_id', 'stroke_number'],
-      });
-      expect(rows).toHaveLength(1);
-      expect(rows[0]).toEqual({
-        pga_tournament_player_hole_id: 'hole-uuid-1',
-        stroke_number: 1,
-        from_location: 'Tee Box',
-        from_location_code: 'TB',
-        to_location: 'Fairway',
-        to_location_code: 'FW',
-        stroke_type: 'stroke',
-        distance: '290 yds',
-        distance_remaining: '142 yds',
-        play_by_play: 'Drive to fairway',
-        is_final_stroke: false,
-        ball_speed: 175.2,
-        club_speed: 120.1,
-        smash_factor: 1.459,
-        launch_angle: 10.5,
-        launch_spin: 2800.0,
-        spin_axis: 5.2,
-        apex_height: 115.0,
-        start_x: 100.5,
-        start_y: 200.3,
-        end_x: 300.7,
-        end_y: 400.9,
-      });
-    });
-
-    it('skips holes without matching hole records', async () => {
-      const { service, holeRepo, strokeRepo, pgaTourApi } = createMocks();
-
-      vi.spyOn(holeRepo, 'find').mockResolvedValue([]);
-
-      vi.spyOn(pgaTourApi, 'getShotDetails').mockResolvedValue({
-        __typename: 'ShotDetails',
-        id: 'test-id',
-        tournamentId: 'R2025003',
-        playerId: '46046',
-        round: 1,
-        displayType: 'ALL',
-        groupPlayers: [],
-        lineColor: '#000',
-        message: '',
-        holes: [
-          {
-            __typename: 'ShotDetailHole',
-            holeNumber: 1,
-            par: 4,
-            score: '3',
-            status: 'BIRDIE',
-            yardage: 432,
-            displayHoleNumber: '1',
-            green: false,
-            rank: null,
-            fairwayCenter: {
-              __typename: 'StrokeCoordinates',
-              x: 0,
-              y: 0,
-              enhancedX: 0,
-              enhancedY: 0,
-              tourcastX: 0,
-              tourcastY: 0,
-              tourcastZ: 0,
-            },
-            pinGreen: { __typename: 'PointOfInterestCoords', x: 0, y: 0, z: 0 },
-            pinOverview: { __typename: 'PointOfInterestCoords', x: 0, y: 0, z: 0 },
-            teeGreen: { __typename: 'PointOfInterestCoords', x: 0, y: 0, z: 0 },
-            teeOverview: { __typename: 'PointOfInterestCoords', x: 0, y: 0, z: 0 },
-            holePickleBottomToTop: '',
-            holePickleBottomToTopAsset: { __typename: 'ImageAsset', url: '' },
-            holePickleGreenBottomToTop: '',
-            holePickleGreenBottomToTopAsset: { __typename: 'ImageAsset', url: '' },
-            holePickleGreenLeftToRight: '',
-            holePickleGreenLeftToRightAsset: { __typename: 'ImageAsset', url: '' },
-            holePickleLeftToRight: '',
-            holePickleLeftToRightAsset: { __typename: 'ImageAsset', url: '' },
-            enhancedPickle: null,
-            strokes: [
-              {
-                __typename: 'HoleStroke',
-                strokeNumber: 1,
-                distance: '290 yds',
-                distanceRemaining: '142 yds',
-                fromLocation: 'Tee Box',
-                fromLocationCode: 'TB',
-                toLocation: 'Fairway',
-                toLocationCode: 'FW',
-                strokeType: 'STROKE',
-                playByPlay: '',
-                finalStroke: false,
-                radarData: null,
-                overview: {
-                  __typename: 'ShotLinkCoordWrapper',
-                  bottomToTopCoords: {
-                    __typename: 'ShotLinkCoordinates',
-                    fromCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                    toCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                  },
-                  leftToRightCoords: {
-                    __typename: 'ShotLinkCoordinates',
-                    fromCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                    toCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                  },
-                },
-                green: {
-                  __typename: 'ShotLinkCoordWrapper',
-                  bottomToTopCoords: {
-                    __typename: 'ShotLinkCoordinates',
-                    fromCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                    toCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                  },
-                  leftToRightCoords: {
-                    __typename: 'ShotLinkCoordinates',
-                    fromCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                    toCoords: {
-                      __typename: 'StrokeCoordinates',
-                      x: 0,
-                      y: 0,
-                      enhancedX: 0,
-                      enhancedY: 0,
-                      tourcastX: 0,
-                      tourcastY: 0,
-                      tourcastZ: 0,
-                    },
-                  },
-                },
-                groupShowMarker: false,
-                markerText: '',
-                showMarker: false,
-                ballPath: null,
-                player: null,
-                videoId: null,
-              },
-            ],
-          },
-        ],
-      });
-
-      await service.ingestStrokesForPlayer('R2025003', '46046', 1);
-
-      expect(strokeRepo.upsert).not.toHaveBeenCalled();
     });
   });
 
