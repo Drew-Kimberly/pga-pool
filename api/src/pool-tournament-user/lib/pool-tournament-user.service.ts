@@ -98,20 +98,15 @@ export class PoolTournamentUserService {
     const updateBatchSize = 25;
     const users = await this.list({ poolTournamentId }, repo);
 
-    for (let i = 0; i < users.length; i += updateBatchSize) {
-      const batch = users.slice(i, i + updateBatchSize);
-      const updates = batch.map((user) => {
-        return this.upsert(
-          {
-            ...user,
-            tournament_score: this.aggregateScore(user.picks),
-            fedex_cup_points: this.aggregateFedexPoints(user.picks),
-          },
-          repo
-        );
-      });
-
-      await Promise.all(updates);
+    for (const user of users) {
+      await this.upsert(
+        {
+          ...user,
+          tournament_score: this.aggregateScore(user.picks),
+          fedex_cup_points: this.aggregateFedexPoints(user.picks),
+        },
+        repo
+      );
     }
   }
 

@@ -106,17 +106,15 @@ export class PoolTournamentFinalizerService {
       where: { pool_tournament_id: poolTournament.id },
     });
 
-    const updates = poolTournamentUsers.map((poolTournamentUser) => {
+    for (const poolTournamentUser of poolTournamentUsers) {
       const delta = this.getScoreDelta(poolTournament, poolTournamentUser);
-      return poolUserRepo
+      await poolUserRepo
         .createQueryBuilder()
         .update()
         .set({ pool_score: () => `pool_score + ${delta}` })
         .where('id = :id', { id: poolTournamentUser.pool_user_id })
         .execute();
-    });
-
-    await Promise.all(updates);
+    }
 
     poolTournament.scores_are_official = true;
     await poolTournamentRepo.save(poolTournament);

@@ -229,6 +229,70 @@ describe('PgaTournamentPlayerStrokeService', () => {
       });
     });
 
+    it('deduplicates strokes with the same hole and stroke number', async () => {
+      const { service, holeRepo, strokeRepo, pgaTourApi } = createMocks();
+
+      vi.spyOn(holeRepo, 'find').mockResolvedValue([
+        { id: 'hole-uuid-1', hole_number: 1, round_number: 1 } as PgaTournamentPlayerHole,
+      ]);
+
+      const makeStroke = (overrides: Record<string, unknown> = {}) => ({
+        __typename: 'HoleStroke' as const,
+        strokeNumber: 1,
+        distance: '290 yds',
+        distanceRemaining: '142 yds',
+        fromLocation: 'Tee Box',
+        fromLocationCode: 'TB',
+        toLocation: 'Fairway',
+        toLocationCode: 'FW',
+        strokeType: 'STROKE',
+        playByPlay: '',
+        finalStroke: false,
+        radarData: null,
+        overview: createShotLinkCoordWrapperStub(),
+        green: createShotLinkCoordWrapperStub(),
+        groupShowMarker: false,
+        markerText: '',
+        showMarker: false,
+        ballPath: null,
+        player: null,
+        videoId: null,
+        ...overrides,
+      });
+
+      vi.spyOn(pgaTourApi, 'getShotDetails').mockResolvedValue({
+        __typename: 'ShotDetails',
+        id: 'test-id',
+        tournamentId: 'R2025003',
+        playerId: '46046',
+        round: 1,
+        displayType: 'ALL',
+        groupPlayers: [],
+        lineColor: '#000',
+        message: '',
+        holes: [
+          createShotDetailHoleStub({
+            holeNumber: 1,
+            par: 4,
+            score: '3',
+            status: 'BIRDIE',
+            yardage: 432,
+            strokes: [
+              makeStroke({ strokeNumber: 1, toLocation: 'Fairway' }),
+              makeStroke({ strokeNumber: 1, toLocation: 'Rough' }),
+            ],
+          }),
+        ],
+      });
+
+      await service.ingestStrokesForPlayer('R2025003', '46046', 1);
+
+      expect(strokeRepo.upsert).toHaveBeenCalledTimes(1);
+      const [rows] = (strokeRepo.upsert as ReturnType<typeof vi.fn>).mock.calls[0];
+      expect(rows).toHaveLength(1);
+      expect(rows[0].to_location).toBe('Rough');
+    });
+
     it('skips holes without matching hole records', async () => {
       const { service, holeRepo, strokeRepo, pgaTourApi } = createMocks();
 

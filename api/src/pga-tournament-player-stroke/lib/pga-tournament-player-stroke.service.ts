@@ -84,7 +84,12 @@ export class PgaTournamentPlayerStrokeService {
       return;
     }
 
-    await this.strokeRepo.upsert(strokeRows, {
+    const deduped = new Map<string, Partial<PgaTournamentPlayerStroke>>();
+    for (const row of strokeRows) {
+      deduped.set(`${row.pga_tournament_player_hole_id}:${row.stroke_number}`, row);
+    }
+
+    await this.strokeRepo.upsert([...deduped.values()], {
       conflictPaths: ['pga_tournament_player_hole_id', 'stroke_number'],
     });
   }

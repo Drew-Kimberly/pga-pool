@@ -334,12 +334,11 @@ export class PgaTournamentPlayerService {
           } of ${playerIds.length})`
         );
 
-        const updates = batch.map((playerId, index) =>
-          tournamentPlayerRepo.update(`${playerId}-${tournament.id}`, {
-            official_fedex_cup_points: pointsByPlayer[index],
-          })
-        );
-        await Promise.all(updates);
+        for (let j = 0; j < batch.length; j++) {
+          await tournamentPlayerRepo.update(`${batch[j]}-${tournament.id}`, {
+            official_fedex_cup_points: pointsByPlayer[j],
+          });
+        }
       }
 
       await tournamentRepo.update(tournament.id, {
