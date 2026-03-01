@@ -217,6 +217,41 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
         - PGA Tournament Players
+  /pga-tournament-players/{pgaTournamentPlayerId}/rounds:
+    parameters:
+      - $ref: '#/components/parameters/PgaTournamentPlayerId'
+    get:
+      summary: Gets round score summaries for a PGA tournament player
+      description: Returns per-round scoring summaries derived from hole-by-hole data
+      operationId: getPgaTournamentPlayerRounds
+      responses:
+        '200':
+          $ref: '#/components/responses/RoundSummariesResponse'
+      tags:
+        - PGA Tournament Players
+  /pga-tournament-players/{pgaTournamentPlayerId}/scorecard:
+    parameters:
+      - $ref: '#/components/parameters/PgaTournamentPlayerId'
+    get:
+      summary: Gets the scorecard for a PGA tournament player for a specific round
+      description: Returns hole-by-hole scorecard data for a given round
+      operationId: getPgaTournamentPlayerScorecard
+      parameters:
+        - name: round
+          in: query
+          required: true
+          description: The round number (1-4)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 4
+      responses:
+        '200':
+          $ref: '#/components/responses/ScorecardResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+        - PGA Tournament Players
 components:
   responses:
     ListPoolsResponse:
@@ -382,6 +417,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PoolTournament'
+    RoundSummariesResponse:
+      description: Response containing round score summaries for a PGA tournament player
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/RoundSummary'
+    ScorecardResponse:
+      description: Response containing a scorecard for a specific round
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Scorecard'
     NotFound:
       description: Error response corresponding to 404 status code
       content:
@@ -431,6 +480,14 @@ components:
       schema:
         type: string
         example: '002-2023'
+    PgaTournamentPlayerId:
+      name: pgaTournamentPlayerId
+      in: path
+      required: true
+      description: The PGA Tournament Player ID
+      schema:
+        type: string
+        example: '24449-R2023006'
     PoolFilter:
       name: filter
       description: Filters a collection of Pools.
@@ -1127,6 +1184,78 @@ components:
         - timezone
         - display
         - display_short
+    RoundSummary:
+      description: Per-round score summary for a PGA tournament player
+      type: object
+      additionalProperties: false
+      properties:
+        round_number:
+          type: integer
+          example: 1
+        strokes:
+          type: integer
+          example: 66
+        to_par:
+          type: integer
+          example: -5
+      required:
+        - round_number
+        - strokes
+        - to_par
+    Scorecard:
+      description: Hole-by-hole scorecard for a specific round
+      type: object
+      additionalProperties: false
+      properties:
+        round_number:
+          type: integer
+          example: 3
+        strokes:
+          type: integer
+          example: 64
+        to_par:
+          type: integer
+          example: -7
+        holes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScorecardHole'
+      required:
+        - round_number
+        - strokes
+        - to_par
+        - holes
+    ScorecardHole:
+      description: Individual hole score within a scorecard
+      type: object
+      additionalProperties: false
+      properties:
+        hole_number:
+          type: integer
+          example: 1
+        par:
+          type: integer
+          example: 4
+        score:
+          type: integer
+          example: 3
+        to_par:
+          type: integer
+          example: -1
+        status:
+          type: string
+          enum: ['birdie', 'bogey', 'eagle', 'double_bogey', 'par', 'none']
+          example: 'birdie'
+        yardage:
+          type: integer
+          example: 432
+      required:
+        - hole_number
+        - par
+        - score
+        - to_par
+        - status
+        - yardage
     LimitOffsetResponseMeta:
       type: object
       title: LimitOffsetResponseMeta

@@ -1,0 +1,59 @@
+query ShotDetailsV3(
+  $tournamentId: ID!
+  $playerId: ID!
+  $round: Int!
+  $includeRadar: Boolean
+) {
+  shotDetailsV3(
+    tournamentId: $tournamentId
+    playerId: $playerId
+    round: $round
+    includeRadar: $includeRadar
+  ) {
+    id
+    tournamentId
+    playerId
+    round
+    displayType
+    holes {
+      holeNumber
+      par
+      score
+      status
+      yardage
+      strokes {
+        strokeNumber
+        distance
+        distanceRemaining
+        fromLocation
+        fromLocationCode
+        toLocation
+        toLocationCode
+        strokeType
+        playByPlay
+        finalStroke
+        radarData {
+          ballSpeed
+          clubSpeed
+          smashFactor
+          verticalLaunchAngle
+          launchSpin
+          spinAxis
+          apexHeight
+        }
+        overview {
+          bottomToTopCoords {
+            fromCoords {
+              x
+              y
+            }
+            toCoords {
+              x
+              y
+            }
+          }
+        }
+      }
+    }
+  }
+}

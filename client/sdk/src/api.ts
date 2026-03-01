@@ -1133,6 +1133,117 @@ export interface PoolUser {
     'updated_at': string;
 }
 /**
+ * Per-round score summary for a PGA tournament player
+ * @export
+ * @interface RoundSummary
+ */
+export interface RoundSummary {
+    /**
+     * 
+     * @type {number}
+     * @memberof RoundSummary
+     */
+    'round_number': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof RoundSummary
+     */
+    'strokes': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof RoundSummary
+     */
+    'to_par': number;
+}
+/**
+ * Hole-by-hole scorecard for a specific round
+ * @export
+ * @interface Scorecard
+ */
+export interface Scorecard {
+    /**
+     * 
+     * @type {number}
+     * @memberof Scorecard
+     */
+    'round_number': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Scorecard
+     */
+    'strokes': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Scorecard
+     */
+    'to_par': number;
+    /**
+     * 
+     * @type {Array<ScorecardHole>}
+     * @memberof Scorecard
+     */
+    'holes': Array<ScorecardHole>;
+}
+/**
+ * Individual hole score within a scorecard
+ * @export
+ * @interface ScorecardHole
+ */
+export interface ScorecardHole {
+    /**
+     * 
+     * @type {number}
+     * @memberof ScorecardHole
+     */
+    'hole_number': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ScorecardHole
+     */
+    'par': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ScorecardHole
+     */
+    'score': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ScorecardHole
+     */
+    'to_par': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ScorecardHole
+     */
+    'status': ScorecardHoleStatusEnum;
+    /**
+     * 
+     * @type {number}
+     * @memberof ScorecardHole
+     */
+    'yardage': number;
+}
+
+export const ScorecardHoleStatusEnum = {
+    Birdie: 'birdie',
+    Bogey: 'bogey',
+    Eagle: 'eagle',
+    DoubleBogey: 'double_bogey',
+    Par: 'par',
+    None: 'none'
+} as const;
+
+export type ScorecardHoleStatusEnum = typeof ScorecardHoleStatusEnum[keyof typeof ScorecardHoleStatusEnum];
+
+/**
  * @type StringEqNeqFieldFilter
  * @export
  */
@@ -1671,6 +1782,81 @@ export class PGATournamentFieldApi extends BaseAPI {
 export const PGATournamentPlayersApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Returns per-round scoring summaries derived from hole-by-hole data
+         * @summary Gets round score summaries for a PGA tournament player
+         * @param {string} pgaTournamentPlayerId The PGA Tournament Player ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPgaTournamentPlayerRounds: async (pgaTournamentPlayerId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pgaTournamentPlayerId' is not null or undefined
+            assertParamExists('getPgaTournamentPlayerRounds', 'pgaTournamentPlayerId', pgaTournamentPlayerId)
+            const localVarPath = `/pga-tournament-players/{pgaTournamentPlayerId}/rounds`
+                .replace(`{${"pgaTournamentPlayerId"}}`, encodeURIComponent(String(pgaTournamentPlayerId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Returns hole-by-hole scorecard data for a given round
+         * @summary Gets the scorecard for a PGA tournament player for a specific round
+         * @param {string} pgaTournamentPlayerId The PGA Tournament Player ID
+         * @param {number} round The round number (1-4)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPgaTournamentPlayerScorecard: async (pgaTournamentPlayerId: string, round: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pgaTournamentPlayerId' is not null or undefined
+            assertParamExists('getPgaTournamentPlayerScorecard', 'pgaTournamentPlayerId', pgaTournamentPlayerId)
+            // verify required parameter 'round' is not null or undefined
+            assertParamExists('getPgaTournamentPlayerScorecard', 'round', round)
+            const localVarPath = `/pga-tournament-players/{pgaTournamentPlayerId}/scorecard`
+                .replace(`{${"pgaTournamentPlayerId"}}`, encodeURIComponent(String(pgaTournamentPlayerId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (round !== undefined) {
+                localVarQueryParameter['round'] = round;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Lists players for a given PGA Tournament
          * @summary Lists players for a given PGA Tournament
          * @param {string} pgaTournamentId The PGA Tournament ID
@@ -1720,6 +1906,33 @@ export const PGATournamentPlayersApiFp = function(configuration?: Configuration)
     const localVarAxiosParamCreator = PGATournamentPlayersApiAxiosParamCreator(configuration)
     return {
         /**
+         * Returns per-round scoring summaries derived from hole-by-hole data
+         * @summary Gets round score summaries for a PGA tournament player
+         * @param {string} pgaTournamentPlayerId The PGA Tournament Player ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getPgaTournamentPlayerRounds(pgaTournamentPlayerId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RoundSummary>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getPgaTournamentPlayerRounds(pgaTournamentPlayerId, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PGATournamentPlayersApi.getPgaTournamentPlayerRounds']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
+         * Returns hole-by-hole scorecard data for a given round
+         * @summary Gets the scorecard for a PGA tournament player for a specific round
+         * @param {string} pgaTournamentPlayerId The PGA Tournament Player ID
+         * @param {number} round The round number (1-4)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getPgaTournamentPlayerScorecard(pgaTournamentPlayerId: string, round: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Scorecard>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getPgaTournamentPlayerScorecard(pgaTournamentPlayerId, round, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PGATournamentPlayersApi.getPgaTournamentPlayerScorecard']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
          * Lists players for a given PGA Tournament
          * @summary Lists players for a given PGA Tournament
          * @param {string} pgaTournamentId The PGA Tournament ID
@@ -1744,6 +1957,26 @@ export const PGATournamentPlayersApiFactory = function (configuration?: Configur
     const localVarFp = PGATournamentPlayersApiFp(configuration)
     return {
         /**
+         * Returns per-round scoring summaries derived from hole-by-hole data
+         * @summary Gets round score summaries for a PGA tournament player
+         * @param {PGATournamentPlayersApiGetPgaTournamentPlayerRoundsRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPgaTournamentPlayerRounds(requestParameters: PGATournamentPlayersApiGetPgaTournamentPlayerRoundsRequest, options?: RawAxiosRequestConfig): AxiosPromise<Array<RoundSummary>> {
+            return localVarFp.getPgaTournamentPlayerRounds(requestParameters.pgaTournamentPlayerId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Returns hole-by-hole scorecard data for a given round
+         * @summary Gets the scorecard for a PGA tournament player for a specific round
+         * @param {PGATournamentPlayersApiGetPgaTournamentPlayerScorecardRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPgaTournamentPlayerScorecard(requestParameters: PGATournamentPlayersApiGetPgaTournamentPlayerScorecardRequest, options?: RawAxiosRequestConfig): AxiosPromise<Scorecard> {
+            return localVarFp.getPgaTournamentPlayerScorecard(requestParameters.pgaTournamentPlayerId, requestParameters.round, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Lists players for a given PGA Tournament
          * @summary Lists players for a given PGA Tournament
          * @param {PGATournamentPlayersApiListPgaTournamentPlayersRequest} requestParameters Request parameters.
@@ -1755,6 +1988,41 @@ export const PGATournamentPlayersApiFactory = function (configuration?: Configur
         },
     };
 };
+
+/**
+ * Request parameters for getPgaTournamentPlayerRounds operation in PGATournamentPlayersApi.
+ * @export
+ * @interface PGATournamentPlayersApiGetPgaTournamentPlayerRoundsRequest
+ */
+export interface PGATournamentPlayersApiGetPgaTournamentPlayerRoundsRequest {
+    /**
+     * The PGA Tournament Player ID
+     * @type {string}
+     * @memberof PGATournamentPlayersApiGetPgaTournamentPlayerRounds
+     */
+    readonly pgaTournamentPlayerId: string
+}
+
+/**
+ * Request parameters for getPgaTournamentPlayerScorecard operation in PGATournamentPlayersApi.
+ * @export
+ * @interface PGATournamentPlayersApiGetPgaTournamentPlayerScorecardRequest
+ */
+export interface PGATournamentPlayersApiGetPgaTournamentPlayerScorecardRequest {
+    /**
+     * The PGA Tournament Player ID
+     * @type {string}
+     * @memberof PGATournamentPlayersApiGetPgaTournamentPlayerScorecard
+     */
+    readonly pgaTournamentPlayerId: string
+
+    /**
+     * The round number (1-4)
+     * @type {number}
+     * @memberof PGATournamentPlayersApiGetPgaTournamentPlayerScorecard
+     */
+    readonly round: number
+}
 
 /**
  * Request parameters for listPgaTournamentPlayers operation in PGATournamentPlayersApi.
@@ -1784,6 +2052,30 @@ export interface PGATournamentPlayersApiListPgaTournamentPlayersRequest {
  * @extends {BaseAPI}
  */
 export class PGATournamentPlayersApi extends BaseAPI {
+    /**
+     * Returns per-round scoring summaries derived from hole-by-hole data
+     * @summary Gets round score summaries for a PGA tournament player
+     * @param {PGATournamentPlayersApiGetPgaTournamentPlayerRoundsRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PGATournamentPlayersApi
+     */
+    public getPgaTournamentPlayerRounds(requestParameters: PGATournamentPlayersApiGetPgaTournamentPlayerRoundsRequest, options?: RawAxiosRequestConfig) {
+        return PGATournamentPlayersApiFp(this.configuration).getPgaTournamentPlayerRounds(requestParameters.pgaTournamentPlayerId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Returns hole-by-hole scorecard data for a given round
+     * @summary Gets the scorecard for a PGA tournament player for a specific round
+     * @param {PGATournamentPlayersApiGetPgaTournamentPlayerScorecardRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PGATournamentPlayersApi
+     */
+    public getPgaTournamentPlayerScorecard(requestParameters: PGATournamentPlayersApiGetPgaTournamentPlayerScorecardRequest, options?: RawAxiosRequestConfig) {
+        return PGATournamentPlayersApiFp(this.configuration).getPgaTournamentPlayerScorecard(requestParameters.pgaTournamentPlayerId, requestParameters.round, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Lists players for a given PGA Tournament
      * @summary Lists players for a given PGA Tournament
