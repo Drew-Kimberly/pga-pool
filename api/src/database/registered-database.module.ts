@@ -3,6 +3,8 @@ import { LeagueUser } from '../league-user/lib/league-user.entity';
 import { PgaPlayer } from '../pga-player/lib/pga-player.entity';
 import { PgaTournament } from '../pga-tournament/lib/pga-tournament.entity';
 import { PgaTournamentPlayer } from '../pga-tournament-player/lib/pga-tournament-player.entity';
+import { PgaTournamentPlayerHole } from '../pga-tournament-player-hole/lib/pga-tournament-player-hole.entity';
+import { PgaTournamentPlayerStroke } from '../pga-tournament-player-hole/lib/pga-tournament-player-stroke.entity';
 import { Pool } from '../pool/lib/pool.entity';
 import { PoolTournament } from '../pool-tournament/lib/pool-tournament.entity';
 import { PoolTournamentPlayer } from '../pool-tournament-player/lib/pool-tournament-player.entity';
@@ -21,6 +23,8 @@ import { Module } from '@nestjs/common';
       PgaPlayer,
       PgaTournament,
       PgaTournamentPlayer,
+      PgaTournamentPlayerHole,
+      PgaTournamentPlayerStroke,
       User,
       League,
       LeagueUser,

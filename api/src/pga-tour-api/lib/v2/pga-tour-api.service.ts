@@ -3,7 +3,14 @@ import { gunzipSync, inflateSync, unzipSync } from 'zlib';
 import { GraphQLClient } from 'graphql-request';
 import { lastValueFrom } from 'rxjs';
 
-import { getSdk, ScheduleQuery, Sdk, TournamentsQuery } from './generated/graphql';
+import {
+  getSdk,
+  LeaderboardHoleByHoleQuery,
+  ScheduleQuery,
+  Sdk,
+  ShotDetailsV3Query,
+  TournamentsQuery,
+} from './generated/graphql';
 import { InjectPgaTourApiConfig, PgaTourApiConfig } from './pga-tour-api.config';
 import {
   PgaApiPlayer,
@@ -98,6 +105,28 @@ export class PgaTourApiService {
         players: this.normalizeLeaderboardPlayers(leaderboard.players ?? []),
       },
     } as PgaApiTournamentLeaderboardResponse;
+  }
+
+  async getLeaderboardHoleByHole(
+    tournamentId: string,
+    round?: number
+  ): Promise<LeaderboardHoleByHoleQuery['leaderboardHoleByHole']> {
+    const response = await this.sdk.LeaderboardHoleByHole({ tournamentId, round });
+    return response.leaderboardHoleByHole;
+  }
+
+  async getShotDetails(
+    tournamentId: string,
+    playerId: string,
+    round: number
+  ): Promise<ShotDetailsV3Query['shotDetailsV3']> {
+    const response = await this.sdk.ShotDetailsV3({
+      tournamentId,
+      playerId,
+      round,
+      includeRadar: true,
+    });
+    return response.shotDetailsV3;
   }
 
   async getProjectedFedexCupPoints(

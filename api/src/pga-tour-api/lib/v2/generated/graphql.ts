@@ -11198,6 +11198,14 @@ export type LeaderboardCompressedV3QueryVariables = Exact<{
 
 export type LeaderboardCompressedV3Query = { __typename?: 'Query', leaderboardCompressedV3: { __typename?: 'LeaderboardCompressedV3', id: string, payload: string } };
 
+export type LeaderboardHoleByHoleQueryVariables = Exact<{
+  tournamentId: Scalars['ID']['input'];
+  round?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type LeaderboardHoleByHoleQuery = { __typename?: 'Query', leaderboardHoleByHole: { __typename?: 'LeaderboardHoleByHole', tournamentId: string, tournamentName: string, currentRound: number, courseHoleHeaders: Array<{ __typename?: 'CourseHoleHeader', courseId: string, holeHeaders: Array<{ __typename?: 'HoleHeaderV2', holeNumber?: number | null, par: string }> }>, playerData: Array<{ __typename?: 'PlayerRowHoleByHole', playerId: string, courseId: string, in?: string | null, out?: string | null, total?: string | null, totalToPar: string, scores: Array<{ __typename?: 'HoleScore', holeNumber: number, par: number, score: string, roundScore: string, status: HoleScoreStatus, sequenceNumber: number, yardage: number }> }> } };
+
 export type ScheduleQueryVariables = Exact<{
   tourCode: Scalars['String']['input'];
   year?: InputMaybe<Scalars['String']['input']>;
@@ -11208,6 +11216,16 @@ export type ScheduleQueryVariables = Exact<{
 export type ScheduleQuery = { __typename?: 'Query', schedule: { __typename?: 'Schedule', seasonYear: string, tour: string, completed: Array<{ __typename?: 'ScheduleMonth', month: string, year: string, monthSort?: number | null, tournaments: Array<{ __typename?: 'ScheduleTournament', tournamentName: string, id: string, beautyImage?: string | null, champion: string, championEarnings?: string | null, championId: string, city: string, country: string, countryCode: string, courseName: string, date: string, dateAccessibilityText: string, purse?: string | null, startDate: unknown, state: string, stateCode: string, tournamentLogo: string, tourStandingHeading?: string | null, tourStandingValue?: string | null }> }>, filters?: Array<{ __typename?: 'ScheduleTournamentFilter', type: TournamentCategory, name: string }> | null, upcoming: Array<{ __typename?: 'ScheduleMonth', month: string, year: string, monthSort?: number | null, tournaments: Array<{ __typename?: 'ScheduleTournament', tournamentName: string, id: string, beautyImage?: string | null, champion: string, championEarnings?: string | null, championId: string, city: string, country: string, countryCode: string, courseName: string, date: string, dateAccessibilityText: string, purse?: string | null, startDate: unknown, state: string, stateCode: string, tournamentLogo: string, tourStandingHeading?: string | null, tourStandingValue?: string | null }> }> } };
 
 export type ScheduleTournamentFragment = { __typename?: 'ScheduleMonth', tournaments: Array<{ __typename?: 'ScheduleTournament', tournamentName: string, id: string, beautyImage?: string | null, champion: string, championEarnings?: string | null, championId: string, city: string, country: string, countryCode: string, courseName: string, date: string, dateAccessibilityText: string, purse?: string | null, startDate: unknown, state: string, stateCode: string, tournamentLogo: string, tourStandingHeading?: string | null, tourStandingValue?: string | null }> };
+
+export type ShotDetailsV3QueryVariables = Exact<{
+  tournamentId: Scalars['ID']['input'];
+  playerId: Scalars['ID']['input'];
+  round: Scalars['Int']['input'];
+  includeRadar?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type ShotDetailsV3Query = { __typename?: 'Query', shotDetailsV3: { __typename?: 'ShotDetails', id: string, tournamentId: string, playerId: string, round: number, displayType: ShotDetailsDisplayType, holes: Array<{ __typename?: 'ShotDetailHole', holeNumber: number, par: number, score: string, status: HoleScoreStatus, yardage: number, strokes: Array<{ __typename?: 'HoleStroke', strokeNumber: number, distance: string, distanceRemaining: string, fromLocation: string, fromLocationCode: string, toLocation: string, toLocationCode: string, strokeType: HoleStrokeType, playByPlay: string, finalStroke: boolean, radarData?: { __typename?: 'RadarData', ballSpeed: number, clubSpeed: number, smashFactor: number, verticalLaunchAngle: number, launchSpin: number, spinAxis: number, apexHeight: number } | null, overview: { __typename?: 'ShotLinkCoordWrapper', bottomToTopCoords: { __typename?: 'ShotLinkCoordinates', fromCoords: { __typename?: 'StrokeCoordinates', x: number, y: number }, toCoords: { __typename?: 'StrokeCoordinates', x: number, y: number } } } }> }> } };
 
 export type TourCupSplitQueryVariables = Exact<{
   tourCode: TourCode;
@@ -11313,6 +11331,39 @@ export const LeaderboardCompressedV3Document = gql`
   }
 }
     `;
+export const LeaderboardHoleByHoleDocument = gql`
+    query LeaderboardHoleByHole($tournamentId: ID!, $round: Int) {
+  leaderboardHoleByHole(tournamentId: $tournamentId, round: $round) {
+    tournamentId
+    tournamentName
+    currentRound
+    courseHoleHeaders {
+      courseId
+      holeHeaders {
+        holeNumber
+        par
+      }
+    }
+    playerData {
+      playerId
+      courseId
+      in
+      out
+      total
+      totalToPar
+      scores {
+        holeNumber
+        par
+        score
+        roundScore
+        status
+        sequenceNumber
+        yardage
+      }
+    }
+  }
+}
+    `;
 export const ScheduleDocument = gql`
     query Schedule($tourCode: String!, $year: String, $filter: TournamentCategory) {
   schedule(tourCode: $tourCode, year: $year, filter: $filter) {
@@ -11337,6 +11388,62 @@ export const ScheduleDocument = gql`
   }
 }
     ${ScheduleTournamentFragmentDoc}`;
+export const ShotDetailsV3Document = gql`
+    query ShotDetailsV3($tournamentId: ID!, $playerId: ID!, $round: Int!, $includeRadar: Boolean) {
+  shotDetailsV3(
+    tournamentId: $tournamentId
+    playerId: $playerId
+    round: $round
+    includeRadar: $includeRadar
+  ) {
+    id
+    tournamentId
+    playerId
+    round
+    displayType
+    holes {
+      holeNumber
+      par
+      score
+      status
+      yardage
+      strokes {
+        strokeNumber
+        distance
+        distanceRemaining
+        fromLocation
+        fromLocationCode
+        toLocation
+        toLocationCode
+        strokeType
+        playByPlay
+        finalStroke
+        radarData {
+          ballSpeed
+          clubSpeed
+          smashFactor
+          verticalLaunchAngle
+          launchSpin
+          spinAxis
+          apexHeight
+        }
+        overview {
+          bottomToTopCoords {
+            fromCoords {
+              x
+              y
+            }
+            toCoords {
+              x
+              y
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
 export const TourCupSplitDocument = gql`
     query TourCupSplit($tourCode: TourCode!, $id: String, $year: Int, $eventQuery: StatDetailEventQuery) {
   tourCupSplit(tourCode: $tourCode, id: $id, year: $year, eventQuery: $eventQuery) {
@@ -11372,8 +11479,14 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     LeaderboardCompressedV3(variables: LeaderboardCompressedV3QueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<LeaderboardCompressedV3Query> {
       return withWrapper((wrappedRequestHeaders) => client.request<LeaderboardCompressedV3Query>({ document: LeaderboardCompressedV3Document, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'LeaderboardCompressedV3', 'query', variables);
     },
+    LeaderboardHoleByHole(variables: LeaderboardHoleByHoleQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<LeaderboardHoleByHoleQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<LeaderboardHoleByHoleQuery>({ document: LeaderboardHoleByHoleDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'LeaderboardHoleByHole', 'query', variables);
+    },
     Schedule(variables: ScheduleQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ScheduleQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<ScheduleQuery>({ document: ScheduleDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Schedule', 'query', variables);
+    },
+    ShotDetailsV3(variables: ShotDetailsV3QueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ShotDetailsV3Query> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ShotDetailsV3Query>({ document: ShotDetailsV3Document, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'ShotDetailsV3', 'query', variables);
     },
     TourCupSplit(variables: TourCupSplitQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<TourCupSplitQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<TourCupSplitQuery>({ document: TourCupSplitDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'TourCupSplit', 'query', variables);
