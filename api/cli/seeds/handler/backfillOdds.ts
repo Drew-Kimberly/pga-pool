@@ -3,8 +3,8 @@ import path from 'path';
 
 import { PgaTournamentField } from '../../../src/pga-tournament-field/lib/pga-tournament-field.interface';
 import { PoolTournament } from '../../../src/pool-tournament/lib/pool-tournament.entity';
-import { PoolTournamentPlayer } from '../../../src/pool-tournament-player/lib/pool-tournament-player.entity';
 import { PoolTournamentService } from '../../../src/pool-tournament/lib/pool-tournament.service';
+import { PoolTournamentPlayer } from '../../../src/pool-tournament-player/lib/pool-tournament-player.entity';
 import { SeedDataService } from '../../../src/seed-data/lib/seed-data.service';
 import { PgaPoolCliModule } from '../../cli.module';
 
@@ -24,10 +24,7 @@ export async function backfillOdds(year?: number) {
   const seedDir = seedDataService.getSeedDirPath();
   const tournamentDirs = fs.readdirSync(seedDir).filter((entry) => {
     const fullPath = path.join(seedDir, entry);
-    return (
-      fs.lstatSync(fullPath).isDirectory() &&
-      fs.existsSync(path.join(fullPath, 'field.json'))
-    );
+    return fs.lstatSync(fullPath).isDirectory() && fs.existsSync(path.join(fullPath, 'field.json'));
   });
 
   logger.log(

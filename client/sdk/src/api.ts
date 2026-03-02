@@ -1083,6 +1083,12 @@ export interface PoolTournamentUserPick {
      */
     'tier': number;
     /**
+     * Field-snapshot odds from pool field generation
+     * @type {string}
+     * @memberof PoolTournamentUserPick
+     */
+    'odds': string | null;
+    /**
      * 
      * @type {PgaTournamentPlayer}
      * @memberof PoolTournamentUserPick

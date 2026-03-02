@@ -1117,10 +1117,16 @@ components:
       properties:
         tier:
           type: number
+        odds:
+          type: string
+          nullable: true
+          example: '+900'
+          description: Field-snapshot odds from pool field generation
         pga_tournament_player:
           $ref: '#/components/schemas/PgaTournamentPlayer'
       required:
         - tier
+        - odds
         - pga_tournament_player
     User:
       description: Defines a user (i.e. contestant who competes in pools)
