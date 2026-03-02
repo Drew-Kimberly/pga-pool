@@ -158,6 +158,29 @@ export class PgaTournamentPlayerService {
     this.logger.log(
       `Ensured ${filteredPlayers.length} player(s) in field for tournament ${pgaTournament.id}`
     );
+
+    if (pgaTournament.tournament_status === PgaTournamentStatus.NOT_STARTED) {
+      const existingRows = await repo.find({
+        select: ['id', 'pga_player'],
+        relations: ['pga_player'],
+        where: { pga_tournament: { id: pgaTournament.id } },
+      });
+
+      const incomingIds = new Set(filteredPlayers.map((p) => Number(p.id)));
+      const staleIds = existingRows
+        .filter((row) => !incomingIds.has(row.pga_player.id))
+        .map((row) => row.id);
+
+      if (staleIds.length > 0) {
+        await repo.update(staleIds, {
+          active: false,
+          status: PlayerStatus.Withdrawn,
+        });
+        this.logger.log(
+          `Marked ${staleIds.length} stale player(s) as withdrawn for tournament ${pgaTournament.id}`
+        );
+      }
+    }
   }
 
   async updateScores(
@@ -185,6 +208,8 @@ export class PgaTournamentPlayerService {
       throw new Error(`PGA Tournament ${pgaTournamentId} does not exist`);
     }
 
+    await this.ensurePlayersFromField(pgaTournament, repo);
+
     let pgaLeaderboard: Awaited<ReturnType<PgaTourApiService['getTournamentLeaderboard']>>;
     try {
       pgaLeaderboard = await this.pgaTourApi.getTournamentLeaderboard(
@@ -193,7 +218,7 @@ export class PgaTournamentPlayerService {
       );
     } catch (e) {
       this.logger.warn(
-        `Skipping field upsert for PGA Tournament ${pgaTournament.id}: leaderboard not available (${e})`
+        `Leaderboard not available for PGA Tournament ${pgaTournament.id}, skipping score update (${e})`
       );
       return;
     }
@@ -201,7 +226,7 @@ export class PgaTournamentPlayerService {
     const leaderboardPlayers = pgaLeaderboard.leaderboard.players;
     if (!Array.isArray(leaderboardPlayers) || leaderboardPlayers.length === 0) {
       this.logger.warn(
-        `Skipping field upsert for PGA Tournament ${pgaTournament.id}: empty leaderboard`
+        `Empty leaderboard for PGA Tournament ${pgaTournament.id}, skipping score update`
       );
       return;
     }
@@ -215,36 +240,11 @@ export class PgaTournamentPlayerService {
 
     if (filteredLeaderboardPlayers.length === 0) {
       this.logger.warn(
-        `Skipping field upsert for PGA Tournament ${pgaTournament.id}: no leaderboard players found in pga_player`
+        `No leaderboard players found in pga_player for PGA Tournament ${pgaTournament.id}, skipping score update`
       );
       return;
     }
 
-    if (pgaTournament.tournament_status === PgaTournamentStatus.NOT_STARTED) {
-      const existing = await repo
-        .createQueryBuilder('ptp')
-        .select(['ptp.id', 'ptp.pga_player'])
-        .addSelect('ptp_pool.id', 'pool_ref_id')
-        .leftJoin('pool_tournament_player', 'ptp_pool', 'ptp_pool.pga_tournament_player = ptp.id')
-        .where('ptp.pga_tournament = :tournamentId', { tournamentId: pgaTournament.id })
-        .getRawMany<{ ptp_id: string; ptp_pga_player: number; pool_ref_id: string | null }>();
-
-      const incomingIds = new Set(filteredLeaderboardPlayers.map((player) => Number(player.id)));
-      const staleRows = existing.filter((row) => !incomingIds.has(Number(row.ptp_pga_player)));
-
-      const idsToDelete = staleRows.filter((row) => !row.pool_ref_id).map((row) => row.ptp_id);
-      const idsToWithdraw = staleRows.filter((row) => row.pool_ref_id).map((row) => row.ptp_id);
-
-      if (idsToDelete.length > 0) {
-        await repo.delete(idsToDelete);
-      }
-      if (idsToWithdraw.length > 0) {
-        await repo.update(idsToWithdraw, {
-          active: false,
-          status: PlayerStatus.Withdrawn,
-        });
-      }
-    }
     await this.updateScoresWithLeaderboard(
       pgaTournament,
       {
