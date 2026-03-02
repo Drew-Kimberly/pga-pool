@@ -11191,6 +11191,14 @@ export type YtVideoStoryType =
   | 'PLAYER_STORIES'
   | 'TOPIC_STORIES';
 
+export type FieldQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  includeWithdrawn?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type FieldQuery = { __typename?: 'Query', field: { __typename?: 'Field', id: string, tournamentName: string, players: Array<{ __typename?: 'PlayerField', id: string, status: string, withdrawn: boolean }> } };
+
 export type LeaderboardCompressedV3QueryVariables = Exact<{
   leaderboardCompressedV3Id: Scalars['ID']['input'];
 }>;
@@ -11321,6 +11329,19 @@ export const TournamentFragmentFragmentDoc = gql`
   }
   formatType
   features
+}
+    `;
+export const FieldDocument = gql`
+    query Field($id: ID!, $includeWithdrawn: Boolean) {
+  field(id: $id, includeWithdrawn: $includeWithdrawn) {
+    id
+    tournamentName
+    players {
+      id
+      status
+      withdrawn
+    }
+  }
 }
     `;
 export const LeaderboardCompressedV3Document = gql`
@@ -11476,6 +11497,9 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
+    Field(variables: FieldQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<FieldQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<FieldQuery>({ document: FieldDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Field', 'query', variables);
+    },
     LeaderboardCompressedV3(variables: LeaderboardCompressedV3QueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<LeaderboardCompressedV3Query> {
       return withWrapper((wrappedRequestHeaders) => client.request<LeaderboardCompressedV3Query>({ document: LeaderboardCompressedV3Document, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'LeaderboardCompressedV3', 'query', variables);
     },

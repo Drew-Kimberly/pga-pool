@@ -1,0 +1,11 @@
+query Field($id: ID!, $includeWithdrawn: Boolean) {
+  field(id: $id, includeWithdrawn: $includeWithdrawn) {
+    id
+    tournamentName
+    players {
+      id
+      status
+      withdrawn
+    }
+  }
+}

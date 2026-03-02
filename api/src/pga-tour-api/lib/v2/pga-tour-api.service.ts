@@ -4,6 +4,7 @@ import { GraphQLClient } from 'graphql-request';
 import { lastValueFrom } from 'rxjs';
 
 import {
+  FieldQuery,
   getSdk,
   LeaderboardHoleByHoleQuery,
   ScheduleQuery,
@@ -59,6 +60,11 @@ export class PgaTourApiService {
     const url = `https://data-api.pgatour.com/player/profiles/${playerId}/results/season?tour=R${seasonParam}`;
     const response$ = this.httpClient.get<PgaApiPlayerSeasonResultsResponse>(url);
     return await lastValueFrom(response$).then((res) => res.data);
+  }
+
+  async getField(tournamentId: string, includeWithdrawn = true): Promise<FieldQuery['field']> {
+    const response = await this.sdk.Field({ id: tournamentId, includeWithdrawn });
+    return response.field;
   }
 
   async getTournamentSchedule(year: number): Promise<ScheduleQuery['schedule']> {

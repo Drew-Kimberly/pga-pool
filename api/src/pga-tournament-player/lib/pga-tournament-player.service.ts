@@ -92,6 +92,74 @@ export class PgaTournamentPlayerService {
     return repo.save(pgaTournamentPlayer);
   }
 
+  async ensurePlayersFromField(
+    pgaTournament: PgaTournament,
+    repo: Repository<PgaTournamentPlayer> = this.tourneyPlayerRepo
+  ): Promise<void> {
+    const field = await this.pgaTourApi.getField(pgaTournament.id);
+
+    if (!field?.players?.length) {
+      this.logger.warn(
+        `No field data returned for tournament ${pgaTournament.id}, skipping ensurePlayersFromField`
+      );
+      return;
+    }
+
+    const fieldPlayerIds = field.players.map((p) => Number(p.id));
+    const existingPlayers = await this.pgaPlayerService.listByIds(fieldPlayerIds);
+    const existingPlayerIdSet = new Set(existingPlayers.map((p) => p.id));
+
+    const filteredPlayers = field.players.filter((p) => existingPlayerIdSet.has(Number(p.id)));
+
+    if (filteredPlayers.length === 0) {
+      this.logger.warn(
+        `No field players found in pga_player for tournament ${pgaTournament.id}, skipping ensurePlayersFromField`
+      );
+      return;
+    }
+
+    const isCompleted = pgaTournament.tournament_status === PgaTournamentStatus.COMPLETED;
+
+    const records = filteredPlayers.map((player) => {
+      const playerId = Number(player.id);
+      const isWithdrawn = player.withdrawn;
+
+      return {
+        id: `${playerId}-${pgaTournament.id}`,
+        pga_player: { id: playerId },
+        pga_tournament: { id: pgaTournament.id },
+        active: !isWithdrawn,
+        status: isWithdrawn
+          ? PlayerStatus.Withdrawn
+          : isCompleted
+            ? PlayerStatus.Complete
+            : PlayerStatus.Active,
+        is_round_complete: isCompleted && !isWithdrawn,
+        current_round: null,
+        current_hole: null,
+        starting_hole: 1,
+        tee_time: null,
+        score_total: null,
+        score_thru: isCompleted && !isWithdrawn ? 18 : null,
+        current_position: null,
+        projected_fedex_cup_points: 0,
+        official_fedex_cup_points: null,
+      };
+    });
+
+    await repo
+      .createQueryBuilder()
+      .insert()
+      .into(PgaTournamentPlayer)
+      .values(records)
+      .orIgnore()
+      .execute();
+
+    this.logger.log(
+      `Ensured ${filteredPlayers.length} player(s) in field for tournament ${pgaTournament.id}`
+    );
+  }
+
   async updateScores(
     pgaTournamentId: string,
     repo: Repository<PgaTournamentPlayer> = this.tourneyPlayerRepo
