@@ -66,6 +66,13 @@ export class PgaTournamentService implements Listable<PgaTournament> {
     });
   }
 
+  listByYear(year: number): Promise<PgaTournament[]> {
+    return this.pgaTournamentRepo.find({
+      where: { year },
+      order: { start_date: 'ASC' },
+    });
+  }
+
   save(payload: SavePgaTournament[]): Promise<PgaTournament[]> {
     return this.pgaTournamentRepo.save(payload);
   }

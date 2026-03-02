@@ -69,10 +69,17 @@ export class PgaTournamentPlayerHoleService {
       return;
     }
 
+    const existingPlayerIds = await this.getExistingPlayerIds(pgaTournamentId);
     const holeRows: Partial<PgaTournamentPlayerHole>[] = [];
+    let skippedPlayers = 0;
 
     for (const playerRow of data.playerData) {
       const pgaTournamentPlayerId = `${playerRow.playerId}-${pgaTournamentId}`;
+
+      if (!existingPlayerIds.has(pgaTournamentPlayerId)) {
+        skippedPlayers++;
+        continue;
+      }
 
       for (const holeScore of playerRow.scores) {
         const score = Number(holeScore.score);
@@ -94,6 +101,12 @@ export class PgaTournamentPlayerHoleService {
       }
     }
 
+    if (skippedPlayers > 0) {
+      this.logger.log(
+        `Skipped ${skippedPlayers} players not found in pga_tournament_player for round ${round}`
+      );
+    }
+
     if (holeRows.length === 0) {
       this.logger.log(`No valid hole scores to upsert for round ${round}`);
       return;
@@ -107,13 +120,16 @@ export class PgaTournamentPlayerHoleService {
   }
 
   async ingestScoringData(pgaTournament: PgaTournament): Promise<void> {
+    const MAX_ROUNDS = 4;
     const currentRound = pgaTournament.current_round;
     if (!currentRound) {
       this.logger.log(`No current round for tournament ${pgaTournament.id}, skipping ingestion`);
       return;
     }
 
-    for (let round = 1; round <= currentRound; round++) {
+    // PGA Tour API encodes playoff tournaments as 4xx (e.g. 401), so cap to actual rounds
+    const roundLimit = Math.min(currentRound, MAX_ROUNDS);
+    for (let round = 1; round <= roundLimit; round++) {
       try {
         await this.ingestHolesForRound(pgaTournament.id, round);
       } catch (e) {
@@ -139,7 +155,7 @@ export class PgaTournamentPlayerHoleService {
       await Promise.all(
         batch.map(async (player: PgaTournamentPlayer) => {
           const playerId = String(player.id).split('-')[0];
-          for (let round = 1; round <= currentRound; round++) {
+          for (let round = 1; round <= roundLimit; round++) {
             try {
               await this.strokeService.ingestStrokesForPlayer(pgaTournament.id, playerId, round);
             } catch (e) {
@@ -154,6 +170,14 @@ export class PgaTournamentPlayerHoleService {
     }
 
     this.logger.log(`Scoring data ingestion complete for tournament ${pgaTournament.id}`);
+  }
+
+  private async getExistingPlayerIds(pgaTournamentId: string): Promise<Set<string>> {
+    const players = await this.pgaTournamentPlayerService.list({
+      tournamentId: pgaTournamentId,
+    });
+    const playerList = Array.isArray(players) ? players : players.data;
+    return new Set(playerList.map((p: PgaTournamentPlayer) => p.id));
   }
 
   mapHoleScoreStatus(gqlStatus: GqlHoleScoreStatus | string): HoleScoreStatus {

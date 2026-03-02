@@ -2,6 +2,7 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { describe, expect, it, vi } from 'vitest';
 
 import { PgaTourApiService } from '../../pga-tour-api/lib/v2/pga-tour-api.service';
+import { PgaTournamentPlayer } from '../../pga-tournament-player/lib/pga-tournament-player.entity';
 import { PgaTournamentPlayerService } from '../../pga-tournament-player/lib/pga-tournament-player.service';
 import { PgaTournamentPlayerStrokeService } from '../../pga-tournament-player-stroke/lib/pga-tournament-player-stroke.service';
 
@@ -92,7 +93,11 @@ describe('PgaTournamentPlayerHoleService', () => {
 
   describe('ingestHolesForRound', () => {
     it('upserts hole data from leaderboardHoleByHole API response', async () => {
-      const { service, holeRepo, pgaTourApi } = createMocks();
+      const { service, holeRepo, pgaTourApi, pgaTournamentPlayerService } = createMocks();
+
+      vi.spyOn(pgaTournamentPlayerService, 'list').mockResolvedValue([
+        { id: '46046-R2025003' },
+      ] as PgaTournamentPlayer[]);
 
       vi.spyOn(pgaTourApi, 'getLeaderboardHoleByHole').mockResolvedValue({
         __typename: 'LeaderboardHoleByHole',
@@ -223,6 +228,31 @@ describe('PgaTournamentPlayerHoleService', () => {
       await service.ingestHolesForRound('R2025003', 1);
 
       expect(holeRepo.upsert).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ingestScoringData', () => {
+    it('caps round iteration at 4 even when current_round is larger', async () => {
+      const { service, pgaTournamentPlayerService } = createMocks();
+
+      const ingestSpy = vi
+        .spyOn(service, 'ingestHolesForRound' as never)
+        .mockResolvedValue(undefined as never);
+
+      vi.spyOn(pgaTournamentPlayerService, 'list').mockResolvedValue([]);
+
+      const tournament = {
+        id: 'R2026003',
+        current_round: 400,
+      } as never;
+
+      await service.ingestScoringData(tournament);
+
+      expect(ingestSpy).toHaveBeenCalledTimes(4);
+      expect(ingestSpy).toHaveBeenCalledWith('R2026003', 1);
+      expect(ingestSpy).toHaveBeenCalledWith('R2026003', 2);
+      expect(ingestSpy).toHaveBeenCalledWith('R2026003', 3);
+      expect(ingestSpy).toHaveBeenCalledWith('R2026003', 4);
     });
   });
 

@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { InsertQueryBuilder, Repository } from 'typeorm';
 import { describe, expect, it, vi } from 'vitest';
 
 import { PgaPlayerService } from '../../pga-player/lib/pga-player.service';
@@ -8,6 +8,7 @@ import {
 } from '../../pga-tour-api/lib/v2/pga-tour-api.interface';
 import { PgaTourApiService } from '../../pga-tour-api/lib/v2/pga-tour-api.service';
 import { PgaTournament } from '../../pga-tournament/lib/pga-tournament.entity';
+import { PgaTournamentStatus } from '../../pga-tournament/lib/pga-tournament.interface';
 import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
 
 import { PgaTournamentPlayer } from './pga-tournament-player.entity';
@@ -249,6 +250,201 @@ describe('PgaTournamentPlayerService', () => {
         active: false,
         status: PlayerStatus.Withdrawn,
       });
+    });
+  });
+
+  describe('ensurePlayersFromField', () => {
+    function createMocks() {
+      const insertBuilder = {
+        into: vi.fn().mockReturnThis(),
+        values: vi.fn().mockReturnThis(),
+        orIgnore: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue({}),
+      } as unknown as InsertQueryBuilder<PgaTournamentPlayer>;
+
+      const repo = {
+        createQueryBuilder: vi.fn().mockReturnValue({
+          insert: vi.fn().mockReturnValue(insertBuilder),
+        }),
+      } as unknown as Repository<PgaTournamentPlayer>;
+
+      const pgaTourApi = {
+        getField: vi.fn(),
+      } as unknown as PgaTourApiService;
+
+      const pgaPlayerService = {
+        listByIds: vi.fn(),
+      } as unknown as PgaPlayerService;
+
+      const pgaTournamentService = {} as unknown as PgaTournamentService;
+
+      const logger = {
+        warn: vi.fn(),
+        error: vi.fn(),
+        log: vi.fn(),
+      } as unknown as LoggerService;
+
+      const service = new PgaTournamentPlayerService(
+        repo,
+        pgaTourApi,
+        pgaPlayerService,
+        pgaTournamentService,
+        logger
+      );
+
+      return { repo, pgaTourApi, pgaPlayerService, logger, service, insertBuilder };
+    }
+
+    it('creates records with correct status and score_thru for completed tournaments', async () => {
+      const { pgaTourApi, pgaPlayerService, service, insertBuilder } = createMocks();
+
+      const tournament = {
+        id: 'R2023006',
+        tournament_status: PgaTournamentStatus.COMPLETED,
+      } as PgaTournament;
+
+      vi.spyOn(pgaTourApi, 'getField').mockResolvedValue({
+        __typename: 'Field',
+        id: 'R2023006',
+        tournamentName: 'Test',
+        players: [
+          { __typename: 'PlayerField', id: '1234', status: 'ACTIVE', withdrawn: false },
+          { __typename: 'PlayerField', id: '5678', status: 'ACTIVE', withdrawn: false },
+        ],
+      });
+
+      vi.spyOn(pgaPlayerService, 'listByIds').mockResolvedValue([
+        { id: 1234 },
+        { id: 5678 },
+      ] as never);
+
+      await service.ensurePlayersFromField(tournament);
+
+      expect(pgaTourApi.getField).toHaveBeenCalledWith('R2023006');
+      expect(pgaPlayerService.listByIds).toHaveBeenCalledWith([1234, 5678]);
+
+      const valuesArg = (insertBuilder.values as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(valuesArg).toHaveLength(2);
+      expect(valuesArg[0]).toEqual(
+        expect.objectContaining({
+          id: '1234-R2023006',
+          status: PlayerStatus.Complete,
+          score_thru: 18,
+          is_round_complete: true,
+          active: true,
+        })
+      );
+      expect(insertBuilder.orIgnore).toHaveBeenCalled();
+      expect(insertBuilder.execute).toHaveBeenCalled();
+    });
+
+    it('sets withdrawn players with status Withdrawn and null score_thru', async () => {
+      const { pgaTourApi, pgaPlayerService, service, insertBuilder } = createMocks();
+
+      const tournament = {
+        id: 'R2023006',
+        tournament_status: PgaTournamentStatus.COMPLETED,
+      } as PgaTournament;
+
+      vi.spyOn(pgaTourApi, 'getField').mockResolvedValue({
+        __typename: 'Field',
+        id: 'R2023006',
+        tournamentName: 'Test',
+        players: [{ __typename: 'PlayerField', id: '1234', status: 'WITHDRAWN', withdrawn: true }],
+      });
+
+      vi.spyOn(pgaPlayerService, 'listByIds').mockResolvedValue([{ id: 1234 }] as never);
+
+      await service.ensurePlayersFromField(tournament);
+
+      const valuesArg = (insertBuilder.values as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(valuesArg[0]).toEqual(
+        expect.objectContaining({
+          id: '1234-R2023006',
+          status: PlayerStatus.Withdrawn,
+          score_thru: null,
+          is_round_complete: false,
+          active: false,
+        })
+      );
+    });
+
+    it('filters out players not in pga_player table', async () => {
+      const { pgaTourApi, pgaPlayerService, service, insertBuilder } = createMocks();
+
+      const tournament = {
+        id: 'R2023006',
+        tournament_status: PgaTournamentStatus.COMPLETED,
+      } as PgaTournament;
+
+      vi.spyOn(pgaTourApi, 'getField').mockResolvedValue({
+        __typename: 'Field',
+        id: 'R2023006',
+        tournamentName: 'Test',
+        players: [
+          { __typename: 'PlayerField', id: '1234', status: 'ACTIVE', withdrawn: false },
+          { __typename: 'PlayerField', id: '9999', status: 'ACTIVE', withdrawn: false },
+        ],
+      });
+
+      vi.spyOn(pgaPlayerService, 'listByIds').mockResolvedValue([{ id: 1234 }] as never);
+
+      await service.ensurePlayersFromField(tournament);
+
+      const valuesArg = (insertBuilder.values as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(valuesArg).toHaveLength(1);
+      expect(valuesArg[0].id).toBe('1234-R2023006');
+    });
+
+    it('handles empty field data gracefully', async () => {
+      const { pgaTourApi, pgaPlayerService, logger, service, insertBuilder } = createMocks();
+
+      const tournament = {
+        id: 'R2023006',
+        tournament_status: PgaTournamentStatus.COMPLETED,
+      } as PgaTournament;
+
+      vi.spyOn(pgaTourApi, 'getField').mockResolvedValue({
+        __typename: 'Field',
+        id: 'R2023006',
+        tournamentName: 'Test',
+        players: [],
+      });
+
+      await service.ensurePlayersFromField(tournament);
+
+      expect(pgaPlayerService.listByIds).not.toHaveBeenCalled();
+      expect(insertBuilder.execute).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('sets Active status for in-progress tournaments', async () => {
+      const { pgaTourApi, pgaPlayerService, service, insertBuilder } = createMocks();
+
+      const tournament = {
+        id: 'R2023006',
+        tournament_status: PgaTournamentStatus.IN_PROGRESS,
+      } as PgaTournament;
+
+      vi.spyOn(pgaTourApi, 'getField').mockResolvedValue({
+        __typename: 'Field',
+        id: 'R2023006',
+        tournamentName: 'Test',
+        players: [{ __typename: 'PlayerField', id: '1234', status: 'ACTIVE', withdrawn: false }],
+      });
+
+      vi.spyOn(pgaPlayerService, 'listByIds').mockResolvedValue([{ id: 1234 }] as never);
+
+      await service.ensurePlayersFromField(tournament);
+
+      const valuesArg = (insertBuilder.values as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(valuesArg[0]).toEqual(
+        expect.objectContaining({
+          status: PlayerStatus.Active,
+          score_thru: null,
+          is_round_complete: false,
+        })
+      );
     });
   });
 });

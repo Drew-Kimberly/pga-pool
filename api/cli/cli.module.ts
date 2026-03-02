@@ -5,6 +5,7 @@ import { MetabetApiModule } from '../src/metabet-api/lib/metabet-api.module';
 import { PgaPlayerModule } from '../src/pga-player/lib/pga-player.module';
 import { PgaTourApiModule } from '../src/pga-tour-api/lib/v2/pga-tour-api.module';
 import { PgaTournamentModule } from '../src/pga-tournament/lib/pga-tournament.module';
+import { PgaTournamentPlayerHoleModule } from '../src/pga-tournament-player-hole/lib/pga-tournament-player-hole.module';
 import { PgaTournamentPlayerModule } from '../src/pga-tournament-player/lib/pga-tournament-player.module';
 import { PoolTournamentModule } from '../src/pool-tournament/lib/pool-tournament.module';
 import { PoolTournamentPlayerModule } from '../src/pool-tournament-player/lib/pool-tournament-player.module';
@@ -23,6 +24,7 @@ import { Module } from '@nestjs/common';
     PgaTourApiModule,
     PgaPlayerModule,
     PgaTournamentModule,
+    PgaTournamentPlayerHoleModule,
     PgaTournamentPlayerModule,
     UserModule,
     LeagueModule,
