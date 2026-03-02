@@ -12,6 +12,7 @@ import { PgaTournamentService } from '../../../src/pga-tournament/lib/pga-tourna
 import { PgaTournamentField } from '../../../src/pga-tournament-field/lib/pga-tournament-field.interface';
 import { PgaTournamentPlayer } from '../../../src/pga-tournament-player/lib/pga-tournament-player.entity';
 import { PlayerStatus } from '../../../src/pga-tournament-player/lib/pga-tournament-player.interface';
+import { PoolTournament } from '../../../src/pool-tournament/lib/pool-tournament.entity';
 import { PoolTournamentPlayer } from '../../../src/pool-tournament-player/lib/pool-tournament-player.entity';
 import { PoolTournamentService } from '../../../src/pool-tournament/lib/pool-tournament.service';
 import { SeedDataService } from '../../../src/seed-data/lib/seed-data.service';
@@ -308,21 +309,23 @@ async function seedPoolTournamentPlayers(
       const toSave: PoolTournamentPlayer[] = [];
       for (const [tierStr, tierPlayers] of tierEntries) {
         const tier = Number(tierStr);
-        for (const playerIdStr of Object.keys(tierPlayers)) {
+        for (const [playerIdStr, playerData] of Object.entries(tierPlayers)) {
           const tournamentPlayer = tournamentPlayerByPlayerId.get(Number(playerIdStr));
           if (!tournamentPlayer) {
             continue;
           }
 
+          const odds = playerData.odds;
           const existing = existingByTourneyPlayerId.get(tournamentPlayer.id);
           if (existing) {
-            if (existing.tier !== tier) {
-              toSave.push({ ...existing, tier });
+            if (existing.tier !== tier || existing.odds !== odds) {
+              toSave.push({ ...existing, tier, odds });
             }
           } else {
             toSave.push(
               poolTournamentPlayerRepo.create({
                 tier,
+                odds,
                 pga_tournament_player: tournamentPlayer,
                 pool_tournament: poolTournament,
               })
@@ -334,6 +337,12 @@ async function seedPoolTournamentPlayers(
       if (toSave.length > 0) {
         await poolTournamentPlayerRepo.save(toSave);
       }
+
+      // Set field_published_at on the pool tournament
+      const poolTournamentRepo = txManager.getRepository(PoolTournament);
+      await poolTournamentRepo.update(poolTournament.id, {
+        field_published_at: new Date(field.created_at * 1000),
+      });
 
       logger.log(
         `Pool tournament ${poolTournament.id}: ${toSave.length} pool_tournament_player rows saved`

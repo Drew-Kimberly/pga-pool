@@ -712,11 +712,16 @@ components:
           format: uuid
         tier:
           type: number
+        odds:
+          type: string
+          nullable: true
+          example: '+900'
         pga_tournament_player:
           $ref: '#/components/schemas/PgaTournamentPlayer'
       required:
         - id
         - tier
+        - odds
         - pga_tournament_player
     PoolTournamentField:
       description: The pool tournament player field divided into tiers.
@@ -728,6 +733,7 @@ components:
         created_at:
           type: string
           format: date-time
+          nullable: true
         player_tiers:
           type: object
           additionalProperties:
@@ -1004,49 +1010,36 @@ components:
         - pga_player
         - pga_tournament
     PgaTournamentField:
-      description: The PGA Tournament player field divided into tiers.
+      description: The PGA Tournament player field as a flat list of players.
       type: object
       additionalProperties: false
       properties:
         pga_tournament:
           $ref: '#/components/schemas/PgaTournament'
-        created_at:
-          type: string
-          format: date-time
-        player_tiers:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/TournamentFieldPlayer'
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/TournamentFieldPlayer'
       required:
         - pga_tournament
-        - created_at
-        - player_tiers
+        - players
     WeeklyPgaTournamentField:
-      description: The PGA Tournament player field for the current week, divided into tiers.
+      description: The PGA Tournament player field for the current week.
       type: object
       additionalProperties: false
       properties:
         pga_tournament:
           $ref: '#/components/schemas/PgaTournament'
-        created_at:
-          type: string
-          format: date-time
+        players:
+          type: array
           nullable: true
-        player_tiers:
-          type: object
-          nullable: true
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/TournamentFieldPlayer'
+          items:
+            $ref: '#/components/schemas/TournamentFieldPlayer'
       required:
         - pga_tournament
-        - created_at
-        - player_tiers
+        - players
     TournamentFieldPlayer:
-      description: Defines a player entry in a tournament field tier.
+      description: Defines a player entry in a tournament field.
       type: object
       additionalProperties: false
       properties:
@@ -1056,13 +1049,9 @@ components:
         name:
           type: string
           example: 'Tiger Woods'
-        odds:
-          type: string
-          example: '+3000'
       required:
         - player_id
         - name
-        - odds
     PoolUser:
       description: Defines a pool user
       type: object
