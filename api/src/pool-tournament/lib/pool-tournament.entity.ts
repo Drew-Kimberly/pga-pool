@@ -51,4 +51,7 @@ export class PoolTournament {
 
   @Column({ type: 'boolean', default: false })
   scores_are_official: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  field_published_at: Date | null;
 }

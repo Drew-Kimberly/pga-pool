@@ -11,3 +11,8 @@ export interface PgaTournamentField {
     };
   };
 }
+
+export interface PgaTournamentFieldPlayer {
+  player_id: number;
+  name: string;
+}

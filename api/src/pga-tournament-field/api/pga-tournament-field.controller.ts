@@ -1,8 +1,6 @@
 import { ControllerBase } from '../../common/api';
 import { PgaTournamentDto } from '../../pga-tournament/api/pga-tournament.dto';
-import { PgaTournament } from '../../pga-tournament/lib/pga-tournament.entity';
 import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
-import { PgaTournamentField } from '../lib/pga-tournament-field.interface';
 import { PgaTournamentFieldService } from '../lib/pga-tournament-field.service';
 
 import { PgaTournamentFieldDto } from './pga-tournament-field.dto';
@@ -34,7 +32,7 @@ export class PgaTournamentFieldController extends ControllerBase {
   ): Promise<PgaTournamentFieldDto> {
     this.logger.log(`Getting field for PGA Tournament ${pgaTournamentId}`);
 
-    let tournament: PgaTournament | null;
+    let tournament;
     try {
       tournament = await this.pgaTourneyService.get(pgaTournamentId);
     } catch (e) {
@@ -49,47 +47,8 @@ export class PgaTournamentFieldController extends ControllerBase {
       throw new NotFoundException(`PGA Tournament (ID: ${pgaTournamentId}) not found`);
     }
 
-    let field: PgaTournamentField | undefined;
-    try {
-      field = await this.pgaTourneyFieldService.get(tournament.id);
-    } catch (e) {
-      this.logErrorSkipping4xx(
-        e,
-        `Error fetching PGA Tournament field (ID: ${tournament.id}): ${e}`
-      );
-      throw e;
-    }
+    const players = await this.pgaTourneyFieldService.getPlayers(tournament.id);
 
-    if (!field) {
-      throw new NotFoundException(`PGA Tournament field (ID: ${tournament.id}) not found`);
-    }
-
-    return this.toPgaTournamentFieldDto(tournament, field);
-  }
-
-  private toPgaTournamentFieldDto(
-    tournament: PgaTournament,
-    field: PgaTournamentField
-  ): PgaTournamentFieldDto {
-    const dto = new PgaTournamentFieldDto(
-      PgaTournamentDto.fromEntity(tournament),
-      new Date(field.created_at * 1000).toISOString()
-    );
-
-    Object.entries(field.player_tiers).forEach(([tier, player]) => {
-      if (!Array.isArray(dto.player_tiers[Number(tier)])) {
-        dto.player_tiers[Number(tier)] = [];
-      }
-
-      Object.entries(player).forEach(([playerId, playerData]) => {
-        dto.player_tiers[Number(tier)].push({
-          name: playerData.name,
-          player_id: Number(playerId),
-          odds: playerData.odds,
-        });
-      });
-    });
-
-    return dto;
+    return new PgaTournamentFieldDto(PgaTournamentDto.fromEntity(tournament), players);
   }
 }

@@ -1,12 +1,8 @@
-import { useParams } from 'react-router';
+import { PoolTournamentFieldAliasPage } from './PoolTournamentFieldAliasPage';
 
-import { TournamentField } from '../components/TournamentField';
-
-import { withPageLayout } from './withPageLayout';
-
-function _TournamentFieldPage() {
-  const params = useParams();
-  return <TournamentField pgaTournamentId={params.pgaTournamentId as string} />;
-}
-
-export const TournamentFieldPage = withPageLayout(_TournamentFieldPage);
+/**
+ * Redirects /pga-tournaments/:pgaTournamentId/field to the pool-specific field page.
+ * The PGA tournament field route no longer has its own dedicated page since
+ * field data is now served from the pool_tournament_player table.
+ */
+export const TournamentFieldPage = PoolTournamentFieldAliasPage;

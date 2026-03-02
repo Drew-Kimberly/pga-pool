@@ -1,20 +1,14 @@
 import { PgaTournamentDto } from '../../pga-tournament/api/pga-tournament.dto';
+import { PgaTournamentFieldPlayer } from '../lib/pga-tournament-field.interface';
 
 export class PgaTournamentFieldDto {
   constructor(
     public pga_tournament: PgaTournamentDto,
-    /**
-     * @note timestamp in ISO-8601 format
-     */
-    public created_at: string,
-    public player_tiers: {
-      [tier: number]: PgaTournamentFieldPlayerDto[];
-    } = {}
+    public players: PgaTournamentFieldPlayerDto[]
   ) {}
 }
 
-export class PgaTournamentFieldPlayerDto {
+export class PgaTournamentFieldPlayerDto implements PgaTournamentFieldPlayer {
   player_id: number;
   name: string;
-  odds: string;
 }

@@ -1,7 +1,5 @@
 import { ControllerBase } from '../../common/api';
 import { UUIDValidationPipe } from '../../common/api/validation';
-import { PgaTournamentField } from '../../pga-tournament-field/lib/pga-tournament-field.interface';
-import { PgaTournamentFieldService } from '../../pga-tournament-field/lib/pga-tournament-field.service';
 import { PoolTournamentDto } from '../../pool-tournament/api/pool-tournament.dto';
 import { PoolTournamentService } from '../../pool-tournament/lib/pool-tournament.service';
 import { PoolTournamentPlayerDto } from '../../pool-tournament-player/api/pool-tournament-player.dto';
@@ -23,7 +21,6 @@ export class PoolTournamentFieldController extends ControllerBase {
   constructor(
     private readonly poolTournamentService: PoolTournamentService,
     private readonly poolTournamentPlayerService: PoolTournamentPlayerService,
-    private readonly pgaTournamentFieldService: PgaTournamentFieldService,
     @Optional()
     protected readonly logger: LoggerService = new Logger(PoolTournamentFieldController.name)
   ) {
@@ -42,31 +39,15 @@ export class PoolTournamentFieldController extends ControllerBase {
       throw new NotFoundException(`Pool Tournament (ID: ${poolTournamentId}) not found`);
     }
 
-    let field: PgaTournamentField | undefined;
-    try {
-      field = await this.pgaTournamentFieldService.get(poolTournament.pga_tournament_id);
-    } catch (e) {
-      this.logErrorSkipping4xx(
-        e,
-        `Error fetching PGA Tournament field (ID: ${poolTournament.pga_tournament_id}): ${e}`
-      );
-      throw e;
-    }
-
-    if (!field) {
-      throw new NotFoundException(
-        `PGA Tournament field (ID: ${poolTournament.pga_tournament_id}) not found`
-      );
-    }
-
     const players = await this.poolTournamentPlayerService.list({
       poolTournamentId: poolTournament.id,
     });
 
-    const dto = new PoolTournamentFieldDto(
-      PoolTournamentDto.fromEntity(poolTournament),
-      new Date(field.created_at * 1000).toISOString()
-    );
+    const createdAt = poolTournament.field_published_at
+      ? poolTournament.field_published_at.toISOString()
+      : null;
+
+    const dto = new PoolTournamentFieldDto(PoolTournamentDto.fromEntity(poolTournament), createdAt);
 
     players.forEach((player) => {
       if (!Array.isArray(dto.player_tiers[player.tier])) {

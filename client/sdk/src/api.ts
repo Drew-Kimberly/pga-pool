@@ -706,7 +706,7 @@ export const PgaTournamentRoundStatusEnum = {
 export type PgaTournamentRoundStatusEnum = typeof PgaTournamentRoundStatusEnum[keyof typeof PgaTournamentRoundStatusEnum];
 
 /**
- * The PGA Tournament player field divided into tiers.
+ * The PGA Tournament player field as a flat list of players.
  * @export
  * @interface PgaTournamentField
  */
@@ -719,16 +719,10 @@ export interface PgaTournamentField {
     'pga_tournament': PgaTournament;
     /**
      * 
-     * @type {string}
+     * @type {Array<TournamentFieldPlayer>}
      * @memberof PgaTournamentField
      */
-    'created_at': string;
-    /**
-     * 
-     * @type {{ [key: string]: Array<TournamentFieldPlayer>; }}
-     * @memberof PgaTournamentField
-     */
-    'player_tiers': { [key: string]: Array<TournamentFieldPlayer>; };
+    'players': Array<TournamentFieldPlayer>;
 }
 /**
  * Defines a PGA player participating in a PGA tournament
@@ -994,7 +988,7 @@ export interface PoolTournamentField {
      * @type {string}
      * @memberof PoolTournamentField
      */
-    'created_at': string;
+    'created_at': string | null;
     /**
      * 
      * @type {{ [key: string]: Array<PoolTournamentPlayer>; }}
@@ -1020,6 +1014,12 @@ export interface PoolTournamentPlayer {
      * @memberof PoolTournamentPlayer
      */
     'tier': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PoolTournamentPlayer
+     */
+    'odds': string | null;
     /**
      * 
      * @type {PgaTournamentPlayer}
@@ -1374,7 +1374,7 @@ export interface TournamentDate {
     'display_short': string;
 }
 /**
- * Defines a player entry in a tournament field tier.
+ * Defines a player entry in a tournament field.
  * @export
  * @interface TournamentFieldPlayer
  */
@@ -1391,12 +1391,6 @@ export interface TournamentFieldPlayer {
      * @memberof TournamentFieldPlayer
      */
     'name': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof TournamentFieldPlayer
-     */
-    'odds': string;
 }
 /**
  * Defines a user (i.e. contestant who competes in pools)
@@ -1430,7 +1424,7 @@ export interface User {
     'email': string | null;
 }
 /**
- * The PGA Tournament player field for the current week, divided into tiers.
+ * The PGA Tournament player field for the current week.
  * @export
  * @interface WeeklyPgaTournamentField
  */
@@ -1443,16 +1437,10 @@ export interface WeeklyPgaTournamentField {
     'pga_tournament': PgaTournament;
     /**
      * 
-     * @type {string}
+     * @type {Array<TournamentFieldPlayer>}
      * @memberof WeeklyPgaTournamentField
      */
-    'created_at': string | null;
-    /**
-     * 
-     * @type {{ [key: string]: Array<TournamentFieldPlayer>; }}
-     * @memberof WeeklyPgaTournamentField
-     */
-    'player_tiers': { [key: string]: Array<TournamentFieldPlayer>; } | null;
+    'players': Array<TournamentFieldPlayer> | null;
 }
 
 /**

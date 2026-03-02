@@ -11,6 +11,9 @@ export class PoolTournamentPlayer {
   @Column({ type: 'int' })
   tier: number;
 
+  @Column({ type: 'varchar', nullable: true })
+  odds: string | null;
+
   @JoinColumn({ name: 'pga_tournament_player' })
   @OneToOne(() => PgaTournamentPlayer, { eager: true })
   pga_tournament_player: PgaTournamentPlayer;

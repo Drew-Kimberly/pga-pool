@@ -5,9 +5,9 @@ export class PoolTournamentFieldDto {
   constructor(
     public pool_tournament: PoolTournamentDto,
     /**
-     * @note timestamp in ISO-8601 format
+     * @note timestamp in ISO-8601 format, null if field hasn't been published
      */
-    public created_at: string,
+    public created_at: string | null,
     public player_tiers: {
       [tier: number]: PoolTournamentPlayerDto[];
     } = {}
