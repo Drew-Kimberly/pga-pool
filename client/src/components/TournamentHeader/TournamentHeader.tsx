@@ -20,7 +20,7 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
 
   return (
     <Box gap="small" pad={{ vertical: 'small' }}>
-      <Box direction="row" align="center" gap={isDesktop ? 'medium' : 'small'}>
+      <Box direction="row" gap={isDesktop ? 'medium' : 'small'}>
         {tournament.logo_url && (
           <Box
             flex={false}
@@ -32,7 +32,7 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
             background="white"
             align="center"
             justify="center"
-            style={{ flexShrink: 0 }}
+            style={{ flexShrink: 0, alignSelf: 'center' }}
           >
             <img
               src={tournament.logo_url}
@@ -46,36 +46,47 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
           </Box>
         )}
 
-        <Box gap="xxsmall" flex>
-          <Text
-            size={isDesktop ? 'xlarge' : 'large'}
-            weight="bold"
-            style={{ fontFamily: 'var(--font-display)', lineHeight: 1.2 }}
-          >
-            {tournament.name}
-          </Text>
+        <Box flex gap="xsmall">
+          {/* Name row with status badge pinned right */}
+          <Box direction="row" justify="between" align="start" gap="small">
+            <Text
+              size={isDesktop ? 'xlarge' : 'large'}
+              weight="bold"
+              style={{ fontFamily: 'var(--font-display)', lineHeight: 1.2 }}
+            >
+              {tournament.name}
+            </Text>
 
-          <Text size="small" color="text-weak">
-            {tournament.course_name}
-            {tournament.city && tournament.state
-              ? ` \u00B7 ${tournament.city}, ${tournament.state}`
-              : ''}
-          </Text>
+            {isDesktop && (
+              <Box flex={false} style={{ marginTop: '2px' }}>
+                <StatusBadge tournament={tournament} round={round} />
+              </Box>
+            )}
+          </Box>
 
-          <Text size="small" style={{ fontStyle: 'italic' }} color="text-weak">
-            {tournament.date.display}
-          </Text>
+          <Box gap="xxsmall">
+            <Text size="small" color="text-weak">
+              {tournament.course_name}
+              {tournament.city && tournament.state
+                ? ` \u00B7 ${tournament.city}, ${tournament.state}`
+                : ''}
+            </Text>
+
+            <Text size="small" style={{ fontStyle: 'italic' }} color="text-weak">
+              {tournament.date.display}
+            </Text>
+          </Box>
+
+          {/* Meta pills + mobile status badge */}
+          <Box direction="row" align="center" gap="xsmall" wrap>
+            {!isDesktop && <StatusBadge tournament={tournament} round={round} />}
+            {tournament.par != null && <MetaPill label={`Par ${tournament.par}`} />}
+            {tournament.yardage != null && (
+              <MetaPill label={`${tournament.yardage.toLocaleString()} yds`} />
+            )}
+            <MetaPill label={formatPurse(tournament.purse)} />
+          </Box>
         </Box>
-      </Box>
-
-      <Box direction="row" align="center" gap="small" wrap>
-        <StatusIndicator tournament={tournament} round={round} />
-
-        {tournament.par != null && <MetaPill label={`Par ${tournament.par}`} />}
-        {tournament.yardage != null && (
-          <MetaPill label={`${tournament.yardage.toLocaleString()} yds`} />
-        )}
-        <MetaPill label={formatPurse(tournament.purse)} />
       </Box>
     </Box>
   );
@@ -101,59 +112,14 @@ function MetaPill({ label }: MetaPillProps) {
   );
 }
 
-interface StatusIndicatorProps {
+interface StatusBadgeProps {
   tournament: PgaTournament;
   round?: number;
 }
 
-function StatusIndicator({ tournament, round }: StatusIndicatorProps) {
-  const { tournament_status, round_status, current_round } = tournament;
-  const displayRound = round ?? current_round;
+function StatusBadge({ tournament, round }: StatusBadgeProps) {
+  const status = resolveStatus(tournament, round);
 
-  if (tournament_status === PgaTournamentTournamentStatusEnum.InProgress) {
-    const isRoundActive = round_status === PgaTournamentRoundStatusEnum.InProgress;
-    const roundLabel = displayRound ? `Round ${displayRound}` : '';
-    const label = isRoundActive
-      ? [roundLabel, 'Live'].filter(Boolean).join(' \u00B7 ')
-      : [roundLabel, 'Suspended'].filter(Boolean).join(' \u00B7 ');
-
-    return (
-      <StatusBadge
-        label={label}
-        color="var(--color-status-live)"
-        bg="rgba(34, 197, 94, 0.12)"
-        dot
-      />
-    );
-  }
-
-  if (tournament_status === PgaTournamentTournamentStatusEnum.Completed) {
-    return (
-      <StatusBadge
-        label="Complete"
-        color="var(--color-status-complete)"
-        bg="rgba(107, 114, 128, 0.10)"
-      />
-    );
-  }
-
-  return (
-    <StatusBadge
-      label="Upcoming"
-      color="var(--color-status-not-started)"
-      bg="rgba(156, 163, 175, 0.10)"
-    />
-  );
-}
-
-interface StatusBadgeProps {
-  label: string;
-  color: string;
-  bg: string;
-  dot?: boolean;
-}
-
-function StatusBadge({ label, color, bg, dot }: StatusBadgeProps) {
   return (
     <Box
       direction="row"
@@ -162,14 +128,58 @@ function StatusBadge({ label, color, bg, dot }: StatusBadgeProps) {
       pad={{ horizontal: 'small', vertical: 'xxsmall' }}
       round="small"
       flex={false}
-      style={{ backgroundColor: bg, borderColor: color, borderWidth: '1px', borderStyle: 'solid' }}
+      style={{
+        backgroundColor: status.bg,
+        borderColor: status.color,
+        borderWidth: '1px',
+        borderStyle: 'solid',
+      }}
     >
-      {dot && <PulsingDot />}
-      <Text size="xsmall" weight="bold" style={{ color }}>
-        {label.toUpperCase()}
+      {status.dot && <PulsingDot />}
+      <Text size="xsmall" weight="bold" style={{ color: status.color }}>
+        {status.label.toUpperCase()}
       </Text>
     </Box>
   );
+}
+
+interface ResolvedStatus {
+  label: string;
+  color: string;
+  bg: string;
+  dot?: boolean;
+}
+
+function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatus {
+  const { tournament_status, round_status, current_round } = tournament;
+  const displayRound = round ?? current_round;
+
+  if (tournament_status === PgaTournamentTournamentStatusEnum.InProgress) {
+    const isRoundActive = round_status === PgaTournamentRoundStatusEnum.InProgress;
+    const roundLabel = displayRound ? `Round ${displayRound}` : '';
+    const suffix = isRoundActive ? 'Live' : 'Suspended';
+
+    return {
+      label: [roundLabel, suffix].filter(Boolean).join(' \u00B7 '),
+      color: 'var(--color-status-live)',
+      bg: 'rgba(34, 197, 94, 0.12)',
+      dot: isRoundActive,
+    };
+  }
+
+  if (tournament_status === PgaTournamentTournamentStatusEnum.Completed) {
+    return {
+      label: 'Official',
+      color: 'var(--color-status-complete)',
+      bg: 'rgba(107, 114, 128, 0.10)',
+    };
+  }
+
+  return {
+    label: 'This Week',
+    color: 'var(--color-status-not-started)',
+    bg: 'rgba(156, 163, 175, 0.10)',
+  };
 }
 
 function PulsingDot() {
