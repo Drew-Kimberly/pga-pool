@@ -19,7 +19,7 @@ export const theme: ThemeType = deepMerge(grommet, {
       'toggle-bg': '#E5E5E5',
     },
     font: {
-      family: "'Bricolage Grotesque', sans-serif",
+      family: "'Instrument Sans', sans-serif",
       size: '18px',
       height: '20px',
     },

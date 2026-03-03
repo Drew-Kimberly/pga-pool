@@ -1,7 +1,7 @@
 :root {
   /* ── Typography ─────────────────────────────────────────── */
-  --font-display: 'Fraunces', serif;
-  --font-body: 'Bricolage Grotesque', sans-serif;
+  --font-display: 'Sora', sans-serif;
+  --font-body: 'Instrument Sans', sans-serif;
 
   /* Size scale */
   --text-xs: 0.75rem;
