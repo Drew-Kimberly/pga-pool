@@ -80,6 +80,20 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
         - Pool Tournaments
+  /pools/{poolId}/weekly-field:
+    parameters:
+      - $ref: '#/components/parameters/PoolId'
+    get:
+      summary: Fetches the player field for the current week's pool tournament
+      description: Resolves the current week's PGA tournament and returns the tiered player field for the corresponding pool tournament
+      operationId: getWeeklyPoolTournamentField
+      responses:
+        '200':
+          $ref: '#/components/responses/PoolTournamentFieldResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+        - Pool Tournament Field
   /pools/{poolId}/tournaments/{poolTournamentId}/field:
     parameters:
       - $ref: '#/components/parameters/PoolId'
