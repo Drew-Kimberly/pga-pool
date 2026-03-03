@@ -11,7 +11,7 @@ export class AddPgaTournamentParAndYardage1777500000000 implements MigrationInte
 
     await queryRunner.query(`
       ALTER TABLE "pga_tournament"
-        ADD COLUMN "yardage" varchar(32)
+        ADD COLUMN "yardage" int
     `);
   }
 

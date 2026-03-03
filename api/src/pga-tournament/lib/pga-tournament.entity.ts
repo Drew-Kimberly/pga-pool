@@ -106,6 +106,6 @@ export class PgaTournament {
   @Column({ type: 'int', nullable: true })
   par: number | null;
 
-  @Column({ type: 'varchar', length: 32, nullable: true })
-  yardage: string | null;
+  @Column({ type: 'int', nullable: true })
+  yardage: number | null;
 }
