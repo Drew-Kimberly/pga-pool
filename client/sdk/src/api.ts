@@ -1468,6 +1468,40 @@ export interface WeeklyPgaTournamentField {
 export const PGAPlayersApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Fetches a PGA Player by ID
+         * @summary Fetches a PGA Player by ID
+         * @param {number} pgaPlayerId The PGA Player ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPgaPlayer: async (pgaPlayerId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pgaPlayerId' is not null or undefined
+            assertParamExists('getPgaPlayer', 'pgaPlayerId', pgaPlayerId)
+            const localVarPath = `/pga-players/{pgaPlayerId}`
+                .replace(`{${"pgaPlayerId"}}`, encodeURIComponent(String(pgaPlayerId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Lists PGA Players. Returns only active players by default.
          * @summary Lists PGA Players
          * @param {ListPoolsPageParameter} [page] 
@@ -1518,6 +1552,19 @@ export const PGAPlayersApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PGAPlayersApiAxiosParamCreator(configuration)
     return {
         /**
+         * Fetches a PGA Player by ID
+         * @summary Fetches a PGA Player by ID
+         * @param {number} pgaPlayerId The PGA Player ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getPgaPlayer(pgaPlayerId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PgaPlayer>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getPgaPlayer(pgaPlayerId, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PGAPlayersApi.getPgaPlayer']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
          * Lists PGA Players. Returns only active players by default.
          * @summary Lists PGA Players
          * @param {ListPoolsPageParameter} [page] 
@@ -1542,6 +1589,16 @@ export const PGAPlayersApiFactory = function (configuration?: Configuration, bas
     const localVarFp = PGAPlayersApiFp(configuration)
     return {
         /**
+         * Fetches a PGA Player by ID
+         * @summary Fetches a PGA Player by ID
+         * @param {PGAPlayersApiGetPgaPlayerRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPgaPlayer(requestParameters: PGAPlayersApiGetPgaPlayerRequest, options?: RawAxiosRequestConfig): AxiosPromise<PgaPlayer> {
+            return localVarFp.getPgaPlayer(requestParameters.pgaPlayerId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Lists PGA Players. Returns only active players by default.
          * @summary Lists PGA Players
          * @param {PGAPlayersApiListPgaPlayersRequest} requestParameters Request parameters.
@@ -1553,6 +1610,20 @@ export const PGAPlayersApiFactory = function (configuration?: Configuration, bas
         },
     };
 };
+
+/**
+ * Request parameters for getPgaPlayer operation in PGAPlayersApi.
+ * @export
+ * @interface PGAPlayersApiGetPgaPlayerRequest
+ */
+export interface PGAPlayersApiGetPgaPlayerRequest {
+    /**
+     * The PGA Player ID
+     * @type {number}
+     * @memberof PGAPlayersApiGetPgaPlayer
+     */
+    readonly pgaPlayerId: number
+}
 
 /**
  * Request parameters for listPgaPlayers operation in PGAPlayersApi.
@@ -1582,6 +1653,18 @@ export interface PGAPlayersApiListPgaPlayersRequest {
  * @extends {BaseAPI}
  */
 export class PGAPlayersApi extends BaseAPI {
+    /**
+     * Fetches a PGA Player by ID
+     * @summary Fetches a PGA Player by ID
+     * @param {PGAPlayersApiGetPgaPlayerRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PGAPlayersApi
+     */
+    public getPgaPlayer(requestParameters: PGAPlayersApiGetPgaPlayerRequest, options?: RawAxiosRequestConfig) {
+        return PGAPlayersApiFp(this.configuration).getPgaPlayer(requestParameters.pgaPlayerId, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Lists PGA Players. Returns only active players by default.
      * @summary Lists PGA Players

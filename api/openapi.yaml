@@ -172,6 +172,20 @@ paths:
           $ref: '#/components/responses/ListPgaPlayersResponse'
       tags:
         - PGA Players
+  /pga-players/{pgaPlayerId}:
+    parameters:
+      - $ref: '#/components/parameters/PgaPlayerId'
+    get:
+      summary: Fetches a PGA Player by ID
+      description: Fetches a PGA Player by ID
+      operationId: getPgaPlayer
+      responses:
+        '200':
+          $ref: '#/components/responses/PgaPlayerResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+        - PGA Players
   /pga-tournaments:
     get:
       summary: Lists PGA Tournaments
@@ -291,6 +305,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Pool'
+    PgaPlayerResponse:
+      description: Response containing a PGA Player
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PgaPlayer'
     PoolTournamentFieldResponse:
       description: Response containing pool tournament field data
       content:
@@ -502,6 +522,14 @@ components:
       schema:
         type: string
         example: '24449-R2023006'
+    PgaPlayerId:
+      name: pgaPlayerId
+      in: path
+      required: true
+      description: The PGA Player ID
+      schema:
+        type: integer
+        example: 46046
     PoolFilter:
       name: filter
       description: Filters a collection of Pools.

@@ -12,7 +12,7 @@ import { PgaPlayerService } from '../lib/pga-player.service';
 
 import { PgaPlayerDto } from './pga-player.dto';
 
-import { Controller } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 
 @Controller('pga-players')
 export class PgaPlayerController extends ControllerBase implements Listable<PgaPlayerDto> {
@@ -40,5 +40,14 @@ export class PgaPlayerController extends ControllerBase implements Listable<PgaP
       ...result,
       data: result.data.map(PgaPlayerDto.fromEntity),
     };
+  }
+
+  @Get('/:pgaPlayerId')
+  async getPlayer(@Param('pgaPlayerId') pgaPlayerId: string) {
+    const player = await this.pgaPlayerService.get(pgaPlayerId);
+    if (!player) {
+      throw new NotFoundException(`PGA Player (ID: ${pgaPlayerId}) not found`);
+    }
+    return PgaPlayerDto.fromEntity(player);
   }
 }
