@@ -86,7 +86,7 @@ export class PgaTournamentIngestor {
         if (stats?.courses?.length) {
           const course = stats.courses.find((c) => c.hostCourse) ?? stats.courses[0];
           tourneysToIngest[tourneyId].par = course.par;
-          tourneysToIngest[tourneyId].yardage = course.yardage;
+          tourneysToIngest[tourneyId].yardage = strToNum(course.yardage.split(',').join('')) ?? null;
         }
       } catch (e) {
         this.logger.warn(`Could not fetch course stats for ${tourneyId}: ${e}`);

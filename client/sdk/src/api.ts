@@ -686,11 +686,11 @@ export interface PgaTournament {
      */
     'par': number | null;
     /**
-     * Total course yardage (e.g. \"7,392\")
-     * @type {string}
+     * Total course yardage (e.g. 7392)
+     * @type {number}
      * @memberof PgaTournament
      */
-    'yardage': string | null;
+    'yardage': number | null;
 }
 
 export const PgaTournamentScoringFormatEnum = {

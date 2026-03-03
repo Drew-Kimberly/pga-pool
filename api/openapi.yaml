@@ -873,9 +873,9 @@ components:
           nullable: true
           description: Total par for the course (e.g. 72)
         yardage:
-          type: string
+          type: number
           nullable: true
-          description: Total course yardage (e.g. "7,392")
+          description: Total course yardage (e.g. 7392)
       required:
         - id
         - name

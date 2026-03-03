@@ -26,7 +26,7 @@ export class PgaTournamentDto {
   logo_url: string | null;
   course_image_url: string | null;
   par: number | null;
-  yardage: string | null;
+  yardage: number | null;
   previous_champion: {
     id: number | null;
     name: string | null;

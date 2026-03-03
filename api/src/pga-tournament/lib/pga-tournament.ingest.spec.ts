@@ -143,7 +143,7 @@ describe('PgaTournamentIngestor', () => {
       const savedPayload = (pgaTournamentService.save as ReturnType<typeof vi.fn>).mock.calls[0][0];
       expect(savedPayload).toHaveLength(1);
       expect(savedPayload[0].par).toBe(71);
-      expect(savedPayload[0].yardage).toBe('7,261');
+      expect(savedPayload[0].yardage).toBe(7261);
     });
 
     it('prefers host course when multiple courses exist', async () => {
@@ -180,7 +180,7 @@ describe('PgaTournamentIngestor', () => {
 
       const savedPayload = (pgaTournamentService.save as ReturnType<typeof vi.fn>).mock.calls[0][0];
       expect(savedPayload[0].par).toBe(70);
-      expect(savedPayload[0].yardage).toBe('6,874');
+      expect(savedPayload[0].yardage).toBe(6874);
     });
 
     it('falls back to first course when no host course is marked', async () => {
@@ -217,7 +217,7 @@ describe('PgaTournamentIngestor', () => {
 
       const savedPayload = (pgaTournamentService.save as ReturnType<typeof vi.fn>).mock.calls[0][0];
       expect(savedPayload[0].par).toBe(72);
-      expect(savedPayload[0].yardage).toBe('7,400');
+      expect(savedPayload[0].yardage).toBe(7400);
     });
 
     it('does not block ingestion when courseStats fails', async () => {
