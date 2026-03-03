@@ -18,17 +18,37 @@ export function TournamentOverview() {
     <Box gap="medium">
       {/* Course section */}
       <OverviewSection title="Course">
-        <Box gap="xsmall">
-          <Text weight="bold" size="medium">
-            {pgaTournament.course_name}
-          </Text>
-          <Box direction="row" gap="small">
-            {pgaTournament.par != null && (
-              <MetaItem label="PAR" value={String(pgaTournament.par)} />
-            )}
-            {pgaTournament.yardage != null && (
-              <MetaItem label="YARDAGE" value={pgaTournament.yardage.toLocaleString()} />
-            )}
+        <Box gap="small">
+          {pgaTournament.course_image_url && (
+            <Box
+              round="small"
+              overflow="hidden"
+              height={{ max: '200px' }}
+              style={{ lineHeight: 0 }}
+            >
+              <img
+                src={pgaTournament.course_image_url}
+                alt={pgaTournament.course_name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            </Box>
+          )}
+          <Box gap="xsmall">
+            <Text weight="bold" size="medium">
+              {pgaTournament.course_name}
+            </Text>
+            <Box direction="row" gap="small">
+              {pgaTournament.par != null && (
+                <MetaItem label="PAR" value={String(pgaTournament.par)} />
+              )}
+              {pgaTournament.yardage != null && (
+                <MetaItem label="YARDAGE" value={pgaTournament.yardage.toLocaleString()} />
+              )}
+            </Box>
           </Box>
         </Box>
       </OverviewSection>
@@ -46,7 +66,7 @@ export function TournamentOverview() {
 
       {/* Previous champion */}
       {pgaTournament.previous_champion?.name && (
-        <OverviewSection title="Defending Champion">
+        <OverviewSection title="Previous Champion">
           <ChampionDisplay name={pgaTournament.previous_champion.name} champion={champion} />
         </OverviewSection>
       )}

@@ -67,13 +67,17 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
             {locationParts.join(' \u00B7 ')}
           </Text>
 
-          {/* Date + inline status */}
-          <Box direction="row" align="center" gap="xsmall" wrap>
-            <Text size="small" style={{ fontStyle: 'italic' }} color="text-weak">
-              {tournament.date.display}
-            </Text>
-            {status && <InlineStatusBadge status={status} />}
-          </Box>
+          {/* Date */}
+          <Text size="small" style={{ fontStyle: 'italic' }} color="text-weak">
+            {tournament.date.display}
+          </Text>
+
+          {/* Status badge */}
+          {status && (
+            <Box align="start">
+              <InlineStatusBadge status={status} />
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>
@@ -161,7 +165,7 @@ function InlineStatusBadge({ status }: InlineStatusBadgeProps) {
       <Text
         size="xsmall"
         weight="bold"
-        style={{ color: styles.textColor, letterSpacing: '0.04em', fontSize: '0.65rem' }}
+        style={{ color: styles.textColor, letterSpacing: '0.04em', fontSize: '0.75rem' }}
       >
         {status.label.toUpperCase()}
       </Text>
