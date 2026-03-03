@@ -25,6 +25,8 @@ export class PgaTournamentDto {
   city: string;
   logo_url: string | null;
   course_image_url: string | null;
+  par: number | null;
+  yardage: string | null;
   previous_champion: {
     id: number | null;
     name: string | null;
@@ -51,6 +53,8 @@ export class PgaTournamentDto {
     dto.city = t.city;
     dto.logo_url = t.logo_url;
     dto.course_image_url = t.course_url;
+    dto.par = t.par;
+    dto.yardage = t.yardage;
     dto.previous_champion = { id: t.previous_champion_id, name: t.previous_champion };
     return dto;
   }

@@ -868,6 +868,14 @@ components:
         course_image_url:
           type: string
           nullable: true
+        par:
+          type: number
+          nullable: true
+          description: Total par for the course (e.g. 72)
+        yardage:
+          type: string
+          nullable: true
+          description: Total course yardage (e.g. "7,392")
       required:
         - id
         - name
@@ -889,6 +897,8 @@ components:
         - previous_champion
         - logo_url
         - course_image_url
+        - par
+        - yardage
     PgaPlayer:
       description: Defines a PGA player (i.e. golfer)
       type: object

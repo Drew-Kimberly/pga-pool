@@ -4,6 +4,7 @@ import { GraphQLClient } from 'graphql-request';
 import { lastValueFrom } from 'rxjs';
 
 import {
+  CourseStatsQuery,
   FieldQuery,
   getSdk,
   LeaderboardHoleByHoleQuery,
@@ -80,6 +81,11 @@ export class PgaTourApiService {
     const response = await this.sdk.Tournaments({ ids: tournamentIds });
 
     return response.tournaments;
+  }
+
+  async getCourseStats(tournamentId: string): Promise<CourseStatsQuery['courseStats']> {
+    const response = await this.sdk.CourseStats({ tournamentId });
+    return response.courseStats;
   }
 
   async getTournamentLeaderboard(
