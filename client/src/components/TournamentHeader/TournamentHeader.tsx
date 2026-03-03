@@ -73,11 +73,9 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
           </Text>
 
           {/* Status badge */}
-          {status && (
-            <Box align="start">
-              <InlineStatusBadge status={status} />
-            </Box>
-          )}
+          <Box align="start">
+            <InlineStatusBadge status={status} />
+          </Box>
         </Box>
       </Box>
     </Box>
@@ -86,11 +84,11 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
 
 interface ResolvedStatus {
   label: string;
-  variant: 'live' | 'official' | 'upcoming' | 'pending';
+  variant: 'live' | 'official' | 'thisweek' | 'upcoming' | 'pending';
   dot?: boolean;
 }
 
-function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatus | null {
+function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatus {
   const { tournament_status, round_status, current_round } = tournament;
   const displayRound = round ?? current_round;
 
@@ -110,7 +108,16 @@ function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatu
     return { label: 'Official', variant: 'official' };
   }
 
-  return null;
+  // NOT_STARTED: determine if this is "this week" or further out
+  const startDate = new Date(tournament.date.start);
+  const now = new Date();
+  const daysUntilStart = (startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+
+  if (daysUntilStart <= 7) {
+    return { label: 'This Week', variant: 'thisweek' };
+  }
+
+  return { label: 'Upcoming', variant: 'upcoming' };
 }
 
 const BADGE_STYLES: Record<
@@ -126,6 +133,11 @@ const BADGE_STYLES: Record<
     color: 'var(--color-status-official)',
     bg: 'var(--color-status-official-bg)',
     textColor: '#ffffff',
+  },
+  thisweek: {
+    color: 'var(--color-status-thisweek)',
+    bg: 'var(--color-status-thisweek-bg)',
+    textColor: 'var(--color-status-thisweek)',
   },
   upcoming: {
     color: 'var(--color-status-upcoming)',

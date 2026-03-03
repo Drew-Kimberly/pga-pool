@@ -32,6 +32,8 @@
   --color-status-live-bg: rgba(22, 163, 74, 0.10);
   --color-status-official: #006747;
   --color-status-official-bg: #006747;
+  --color-status-thisweek: #4f46e5;
+  --color-status-thisweek-bg: rgba(79, 70, 229, 0.10);
   --color-status-upcoming: #6b7280;
   --color-status-upcoming-bg: rgba(107, 114, 128, 0.08);
   --color-status-pending: #d97706;
@@ -72,8 +74,10 @@
   --color-status-live-bg: rgba(74, 222, 128, 0.12);
   --color-status-official: #22c55e;
   --color-status-official-bg: #15803d;
+  --color-status-thisweek: #818cf8;
+  --color-status-thisweek-bg: rgba(129, 140, 248, 0.15);
   --color-status-upcoming: #9ca3af;
-  --color-status-upcoming-bg: rgba(156, 163, 175, 0.10);
+  --color-status-upcoming-bg: rgba(156, 163, 175, 0.12);
   --color-status-pending: #fbbf24;
   --color-status-pending-bg: rgba(251, 191, 36, 0.12);
   --color-status-cut: #f87171;

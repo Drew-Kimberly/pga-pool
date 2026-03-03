@@ -566,7 +566,7 @@ function TournamentCard({
   );
 }
 
-type StatusVariant = 'live' | 'official' | 'upcoming' | 'pending' | 'default';
+type StatusVariant = 'live' | 'official' | 'thisweek' | 'upcoming' | 'pending' | 'default';
 
 interface StatusPillProps {
   label: string;
@@ -583,6 +583,11 @@ const STATUS_STYLES: Record<StatusVariant, { color: string; bg: string; textColo
     color: 'var(--color-status-official)',
     bg: 'var(--color-status-official-bg)',
     textColor: '#ffffff',
+  },
+  thisweek: {
+    color: 'var(--color-status-thisweek)',
+    bg: 'var(--color-status-thisweek-bg)',
+    textColor: 'var(--color-status-thisweek)',
   },
   upcoming: {
     color: 'var(--color-status-upcoming)',
@@ -652,7 +657,7 @@ function toCurrentStatus(tournament: PoolTournament): { label: string; variant: 
   if (
     tournament.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.NotStarted
   ) {
-    return { label: 'This Week', variant: 'upcoming' };
+    return { label: 'This Week', variant: 'thisweek' };
   }
 
   return tournament.scores_are_official
