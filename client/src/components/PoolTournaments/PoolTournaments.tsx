@@ -507,7 +507,7 @@ function TournamentCard({
             )}
             {onOverviewNavigate && (
               <CardLink
-                label="Event overview"
+                label={isDesktop ? 'Event overview' : 'Overview'}
                 onClick={(e) => {
                   e.stopPropagation();
                   onOverviewNavigate();
