@@ -15,6 +15,7 @@ const TOURNAMENT_POLL_INTERVAL = 5 * 60 * 1000; // 5 min
 export interface TournamentLayoutContext {
   tournament: PoolTournament;
   poolId: string;
+  hasField: boolean;
 }
 
 export function useTournamentLayoutContext(): TournamentLayoutContext {
@@ -33,20 +34,28 @@ export function TournamentLayout({ poolId, poolTournamentId }: TournamentLayoutP
   const [tournament, setTournament] = React.useState<PoolTournament | undefined>();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | undefined>();
+  const [hasField, setHasField] = React.useState<boolean | undefined>();
 
   React.useEffect(() => {
     let isMounted = true;
 
-    async function fetchTournament() {
+    async function fetchData() {
       setIsLoading(true);
       setError(undefined);
 
       try {
-        const res = await pgaPoolApi.poolTournaments.getPoolTournament({
-          poolId,
-          poolTournamentId,
-        });
-        if (isMounted) setTournament(res.data);
+        const [tournamentRes, fieldAvailable] = await Promise.all([
+          pgaPoolApi.poolTournaments.getPoolTournament({ poolId, poolTournamentId }),
+          pgaPoolApi.poolTournamentField
+            .getPoolTournamentField({ poolId, poolTournamentId })
+            .then(() => true)
+            .catch(() => false),
+        ]);
+
+        if (isMounted) {
+          setTournament(tournamentRes.data);
+          setHasField(fieldAvailable);
+        }
       } catch (e) {
         if (isMounted && !pgaPoolApi.is404Error(e as Error)) {
           setError(e as Error);
@@ -56,7 +65,7 @@ export function TournamentLayout({ poolId, poolTournamentId }: TournamentLayoutP
       }
     }
 
-    fetchTournament();
+    fetchData();
 
     return () => {
       isMounted = false;
@@ -110,8 +119,9 @@ export function TournamentLayout({ poolId, poolTournamentId }: TournamentLayoutP
     );
   }
 
-  const context: TournamentLayoutContext = { tournament, poolId };
-  const tabs = getTabs(tournament);
+  const fieldAvailable = hasField ?? false;
+  const context: TournamentLayoutContext = { tournament, poolId, hasField: fieldAvailable };
+  const tabs = getTabs(tournament, fieldAvailable);
 
   return (
     <PageContent>
@@ -185,10 +195,10 @@ export function TournamentLayout({ poolId, poolTournamentId }: TournamentLayoutP
 }
 
 /**
- * Smart index redirect based on tournament status.
+ * Smart index redirect based on tournament status and field availability.
  */
 export function TournamentDefaultRedirect() {
-  const { tournament } = useTournamentLayoutContext();
+  const { tournament, hasField } = useTournamentLayoutContext();
   const status = tournament.pga_tournament.tournament_status;
 
   if (status === PgaTournamentTournamentStatusEnum.InProgress) {
@@ -199,7 +209,12 @@ export function TournamentDefaultRedirect() {
     return <Navigate to="results" replace />;
   }
 
-  return <Navigate to="field" replace />;
+  // NOT_STARTED: go to field if available, otherwise overview
+  if (hasField) {
+    return <Navigate to="field" replace />;
+  }
+
+  return <Navigate to="overview" replace />;
 }
 
 interface Tab {
@@ -207,7 +222,7 @@ interface Tab {
   path: string;
 }
 
-function getTabs(tournament: PoolTournament): Tab[] {
+function getTabs(tournament: PoolTournament, hasField: boolean): Tab[] {
   const status = tournament.pga_tournament.tournament_status;
   const tabs: Tab[] = [];
 
@@ -219,7 +234,10 @@ function getTabs(tournament: PoolTournament): Tab[] {
     tabs.push({ label: 'Results', path: 'results' });
   }
 
-  tabs.push({ label: 'Field', path: 'field' });
+  if (hasField) {
+    tabs.push({ label: 'Field', path: 'field' });
+  }
+
   tabs.push({ label: 'Overview', path: 'overview' });
 
   return tabs;

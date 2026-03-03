@@ -15,6 +15,7 @@ interface PoolNavItem {
   key: 'leaderboard' | 'tournaments' | 'standings';
   label: string;
   href: string;
+  icon?: React.ReactNode;
 }
 
 export function PoolNav({ model, mobile }: PoolNavProps) {
@@ -23,11 +24,20 @@ export function PoolNav({ model, mobile }: PoolNavProps) {
   const activeBackground = darkMode ? '#2b62c8' : 'brand';
   const activeBorder = darkMode ? '#8eb3ff' : '#273344';
   const inactiveTextColor = darkMode ? 'light-3' : undefined;
-  const items: PoolNavItem[] = [
-    { key: 'leaderboard', label: 'Leaderboard', href: model.leaderboardPath },
-    { key: 'tournaments', label: 'Tournaments', href: model.tournamentsPath },
-    { key: 'standings', label: 'Standings', href: model.standingsPath },
-  ];
+
+  const items: PoolNavItem[] = [];
+
+  if (model.showLeaderboard && model.leaderboardPath) {
+    items.push({
+      key: 'leaderboard',
+      label: 'Live',
+      href: model.leaderboardPath,
+      icon: <LiveDot />,
+    });
+  }
+
+  items.push({ key: 'tournaments', label: 'Tournaments', href: model.tournamentsPath });
+  items.push({ key: 'standings', label: 'Standings', href: model.standingsPath });
 
   const navItems = items.map((item) => {
     const active = model.activeSection === item.key;
@@ -41,6 +51,8 @@ export function PoolNav({ model, mobile }: PoolNavProps) {
             <Box
               align="center"
               justify="center"
+              direction="row"
+              gap="xsmall"
               pad={mobile ? { vertical: 'small' } : { vertical: 'xsmall', horizontal: 'small' }}
               round="small"
               background={active ? activeBackground : undefined}
@@ -54,6 +66,7 @@ export function PoolNav({ model, mobile }: PoolNavProps) {
                   : undefined
               }
             >
+              {item.icon}
               <Text
                 size={mobile ? 'small' : 'medium'}
                 weight={active ? 'bold' : undefined}
@@ -109,5 +122,20 @@ export function PoolNav({ model, mobile }: PoolNavProps) {
         {navItems}
       </Box>
     </>
+  );
+}
+
+function LiveDot() {
+  return (
+    <Box
+      flex={false}
+      width="8px"
+      height="8px"
+      round="full"
+      style={{
+        backgroundColor: 'var(--color-status-live)',
+        animation: 'pulse-live 2s ease-in-out infinite',
+      }}
+    />
   );
 }
