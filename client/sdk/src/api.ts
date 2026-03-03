@@ -2339,6 +2339,40 @@ export const PoolTournamentFieldApiAxiosParamCreator = function (configuration?:
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Resolves the current week\'s PGA tournament and returns the tiered player field for the corresponding pool tournament
+         * @summary Fetches the player field for the current week\'s pool tournament
+         * @param {string} poolId Pool ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWeeklyPoolTournamentField: async (poolId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'poolId' is not null or undefined
+            assertParamExists('getWeeklyPoolTournamentField', 'poolId', poolId)
+            const localVarPath = `/pools/{poolId}/weekly-field`
+                .replace(`{${"poolId"}}`, encodeURIComponent(String(poolId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -2363,6 +2397,19 @@ export const PoolTournamentFieldApiFp = function(configuration?: Configuration) 
             const operationBasePath = operationServerMap['PoolTournamentFieldApi.getPoolTournamentField']?.[index]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
+        /**
+         * Resolves the current week\'s PGA tournament and returns the tiered player field for the corresponding pool tournament
+         * @summary Fetches the player field for the current week\'s pool tournament
+         * @param {string} poolId Pool ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getWeeklyPoolTournamentField(poolId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PoolTournamentField>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getWeeklyPoolTournamentField(poolId, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PoolTournamentFieldApi.getWeeklyPoolTournamentField']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
     }
 };
 
@@ -2382,6 +2429,16 @@ export const PoolTournamentFieldApiFactory = function (configuration?: Configura
          */
         getPoolTournamentField(requestParameters: PoolTournamentFieldApiGetPoolTournamentFieldRequest, options?: RawAxiosRequestConfig): AxiosPromise<PoolTournamentField> {
             return localVarFp.getPoolTournamentField(requestParameters.poolId, requestParameters.poolTournamentId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Resolves the current week\'s PGA tournament and returns the tiered player field for the corresponding pool tournament
+         * @summary Fetches the player field for the current week\'s pool tournament
+         * @param {PoolTournamentFieldApiGetWeeklyPoolTournamentFieldRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWeeklyPoolTournamentField(requestParameters: PoolTournamentFieldApiGetWeeklyPoolTournamentFieldRequest, options?: RawAxiosRequestConfig): AxiosPromise<PoolTournamentField> {
+            return localVarFp.getWeeklyPoolTournamentField(requestParameters.poolId, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2408,6 +2465,20 @@ export interface PoolTournamentFieldApiGetPoolTournamentFieldRequest {
 }
 
 /**
+ * Request parameters for getWeeklyPoolTournamentField operation in PoolTournamentFieldApi.
+ * @export
+ * @interface PoolTournamentFieldApiGetWeeklyPoolTournamentFieldRequest
+ */
+export interface PoolTournamentFieldApiGetWeeklyPoolTournamentFieldRequest {
+    /**
+     * Pool ID
+     * @type {string}
+     * @memberof PoolTournamentFieldApiGetWeeklyPoolTournamentField
+     */
+    readonly poolId: string
+}
+
+/**
  * PoolTournamentFieldApi - object-oriented interface
  * @export
  * @class PoolTournamentFieldApi
@@ -2424,6 +2495,18 @@ export class PoolTournamentFieldApi extends BaseAPI {
      */
     public getPoolTournamentField(requestParameters: PoolTournamentFieldApiGetPoolTournamentFieldRequest, options?: RawAxiosRequestConfig) {
         return PoolTournamentFieldApiFp(this.configuration).getPoolTournamentField(requestParameters.poolId, requestParameters.poolTournamentId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Resolves the current week\'s PGA tournament and returns the tiered player field for the corresponding pool tournament
+     * @summary Fetches the player field for the current week\'s pool tournament
+     * @param {PoolTournamentFieldApiGetWeeklyPoolTournamentFieldRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PoolTournamentFieldApi
+     */
+    public getWeeklyPoolTournamentField(requestParameters: PoolTournamentFieldApiGetWeeklyPoolTournamentFieldRequest, options?: RawAxiosRequestConfig) {
+        return PoolTournamentFieldApiFp(this.configuration).getWeeklyPoolTournamentField(requestParameters.poolId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
