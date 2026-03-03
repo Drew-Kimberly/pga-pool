@@ -19,6 +19,12 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
   const imgSize = isDesktop ? '110px' : '78px';
   const status = resolveStatus(tournament, round);
 
+  const locationParts: string[] = [];
+  if (tournament.course_name) locationParts.push(tournament.course_name);
+  if (tournament.city && tournament.state) {
+    locationParts.push(`${tournament.city}, ${tournament.state}`);
+  }
+
   return (
     <Box gap="small" pad={{ vertical: 'small' }}>
       <Box direction="row" gap={isDesktop ? 'medium' : 'small'}>
@@ -47,70 +53,30 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
           </Box>
         )}
 
-        <Box flex gap="xsmall">
-          {/* Name row with status badge pinned right on desktop */}
-          <Box direction="row" justify="between" align="start" gap="small">
-            <Text
-              size={isDesktop ? 'xlarge' : 'large'}
-              weight="bold"
-              style={{ fontFamily: 'var(--font-display)', lineHeight: 1.2 }}
-            >
-              {tournament.name}
-            </Text>
+        <Box flex gap="xsmall" justify="center">
+          <Text
+            size={isDesktop ? 'xlarge' : 'large'}
+            weight="bold"
+            style={{ fontFamily: 'var(--font-display)', lineHeight: 1.2 }}
+          >
+            {tournament.name}
+          </Text>
 
-            {isDesktop && status && (
-              <Box flex={false} style={{ marginTop: '4px' }}>
-                <StatusBadge status={status} />
-              </Box>
-            )}
-          </Box>
+          {/* Location line */}
+          <Text size="small" color="text-weak">
+            {locationParts.join(' \u00B7 ')}
+          </Text>
 
-          <Box gap="xxsmall">
-            <Text size="small" color="text-weak">
-              {tournament.course_name}
-              {tournament.city && tournament.state
-                ? ` \u00B7 ${tournament.city}, ${tournament.state}`
-                : ''}
-            </Text>
-
+          {/* Date + inline status */}
+          <Box direction="row" align="center" gap="xsmall" wrap>
             <Text size="small" style={{ fontStyle: 'italic' }} color="text-weak">
               {tournament.date.display}
             </Text>
-          </Box>
-
-          {/* Meta key/values + mobile status badge */}
-          <Box direction="row" align="center" gap="xsmall" wrap>
-            {!isDesktop && status && <StatusBadge status={status} />}
-            <MetaValues tournament={tournament} />
+            {status && <InlineStatusBadge status={status} />}
           </Box>
         </Box>
       </Box>
     </Box>
-  );
-}
-
-interface MetaValuesProps {
-  tournament: PgaTournament;
-}
-
-function MetaValues({ tournament }: MetaValuesProps) {
-  const parts: string[] = [];
-
-  if (tournament.par != null) {
-    parts.push(`Par ${tournament.par}`);
-  }
-  if (tournament.yardage != null) {
-    parts.push(`${tournament.yardage.toLocaleString()} yds`);
-  }
-  parts.push(formatPurse(tournament.purse));
-  if (tournament.fedex_cup_points != null) {
-    parts.push(`FedEx ${tournament.fedex_cup_points} pts`);
-  }
-
-  return (
-    <Text size="xsmall" color="text-weak" weight="bold">
-      {parts.join(' \u00B7 ')}
-    </Text>
   );
 }
 
@@ -140,7 +106,6 @@ function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatu
     return { label: 'Official', variant: 'official' };
   }
 
-  // NOT_STARTED: no badge shown in the header
   return null;
 }
 
@@ -170,19 +135,19 @@ const BADGE_STYLES: Record<
   },
 };
 
-interface StatusBadgeComponentProps {
+interface InlineStatusBadgeProps {
   status: ResolvedStatus;
 }
 
-function StatusBadge({ status }: StatusBadgeComponentProps) {
+function InlineStatusBadge({ status }: InlineStatusBadgeProps) {
   const styles = BADGE_STYLES[status.variant];
 
   return (
     <Box
       direction="row"
       align="center"
-      gap="xsmall"
-      pad={{ horizontal: 'small', vertical: 'xxsmall' }}
+      gap="xxsmall"
+      pad={{ horizontal: 'xsmall', vertical: 'xxsmall' }}
       round="xsmall"
       flex={false}
       style={{
@@ -196,7 +161,7 @@ function StatusBadge({ status }: StatusBadgeComponentProps) {
       <Text
         size="xsmall"
         weight="bold"
-        style={{ color: styles.textColor, letterSpacing: '0.04em' }}
+        style={{ color: styles.textColor, letterSpacing: '0.04em', fontSize: '0.65rem' }}
       >
         {status.label.toUpperCase()}
       </Text>
@@ -208,8 +173,8 @@ function PulsingDot() {
   return (
     <Box
       flex={false}
-      width="8px"
-      height="8px"
+      width="6px"
+      height="6px"
       round="full"
       style={{
         backgroundColor: 'var(--color-status-live)',
@@ -217,18 +182,4 @@ function PulsingDot() {
       }}
     />
   );
-}
-
-function formatPurse(purse: number): string {
-  if (purse >= 1_000_000) {
-    const millions = purse / 1_000_000;
-    const formatted = millions % 1 === 0 ? `${millions}` : `${parseFloat(millions.toFixed(1))}`;
-    return `$${formatted}M`;
-  }
-
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(purse);
 }

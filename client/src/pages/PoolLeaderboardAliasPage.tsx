@@ -42,7 +42,7 @@ function _PoolLeaderboardAliasPage() {
           return;
         }
 
-        setRedirectPath(`/pools/${poolId}/tournaments/${tournament.id}/leaderboard`);
+        setRedirectPath(`/pools/${poolId}/tournaments/${tournament.id}`);
       } catch (e) {
         if (!isMounted) {
           return;

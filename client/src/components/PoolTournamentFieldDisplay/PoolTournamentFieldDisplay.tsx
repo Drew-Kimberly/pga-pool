@@ -1,19 +1,8 @@
-import {
-  Box,
-  Button,
-  Grid,
-  Heading,
-  PageContent,
-  ResponsiveContext,
-  Text,
-  TextInput,
-} from 'grommet';
-import { FormPrevious, Search, User as UserIcon } from 'grommet-icons';
+import { Box, Button, Grid, Heading, ResponsiveContext, Text, TextInput } from 'grommet';
+import { Search, User as UserIcon } from 'grommet-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
 
 import { useThemeContext } from '../../contexts/ThemeContext';
-import { TournamentHeader } from '../TournamentHeader';
 
 import { PoolTournamentField, PoolTournamentPlayer } from '@drewkimberly/pga-pool-api';
 
@@ -21,12 +10,10 @@ type ViewMode = 'tier' | 'name';
 
 export interface PoolTournamentFieldDisplayProps {
   field: PoolTournamentField;
-  poolId: string;
 }
 
-export function PoolTournamentFieldDisplay({ field, poolId }: PoolTournamentFieldDisplayProps) {
+export function PoolTournamentFieldDisplay({ field }: PoolTournamentFieldDisplayProps) {
   const size = useContext(ResponsiveContext);
-  const navigate = useNavigate();
   const { darkMode } = useThemeContext();
   const isDesktop = size !== 'small';
 
@@ -84,85 +71,68 @@ export function PoolTournamentFieldDisplay({ field, poolId }: PoolTournamentFiel
   const showExpandedSearch = isDesktop || searchOpen;
 
   return (
-    <PageContent pad={{ horizontal: 'small', vertical: 'medium' }}>
-      <Box gap="medium">
-        <Button
-          plain
-          onClick={() => navigate(`/pools/${poolId}/tournaments`)}
-          style={{ alignSelf: 'flex-start' }}
-        >
-          <Box direction="row" align="center" gap="xsmall">
-            <FormPrevious size="small" />
-            <Text size="small" weight="bold">
-              All tournaments
-            </Text>
-          </Box>
-        </Button>
-
-        <TournamentHeader tournament={field.pool_tournament.pga_tournament} />
-
-        <Box direction="row" align="center" justify="between">
-          {showExpandedSearch ? (
-            <Box direction="row" align="center" gap="small" flex>
-              <Box
-                direction="row"
-                align="center"
-                gap="small"
-                round="large"
-                border={{ size: 'xsmall', color: 'border' }}
-                pad={{ vertical: 'small', horizontal: 'medium' }}
-                background="background-front"
-                width={isDesktop ? { max: '400px' } : undefined}
-                flex={!isDesktop}
-              >
-                <Search size="medium" />
-                <TextInput
-                  ref={searchInputRef}
-                  plain
-                  placeholder="Search player name"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{ padding: 0, outline: 'none', boxShadow: 'none' }}
-                  focusIndicator={false}
-                />
-              </Box>
-              {!isDesktop && (
-                <Button plain onClick={handleSearchCancel}>
-                  <Text size="small" color="text-weak">
-                    Cancel
-                  </Text>
-                </Button>
-              )}
+    <Box gap="medium">
+      <Box direction="row" align="center" justify="between">
+        {showExpandedSearch ? (
+          <Box direction="row" align="center" gap="small" flex>
+            <Box
+              direction="row"
+              align="center"
+              gap="small"
+              round="large"
+              border={{ size: 'xsmall', color: 'border' }}
+              pad={{ vertical: 'small', horizontal: 'medium' }}
+              background="background-front"
+              width={isDesktop ? { max: '400px' } : undefined}
+              flex={!isDesktop}
+            >
+              <Search size="medium" />
+              <TextInput
+                ref={searchInputRef}
+                plain
+                placeholder="Search player name"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ padding: 0, outline: 'none', boxShadow: 'none' }}
+                focusIndicator={false}
+              />
             </Box>
-          ) : (
-            <Button plain onClick={handleSearchOpen}>
-              <Box
-                direction="row"
-                align="center"
-                gap="small"
-                round="large"
-                border={{ size: 'xsmall', color: 'border' }}
-                pad={{ vertical: 'small', horizontal: 'medium' }}
-              >
-                <Search size="medium" />
-                <Text size="small" color="placeholder">
-                  Search player name
+            {!isDesktop && (
+              <Button plain onClick={handleSearchCancel}>
+                <Text size="small" color="text-weak">
+                  Cancel
                 </Text>
-              </Box>
-            </Button>
-          )}
-          {(!searchOpen || isDesktop) && (
-            <ViewToggle activeView={viewMode} onViewChange={setViewMode} darkMode={darkMode} />
-          )}
-        </Box>
-
-        {viewMode === 'tier' ? (
-          <TierView playerTiers={filteredTiers} isDesktop={isDesktop} />
+              </Button>
+            )}
+          </Box>
         ) : (
-          <NameView players={filteredByName} isDesktop={isDesktop} />
+          <Button plain onClick={handleSearchOpen}>
+            <Box
+              direction="row"
+              align="center"
+              gap="small"
+              round="large"
+              border={{ size: 'xsmall', color: 'border' }}
+              pad={{ vertical: 'small', horizontal: 'medium' }}
+            >
+              <Search size="medium" />
+              <Text size="small" color="placeholder">
+                Search player name
+              </Text>
+            </Box>
+          </Button>
+        )}
+        {(!searchOpen || isDesktop) && (
+          <ViewToggle activeView={viewMode} onViewChange={setViewMode} darkMode={darkMode} />
         )}
       </Box>
-    </PageContent>
+
+      {viewMode === 'tier' ? (
+        <TierView playerTiers={filteredTiers} isDesktop={isDesktop} />
+      ) : (
+        <NameView players={filteredByName} isDesktop={isDesktop} />
+      )}
+    </Box>
   );
 }
 

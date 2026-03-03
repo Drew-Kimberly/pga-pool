@@ -1,11 +1,11 @@
 import { useParams } from 'react-router';
 
 import { ErrorPage } from '../components/ErrorPage';
-import { TournamentLeaderboard } from '../components/TournamentLeaderboard';
+import { TournamentLayout } from '../components/TournamentLayout/TournamentLayout';
 
 import { withPageLayout } from './withPageLayout';
 
-function _PoolTournamentResultsPage() {
+function _PoolTournamentLayoutPage() {
   const { poolId, poolTournamentId } = useParams();
 
   if (!poolId || !poolTournamentId) {
@@ -17,13 +17,7 @@ function _PoolTournamentResultsPage() {
     );
   }
 
-  return (
-    <TournamentLeaderboard
-      poolId={poolId}
-      poolTournamentId={poolTournamentId}
-      backTo="tournaments"
-    />
-  );
+  return <TournamentLayout poolId={poolId} poolTournamentId={poolTournamentId} />;
 }
 
-export const PoolTournamentResultsPage = withPageLayout(_PoolTournamentResultsPage);
+export const PoolTournamentLayoutPage = withPageLayout(_PoolTournamentLayoutPage);
