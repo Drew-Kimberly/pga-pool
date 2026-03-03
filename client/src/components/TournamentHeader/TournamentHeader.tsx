@@ -111,37 +111,64 @@ function StatusIndicator({ tournament, round }: StatusIndicatorProps) {
   const displayRound = round ?? current_round;
 
   if (tournament_status === PgaTournamentTournamentStatusEnum.InProgress) {
-    const roundLabel = displayRound ? `Round ${displayRound}` : '';
     const isRoundActive = round_status === PgaTournamentRoundStatusEnum.InProgress;
-    const statusSuffix = isRoundActive ? 'In Progress' : 'Suspended';
+    const roundLabel = displayRound ? `Round ${displayRound}` : '';
+    const label = isRoundActive
+      ? [roundLabel, 'Live'].filter(Boolean).join(' \u00B7 ')
+      : [roundLabel, 'Suspended'].filter(Boolean).join(' \u00B7 ');
 
     return (
-      <Box direction="row" align="center" gap="xsmall" flex={false}>
-        <PulsingDot />
-        <Text size="xsmall" weight="bold" color="text-weak">
-          {[roundLabel, statusSuffix].filter(Boolean).join(' \u00B7 ')}
-        </Text>
-      </Box>
+      <StatusBadge
+        label={label}
+        color="var(--color-status-live)"
+        bg="rgba(34, 197, 94, 0.12)"
+        dot
+      />
     );
   }
 
   if (tournament_status === PgaTournamentTournamentStatusEnum.Completed) {
     return (
-      <Box direction="row" align="center" gap="xsmall" flex={false}>
-        <Text size="small" style={{ lineHeight: 1 }}>
-          &#10003;
-        </Text>
-        <Text size="xsmall" weight="bold" color="text-weak">
-          Tournament Complete
-        </Text>
-      </Box>
+      <StatusBadge
+        label="Complete"
+        color="var(--color-status-complete)"
+        bg="rgba(107, 114, 128, 0.10)"
+      />
     );
   }
 
   return (
-    <Text size="xsmall" color="text-weak">
-      Starts {tournament.date.display}
-    </Text>
+    <StatusBadge
+      label="Upcoming"
+      color="var(--color-status-not-started)"
+      bg="rgba(156, 163, 175, 0.10)"
+    />
+  );
+}
+
+interface StatusBadgeProps {
+  label: string;
+  color: string;
+  bg: string;
+  dot?: boolean;
+}
+
+function StatusBadge({ label, color, bg, dot }: StatusBadgeProps) {
+  return (
+    <Box
+      direction="row"
+      align="center"
+      gap="xsmall"
+      pad={{ horizontal: 'small', vertical: 'xxsmall' }}
+      round="small"
+      flex={false}
+      style={{ backgroundColor: bg, borderColor: color, borderWidth: '1px', borderStyle: 'solid' }}
+    >
+      {dot && <PulsingDot />}
+      <Text size="xsmall" weight="bold" style={{ color }}>
+        {label.toUpperCase()}
+      </Text>
+    </Box>
   );
 }
 
