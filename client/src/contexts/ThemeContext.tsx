@@ -13,6 +13,10 @@ const Context = React.createContext<ThemeContext | null>(null);
 export function ThemeContextProvider({ children }: ParentComponentProps) {
   const [darkMode, setDarkMode] = usePersistedState(false, 'theme-selection');
 
+  React.useEffect(() => {
+    document.documentElement.dataset.theme = darkMode ? 'dark' : 'light';
+  }, [darkMode]);
+
   return <Context.Provider value={{ darkMode, setDarkMode }}>{children}</Context.Provider>;
 }
 
