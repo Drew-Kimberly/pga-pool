@@ -229,12 +229,16 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
             <Box gap="small">
               {currentTournaments.map((entry) => {
                 const status = toCurrentStatus(entry);
+                const isLive =
+                  entry.pga_tournament.tournament_status ===
+                  PgaTournamentTournamentStatusEnum.InProgress;
                 return (
                   <TournamentCard
                     key={entry.id}
                     tournament={entry}
-                    canNavigate={true}
+                    canNavigate={isLive}
                     onNavigate={() => navigate(`/pools/${pool.id}/tournaments/${entry.id}`)}
+                    navigateLabel="View leaderboard"
                     onFieldNavigate={() =>
                       navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
                     }
