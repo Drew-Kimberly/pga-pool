@@ -91,7 +91,7 @@ export function PoolTournamentFieldDisplay({ field }: PoolTournamentFieldDisplay
               <TextInput
                 ref={searchInputRef}
                 plain
-                placeholder={isDesktop ? 'Search player name' : 'Search player'}
+                placeholder="Search player name"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ padding: 0, outline: 'none', boxShadow: 'none' }}
@@ -119,7 +119,7 @@ export function PoolTournamentFieldDisplay({ field }: PoolTournamentFieldDisplay
             >
               <Search size="small" color="text-weak" />
               <Text size="small" color="placeholder" style={{ whiteSpace: 'nowrap' }}>
-                {isDesktop ? 'Search player name' : 'Search'}
+                Search player name
               </Text>
             </Box>
           </Button>
