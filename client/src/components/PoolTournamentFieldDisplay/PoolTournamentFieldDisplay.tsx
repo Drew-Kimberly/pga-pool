@@ -72,25 +72,26 @@ export function PoolTournamentFieldDisplay({ field }: PoolTournamentFieldDisplay
 
   return (
     <Box gap="medium">
-      <Box direction="row" align="center" justify="between">
+      <Box direction="row" align="center" justify="between" wrap={false} gap="small">
         {showExpandedSearch ? (
-          <Box direction="row" align="center" gap="small" flex>
+          <Box direction="row" align="center" gap="small" flex style={{ minWidth: 0 }}>
             <Box
               direction="row"
               align="center"
               gap="small"
               round="large"
               border={{ size: 'xsmall', color: 'border' }}
-              pad={{ vertical: 'small', horizontal: 'medium' }}
+              pad={{ vertical: 'xsmall', horizontal: 'small' }}
               background="background-front"
               width={isDesktop ? { max: '400px' } : undefined}
               flex={!isDesktop}
+              style={{ minWidth: 0 }}
             >
-              <Search size="medium" />
+              <Search size="small" />
               <TextInput
                 ref={searchInputRef}
                 plain
-                placeholder="Search player name"
+                placeholder={isDesktop ? 'Search player name' : 'Search player'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ padding: 0, outline: 'none', boxShadow: 'none' }}
@@ -99,7 +100,7 @@ export function PoolTournamentFieldDisplay({ field }: PoolTournamentFieldDisplay
             </Box>
             {!isDesktop && (
               <Button plain onClick={handleSearchCancel}>
-                <Text size="small" color="text-weak">
+                <Text size="small" color="text-weak" style={{ whiteSpace: 'nowrap' }}>
                   Cancel
                 </Text>
               </Button>
@@ -110,20 +111,26 @@ export function PoolTournamentFieldDisplay({ field }: PoolTournamentFieldDisplay
             <Box
               direction="row"
               align="center"
-              gap="small"
+              gap="xsmall"
               round="large"
               border={{ size: 'xsmall', color: 'border' }}
-              pad={{ vertical: 'small', horizontal: 'medium' }}
+              pad={{ vertical: 'xsmall', horizontal: 'small' }}
+              background="background-front"
             >
-              <Search size="medium" />
-              <Text size="small" color="placeholder">
-                Search player name
+              <Search size="small" color="text-weak" />
+              <Text size="small" color="placeholder" style={{ whiteSpace: 'nowrap' }}>
+                {isDesktop ? 'Search player name' : 'Search'}
               </Text>
             </Box>
           </Button>
         )}
         {(!searchOpen || isDesktop) && (
-          <ViewToggle activeView={viewMode} onViewChange={setViewMode} darkMode={darkMode} />
+          <ViewToggle
+            activeView={viewMode}
+            onViewChange={setViewMode}
+            darkMode={darkMode}
+            compact={!isDesktop}
+          />
         )}
       </Box>
 
@@ -140,9 +147,10 @@ interface ViewToggleProps {
   activeView: ViewMode;
   onViewChange: (view: ViewMode) => void;
   darkMode: boolean;
+  compact?: boolean;
 }
 
-function ViewToggle({ activeView, onViewChange, darkMode }: ViewToggleProps) {
+function ViewToggle({ activeView, onViewChange, darkMode, compact }: ViewToggleProps) {
   const activeBg = darkMode ? '#2b62c8' : 'brand';
   const activeBorder = darkMode ? '#8eb3ff' : '#273344';
   const inactiveText = darkMode ? 'light-3' : 'text-weak';
@@ -159,13 +167,14 @@ function ViewToggle({ activeView, onViewChange, darkMode }: ViewToggleProps) {
       border={{ size: 'xsmall', color: 'border' }}
       background="background-front"
       overflow="hidden"
+      flex={false}
     >
       {tabs.map((tab) => {
         const isActive = activeView === tab.key;
         return (
           <Button key={tab.key} plain onClick={() => onViewChange(tab.key)}>
             <Box
-              pad={{ vertical: 'xsmall', horizontal: 'medium' }}
+              pad={{ vertical: 'xsmall', horizontal: compact ? 'small' : 'medium' }}
               align="center"
               background={isActive ? activeBg : undefined}
               border={isActive ? { size: 'xsmall', color: activeBorder } : undefined}
