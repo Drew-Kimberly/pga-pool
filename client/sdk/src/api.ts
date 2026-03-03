@@ -679,6 +679,18 @@ export interface PgaTournament {
      * @memberof PgaTournament
      */
     'course_image_url': string | null;
+    /**
+     * Total par for the course (e.g. 72)
+     * @type {number}
+     * @memberof PgaTournament
+     */
+    'par': number | null;
+    /**
+     * Total course yardage (e.g. \"7,392\")
+     * @type {string}
+     * @memberof PgaTournament
+     */
+    'yardage': string | null;
 }
 
 export const PgaTournamentScoringFormatEnum = {

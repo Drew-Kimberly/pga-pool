@@ -1479,6 +1479,7 @@ export type Field = {
   lastUpdated?: Maybe<Scalars['AWSTimestamp']['output']>;
   message?: Maybe<Scalars['String']['output']>;
   players: Array<PlayerField>;
+  rangeAvailable?: Maybe<Scalars['Boolean']['output']>;
   standingsHeader: Scalars['String']['output'];
   tournamentName: Scalars['String']['output'];
 };
@@ -2922,6 +2923,7 @@ export type LeaderboardUpdateV3 = {
   leaderboardRoundHeader: Scalars['String']['output'];
   messages: Array<LeaderboardMessage>;
   players: Array<LeaderboardUpdateRowV3>;
+  rangeAvailable?: Maybe<Scalars['Boolean']['output']>;
   rounds: Array<LbRound>;
   subEvent: Scalars['Boolean']['output'];
   tournamentStatus: TournamentStatus;
@@ -2981,6 +2983,7 @@ export type LeaderboardV3 = {
   messages: Array<LeaderboardMessage>;
   players: Array<LeaderboardRowV3>;
   profileEnabled: Scalars['Boolean']['output'];
+  rangeAvailable?: Maybe<Scalars['Boolean']['output']>;
   rounds: Array<LbRound>;
   scorecardEnabled: Scalars['Boolean']['output'];
   standingsEnabled: Scalars['Boolean']['output'];
@@ -8273,6 +8276,7 @@ export type ScorecardUpdateV3 = {
   playerId: Scalars['String']['output'];
   playerState?: Maybe<PlayerState>;
   profileEnabled: Scalars['Boolean']['output'];
+  rangeAvailable?: Maybe<Scalars['Boolean']['output']>;
   roundScores: Array<RoundScore>;
   teeTime?: Maybe<Scalars['AWSTimestamp']['output']>;
   tournamentName: Scalars['String']['output'];
@@ -8293,6 +8297,7 @@ export type ScorecardV3 = {
   player: Player;
   playerState?: Maybe<PlayerState>;
   profileEnabled: Scalars['Boolean']['output'];
+  rangeAvailable?: Maybe<Scalars['Boolean']['output']>;
   roundScores: Array<RoundScore>;
   standings?: Maybe<ScorecardStandings>;
   teeTime?: Maybe<Scalars['AWSTimestamp']['output']>;
@@ -9701,6 +9706,7 @@ export type TeeTimesV2 = {
   hideSov: Scalars['Boolean']['output'];
   id: Scalars['ID']['output'];
   informationSections: Array<InformationSection>;
+  rangeAvailable?: Maybe<Scalars['Boolean']['output']>;
   rounds: Array<TeeTimeRoundV2>;
   teeTimesFeatures: Array<TeeTimesFeature>;
   timezone: Scalars['String']['output'];
@@ -11191,6 +11197,13 @@ export type YtVideoStoryType =
   | 'PLAYER_STORIES'
   | 'TOPIC_STORIES';
 
+export type CourseStatsQueryVariables = Exact<{
+  tournamentId: Scalars['ID']['input'];
+}>;
+
+
+export type CourseStatsQuery = { __typename?: 'Query', courseStats: { __typename?: 'TournamentHoleStats', tournamentId: string, courses: Array<{ __typename?: 'CourseStat', courseId: string, courseCode: string, courseName: string, hostCourse: boolean, par: number, yardage: string }> } };
+
 export type FieldQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   includeWithdrawn?: InputMaybe<Scalars['Boolean']['input']>;
@@ -11329,6 +11342,21 @@ export const TournamentFragmentFragmentDoc = gql`
   }
   formatType
   features
+}
+    `;
+export const CourseStatsDocument = gql`
+    query CourseStats($tournamentId: ID!) {
+  courseStats(tournamentId: $tournamentId) {
+    tournamentId
+    courses {
+      courseId
+      courseCode
+      courseName
+      hostCourse
+      par
+      yardage
+    }
+  }
 }
     `;
 export const FieldDocument = gql`
@@ -11497,6 +11525,9 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
+    CourseStats(variables: CourseStatsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<CourseStatsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<CourseStatsQuery>({ document: CourseStatsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'CourseStats', 'query', variables);
+    },
     Field(variables: FieldQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<FieldQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FieldQuery>({ document: FieldDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Field', 'query', variables);
     },

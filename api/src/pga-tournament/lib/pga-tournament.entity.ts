@@ -102,4 +102,10 @@ export class PgaTournament {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   course_url: string | null;
+
+  @Column({ type: 'int', nullable: true })
+  par: number | null;
+
+  @Column({ type: 'varchar', length: 32, nullable: true })
+  yardage: string | null;
 }

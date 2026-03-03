@@ -80,6 +80,19 @@ export class PgaTournamentIngestor {
       }
     }
 
+    for (const tourneyId of Object.keys(tourneysToIngest)) {
+      try {
+        const stats = await this.pgaTourApi.getCourseStats(tourneyId);
+        if (stats?.courses?.length) {
+          const course = stats.courses.find((c) => c.hostCourse) ?? stats.courses[0];
+          tourneysToIngest[tourneyId].par = course.par;
+          tourneysToIngest[tourneyId].yardage = course.yardage;
+        }
+      } catch (e) {
+        this.logger.warn(`Could not fetch course stats for ${tourneyId}: ${e}`);
+      }
+    }
+
     const payload = Object.values(tourneysToIngest)
     this.logger.log(`Ingesting ${payload.length} PGA Tour tournaments`);
     return this.pgaTournamentService.save(Object.values(payload));

@@ -1,4 +1,4 @@
-import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, DataSource, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import {
   defaultListParams,
@@ -20,7 +20,8 @@ export class PgaTournamentService implements Listable<PgaTournament> {
   constructor(
     @InjectRepository(PgaTournament)
     private readonly pgaTournamentRepo: Repository<PgaTournament>,
-    private readonly listService: TypeOrmListService<PgaTournament>
+    private readonly listService: TypeOrmListService<PgaTournament>,
+    private readonly dataSource: DataSource
   ) {}
 
   async list(
@@ -74,6 +75,8 @@ export class PgaTournamentService implements Listable<PgaTournament> {
   }
 
   save(payload: SavePgaTournament[]): Promise<PgaTournament[]> {
-    return this.pgaTournamentRepo.save(payload);
+    return this.dataSource.transaction((manager) => {
+      return manager.save(PgaTournament, payload);
+    });
   }
 }

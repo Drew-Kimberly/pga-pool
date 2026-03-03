@@ -1,0 +1,13 @@
+query CourseStats($tournamentId: ID!) {
+  courseStats(tournamentId: $tournamentId) {
+    tournamentId
+    courses {
+      courseId
+      courseCode
+      courseName
+      hostCourse
+      par
+      yardage
+    }
+  }
+}
