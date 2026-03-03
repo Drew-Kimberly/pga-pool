@@ -239,6 +239,7 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                     canNavigate={isLive}
                     onNavigate={() => navigate(`/pools/${pool.id}/tournaments/${entry.id}`)}
                     navigateLabel="View leaderboard"
+                    mobileNavigateLabel="Leaderboard"
                     onFieldNavigate={() =>
                       navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
                     }
@@ -283,6 +284,7 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                     statusLabel="Official"
                     statusVariant="official"
                     navigateLabel="View results"
+                    mobileNavigateLabel="Results"
                   />
                 ))}
               </Box>
@@ -404,6 +406,7 @@ interface TournamentCardProps {
   statusVariant?: StatusVariant;
   onNavigate?: () => void;
   navigateLabel?: string;
+  mobileNavigateLabel?: string;
   onFieldNavigate?: () => void;
   onOverviewNavigate?: () => void;
 }
@@ -415,6 +418,7 @@ function TournamentCard({
   statusVariant = 'default',
   onNavigate,
   navigateLabel = 'View leaderboard',
+  mobileNavigateLabel,
   onFieldNavigate,
   onOverviewNavigate,
 }: TournamentCardProps) {
@@ -424,12 +428,12 @@ function TournamentCard({
 
   const content = (
     <Box
-      pad={{ horizontal: 'medium', vertical: 'medium' }}
+      pad={isDesktop ? 'medium' : { horizontal: 'small', vertical: 'small' }}
       round="small"
       border={{ size: 'xsmall', color: 'border' }}
       background="background-front"
     >
-      <Box direction="row" gap="medium">
+      <Box direction="row" gap={isDesktop ? 'medium' : 'small'}>
         {/* Left: all text content */}
         <Box flex gap="small" justify="center">
           <Box gap="xxsmall">
@@ -479,47 +483,69 @@ function TournamentCard({
             </Box>
           </Box>
 
-          <Box direction="row" align="center" gap="medium">
+          <Box direction="row" align="center" gap={isDesktop ? 'medium' : 'small'} wrap={false}>
             {canNavigate && (
-              <Box direction="row" align="center" gap="xsmall">
-                <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
-                  {navigateLabel}
+              <Box
+                direction="row"
+                align="center"
+                gap="xxsmall"
+                onClick={(e) => {
+                  if (!onNavigate) return;
+                  e.stopPropagation();
+                  onNavigate();
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <Text
+                  size="small"
+                  weight="bold"
+                  style={{ textDecoration: 'underline', whiteSpace: 'nowrap' }}
+                >
+                  {isDesktop ? navigateLabel : (mobileNavigateLabel ?? navigateLabel)}
                 </Text>
-                <FormNext size="small" />
+                {isDesktop && <FormNext size="small" />}
               </Box>
             )}
             {onFieldNavigate && (
               <Box
                 direction="row"
                 align="center"
-                gap="xsmall"
+                gap="xxsmall"
                 onClick={(e) => {
                   e.stopPropagation();
                   onFieldNavigate();
                 }}
                 style={{ cursor: 'pointer' }}
               >
-                <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
-                  View field
+                <Text
+                  size="small"
+                  weight="bold"
+                  style={{ textDecoration: 'underline', whiteSpace: 'nowrap' }}
+                >
+                  {isDesktop ? 'View field' : 'Field'}
                 </Text>
-                <FormNext size="small" />
+                {isDesktop && <FormNext size="small" />}
               </Box>
             )}
             {onOverviewNavigate && (
               <Box
                 direction="row"
                 align="center"
-                gap="xsmall"
+                gap="xxsmall"
                 onClick={(e) => {
                   e.stopPropagation();
                   onOverviewNavigate();
                 }}
                 style={{ cursor: 'pointer' }}
               >
-                <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
-                  Event overview
+                <Text
+                  size="small"
+                  weight="bold"
+                  style={{ textDecoration: 'underline', whiteSpace: 'nowrap' }}
+                >
+                  {isDesktop ? 'Event overview' : 'Overview'}
                 </Text>
-                <FormNext size="small" />
+                {isDesktop && <FormNext size="small" />}
               </Box>
             )}
           </Box>
@@ -529,8 +555,8 @@ function TournamentCard({
         {logoUrl && (
           <Box flex={false} align="center" justify="center">
             <Box
-              width={isDesktop ? '130px' : '110px'}
-              height={isDesktop ? '130px' : '110px'}
+              width={isDesktop ? '130px' : '72px'}
+              height={isDesktop ? '130px' : '72px'}
               round="full"
               overflow="hidden"
               border={{ size: 'xsmall', color: 'light-4' }}
@@ -543,8 +569,8 @@ function TournamentCard({
                 src={logoUrl}
                 alt=""
                 style={{
-                  width: isDesktop ? '110px' : '92px',
-                  height: isDesktop ? '110px' : '92px',
+                  width: isDesktop ? '110px' : '60px',
+                  height: isDesktop ? '110px' : '60px',
                   objectFit: 'contain',
                 }}
               />

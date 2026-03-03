@@ -1,4 +1,4 @@
-import { Box, Button, Notification, PageContent, ResponsiveContext, Text } from 'grommet';
+import { Box, Button, Notification, PageContent, Text } from 'grommet';
 import { CircleInformation, FormPrevious } from 'grommet-icons';
 import React from 'react';
 import { Navigate, NavLink, Outlet, useNavigate, useOutletContext } from 'react-router';
@@ -29,8 +29,6 @@ export interface TournamentLayoutProps {
 
 export function TournamentLayout({ poolId, poolTournamentId }: TournamentLayoutProps) {
   const navigate = useNavigate();
-  const size = React.useContext(ResponsiveContext);
-  const isDesktop = size !== 'small';
   const [tournament, setTournament] = React.useState<PoolTournament | undefined>();
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | undefined>();
@@ -149,7 +147,7 @@ export function TournamentLayout({ poolId, poolTournamentId }: TournamentLayoutP
         <Box
           as="nav"
           direction="row"
-          gap={isDesktop ? 'medium' : 'small'}
+          gap="medium"
           style={{ borderBottom: '1px solid var(--color-tab-border, #e5e7eb)' }}
           margin={{ bottom: 'medium' }}
         >
@@ -159,7 +157,7 @@ export function TournamentLayout({ poolId, poolTournamentId }: TournamentLayoutP
                 <Box
                   pad={{
                     vertical: 'small',
-                    horizontal: isDesktop ? 'xsmall' : 'xxsmall',
+                    horizontal: 'xxsmall',
                   }}
                   style={{
                     borderBottom: isActive
@@ -171,7 +169,7 @@ export function TournamentLayout({ poolId, poolTournamentId }: TournamentLayoutP
                   }}
                 >
                   <Text
-                    size={isDesktop ? 'small' : 'xsmall'}
+                    size="small"
                     weight={isActive ? 'bold' : undefined}
                     color={isActive ? undefined : 'text-weak'}
                     style={{
