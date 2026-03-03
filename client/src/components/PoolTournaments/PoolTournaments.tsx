@@ -227,20 +227,24 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
             <EmptySectionMessage message="No tournament has been scheduled for this pool yet." />
           ) : (
             <Box gap="small">
-              {currentTournaments.map((entry) => (
-                <TournamentCard
-                  key={entry.id}
-                  tournament={entry}
-                  canNavigate={true}
-                  onNavigate={() =>
-                    navigate(`/pools/${pool.id}/tournaments/${entry.id}/leaderboard`)
-                  }
-                  onFieldNavigate={() =>
-                    navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
-                  }
-                  statusLabel={toCurrentStatusLabel(entry)}
-                />
-              ))}
+              {currentTournaments.map((entry) => {
+                const status = toCurrentStatus(entry);
+                return (
+                  <TournamentCard
+                    key={entry.id}
+                    tournament={entry}
+                    canNavigate={true}
+                    onNavigate={() =>
+                      navigate(`/pools/${pool.id}/tournaments/${entry.id}/leaderboard`)
+                    }
+                    onFieldNavigate={() =>
+                      navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
+                    }
+                    statusLabel={status.label}
+                    statusVariant={status.variant}
+                  />
+                );
+              })}
             </Box>
           )}
         </Section>
@@ -269,6 +273,7 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                       navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
                     }
                     statusLabel="Official"
+                    statusVariant="complete"
                     navigateLabel="View results"
                   />
                 ))}
@@ -278,14 +283,18 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
             <EmptySectionMessage message="No additional upcoming tournaments are available." />
           ) : (
             <Box gap="small">
-              {upcomingTournaments.map((entry) => (
-                <TournamentCard
-                  key={entry.id}
-                  tournament={entry}
-                  canNavigate={false}
-                  statusLabel={toFutureStatusLabel(entry)}
-                />
-              ))}
+              {upcomingTournaments.map((entry) => {
+                const status = toFutureStatus(entry);
+                return (
+                  <TournamentCard
+                    key={entry.id}
+                    tournament={entry}
+                    canNavigate={false}
+                    statusLabel={status.label}
+                    statusVariant={status.variant}
+                  />
+                );
+              })}
             </Box>
           )}
         </Box>
@@ -381,6 +390,7 @@ interface TournamentCardProps {
   tournament: PoolTournament;
   canNavigate: boolean;
   statusLabel: string;
+  statusVariant?: StatusVariant;
   onNavigate?: () => void;
   navigateLabel?: string;
   onFieldNavigate?: () => void;
@@ -390,6 +400,7 @@ function TournamentCard({
   tournament,
   canNavigate,
   statusLabel,
+  statusVariant = 'default',
   onNavigate,
   navigateLabel = 'View leaderboard',
   onFieldNavigate,
@@ -418,9 +429,9 @@ function TournamentCard({
               >
                 {tournament.pga_tournament.date.display_short}
               </Text>
-              <StatusPill label={statusLabel} />
+              <StatusPill label={statusLabel} variant={statusVariant} />
             </Box>
-            <Text size="medium" weight="bold">
+            <Text size="medium" weight="bold" style={{ fontFamily: 'var(--font-display)' }}>
               {tournament.pga_tournament.name}
             </Text>
             <Text size="small" color="text-weak">
@@ -525,20 +536,44 @@ function TournamentCard({
   );
 }
 
+type StatusVariant = 'live' | 'complete' | 'not-started' | 'default';
+
 interface StatusPillProps {
   label: string;
+  variant?: StatusVariant;
 }
 
-function StatusPill({ label }: StatusPillProps) {
+const STATUS_STYLES: Record<StatusVariant, { color: string; bg: string }> = {
+  live: {
+    color: 'var(--color-status-live)',
+    bg: 'rgba(34, 197, 94, 0.12)',
+  },
+  complete: {
+    color: 'var(--color-status-complete)',
+    bg: 'rgba(107, 114, 128, 0.10)',
+  },
+  'not-started': {
+    color: 'var(--color-status-not-started)',
+    bg: 'rgba(156, 163, 175, 0.10)',
+  },
+  default: {
+    color: 'inherit',
+    bg: 'transparent',
+  },
+};
+
+function StatusPill({ label, variant = 'default' }: StatusPillProps) {
+  const styles = STATUS_STYLES[variant];
+
   return (
     <Box
       pad={{ horizontal: 'small', vertical: 'xxsmall' }}
       round="small"
-      border={{ size: 'xsmall', color: 'border' }}
-      background="background"
+      border={{ size: 'xsmall', color: variant === 'default' ? 'border' : styles.color }}
       flex={false}
+      style={{ backgroundColor: styles.bg }}
     >
-      <Text size="xsmall" weight="bold">
+      <Text size="xsmall" weight="bold" style={{ color: styles.color }}>
         {label.toUpperCase()}
       </Text>
     </Box>
@@ -564,30 +599,32 @@ function EmptySectionMessage({ message }: EmptySectionMessageProps) {
   );
 }
 
-function toCurrentStatusLabel(tournament: PoolTournament): string {
+function toCurrentStatus(tournament: PoolTournament): { label: string; variant: StatusVariant } {
   if (
     tournament.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.InProgress
   ) {
-    return 'Live';
+    return { label: 'Live', variant: 'live' };
   }
 
   if (
     tournament.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.NotStarted
   ) {
-    return 'This Week';
+    return { label: 'This Week', variant: 'not-started' };
   }
 
-  return tournament.scores_are_official ? 'Official' : 'In Progress';
+  return tournament.scores_are_official
+    ? { label: 'Official', variant: 'complete' }
+    : { label: 'In Progress', variant: 'live' };
 }
 
-function toFutureStatusLabel(tournament: PoolTournament): string {
+function toFutureStatus(tournament: PoolTournament): { label: string; variant: StatusVariant } {
   if (
     tournament.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.NotStarted
   ) {
-    return 'Upcoming';
+    return { label: 'Upcoming', variant: 'not-started' };
   }
 
-  return 'Pending';
+  return { label: 'Pending', variant: 'not-started' };
 }
 
 function toFedexCupLabel(points: number | null): string {
