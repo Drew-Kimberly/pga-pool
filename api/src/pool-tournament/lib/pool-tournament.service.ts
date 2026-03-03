@@ -55,4 +55,13 @@ export class PoolTournamentService {
   listByPgaTournamentId(pgaTournamentId: string) {
     return this.poolTournamentRepo.find({ where: { pga_tournament_id: pgaTournamentId } });
   }
+
+  getByPoolAndPgaTournament(
+    poolId: string,
+    pgaTournamentId: string
+  ): Promise<PoolTournament | null> {
+    return this.poolTournamentRepo.findOne({
+      where: { pool_id: poolId, pga_tournament_id: pgaTournamentId },
+    });
+  }
 }
