@@ -15,8 +15,9 @@ export interface TournamentHeaderProps {
 export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
   const size = React.useContext(ResponsiveContext);
   const isDesktop = size !== 'small';
-  const circleSize = isDesktop ? '100px' : '80px';
-  const imgSize = isDesktop ? '90px' : '68px';
+  const circleSize = isDesktop ? '116px' : '90px';
+  const imgSize = isDesktop ? '110px' : '78px';
+  const status = resolveStatus(tournament, round);
 
   return (
     <Box gap="small" pad={{ vertical: 'small' }}>
@@ -47,7 +48,7 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
         )}
 
         <Box flex gap="xsmall">
-          {/* Name row with status badge pinned right */}
+          {/* Name row with status badge pinned right on desktop */}
           <Box direction="row" justify="between" align="start" gap="small">
             <Text
               size={isDesktop ? 'xlarge' : 'large'}
@@ -57,9 +58,9 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
               {tournament.name}
             </Text>
 
-            {isDesktop && (
-              <Box flex={false} style={{ marginTop: '2px' }}>
-                <StatusBadge tournament={tournament} round={round} />
+            {isDesktop && status && (
+              <Box flex={false} style={{ marginTop: '4px' }}>
+                <StatusBadge status={status} />
               </Box>
             )}
           </Box>
@@ -77,14 +78,10 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
             </Text>
           </Box>
 
-          {/* Meta pills + mobile status badge */}
+          {/* Meta key/values + mobile status badge */}
           <Box direction="row" align="center" gap="xsmall" wrap>
-            {!isDesktop && <StatusBadge tournament={tournament} round={round} />}
-            {tournament.par != null && <MetaPill label={`Par ${tournament.par}`} />}
-            {tournament.yardage != null && (
-              <MetaPill label={`${tournament.yardage.toLocaleString()} yds`} />
-            )}
-            <MetaPill label={formatPurse(tournament.purse)} />
+            {!isDesktop && status && <StatusBadge status={status} />}
+            <MetaValues tournament={tournament} />
           </Box>
         </Box>
       </Box>
@@ -92,65 +89,38 @@ export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
   );
 }
 
-interface MetaPillProps {
-  label: string;
-}
-
-function MetaPill({ label }: MetaPillProps) {
-  return (
-    <Box
-      pad={{ horizontal: 'small', vertical: 'xxsmall' }}
-      round="small"
-      border={{ size: 'xsmall', color: 'border' }}
-      background="background-front"
-      flex={false}
-    >
-      <Text size="xsmall" weight="bold">
-        {label}
-      </Text>
-    </Box>
-  );
-}
-
-interface StatusBadgeProps {
+interface MetaValuesProps {
   tournament: PgaTournament;
-  round?: number;
 }
 
-function StatusBadge({ tournament, round }: StatusBadgeProps) {
-  const status = resolveStatus(tournament, round);
+function MetaValues({ tournament }: MetaValuesProps) {
+  const parts: string[] = [];
+
+  if (tournament.par != null) {
+    parts.push(`Par ${tournament.par}`);
+  }
+  if (tournament.yardage != null) {
+    parts.push(`${tournament.yardage.toLocaleString()} yds`);
+  }
+  parts.push(formatPurse(tournament.purse));
+  if (tournament.fedex_cup_points != null) {
+    parts.push(`FedEx ${tournament.fedex_cup_points} pts`);
+  }
 
   return (
-    <Box
-      direction="row"
-      align="center"
-      gap="xsmall"
-      pad={{ horizontal: 'small', vertical: 'xxsmall' }}
-      round="small"
-      flex={false}
-      style={{
-        backgroundColor: status.bg,
-        borderColor: status.color,
-        borderWidth: '1px',
-        borderStyle: 'solid',
-      }}
-    >
-      {status.dot && <PulsingDot />}
-      <Text size="xsmall" weight="bold" style={{ color: status.color }}>
-        {status.label.toUpperCase()}
-      </Text>
-    </Box>
+    <Text size="xsmall" color="text-weak" weight="bold">
+      {parts.join(' \u00B7 ')}
+    </Text>
   );
 }
 
 interface ResolvedStatus {
   label: string;
-  color: string;
-  bg: string;
+  variant: 'live' | 'official' | 'upcoming' | 'pending';
   dot?: boolean;
 }
 
-function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatus {
+function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatus | null {
   const { tournament_status, round_status, current_round } = tournament;
   const displayRound = round ?? current_round;
 
@@ -161,25 +131,77 @@ function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatu
 
     return {
       label: [roundLabel, suffix].filter(Boolean).join(' \u00B7 '),
-      color: 'var(--color-status-live)',
-      bg: 'rgba(34, 197, 94, 0.12)',
+      variant: 'live',
       dot: isRoundActive,
     };
   }
 
   if (tournament_status === PgaTournamentTournamentStatusEnum.Completed) {
-    return {
-      label: 'Official',
-      color: 'var(--color-status-complete)',
-      bg: 'rgba(107, 114, 128, 0.10)',
-    };
+    return { label: 'Official', variant: 'official' };
   }
 
-  return {
-    label: 'This Week',
-    color: 'var(--color-status-not-started)',
-    bg: 'rgba(156, 163, 175, 0.10)',
-  };
+  // NOT_STARTED: no badge shown in the header
+  return null;
+}
+
+const BADGE_STYLES: Record<
+  ResolvedStatus['variant'],
+  { color: string; bg: string; textColor: string }
+> = {
+  live: {
+    color: 'var(--color-status-live)',
+    bg: 'var(--color-status-live-bg)',
+    textColor: 'var(--color-status-live)',
+  },
+  official: {
+    color: 'var(--color-status-official)',
+    bg: 'var(--color-status-official-bg)',
+    textColor: '#ffffff',
+  },
+  upcoming: {
+    color: 'var(--color-status-upcoming)',
+    bg: 'var(--color-status-upcoming-bg)',
+    textColor: 'var(--color-status-upcoming)',
+  },
+  pending: {
+    color: 'var(--color-status-pending)',
+    bg: 'var(--color-status-pending-bg)',
+    textColor: 'var(--color-status-pending)',
+  },
+};
+
+interface StatusBadgeComponentProps {
+  status: ResolvedStatus;
+}
+
+function StatusBadge({ status }: StatusBadgeComponentProps) {
+  const styles = BADGE_STYLES[status.variant];
+
+  return (
+    <Box
+      direction="row"
+      align="center"
+      gap="xsmall"
+      pad={{ horizontal: 'small', vertical: 'xxsmall' }}
+      round="xsmall"
+      flex={false}
+      style={{
+        backgroundColor: styles.bg,
+        borderColor: styles.color,
+        borderWidth: '1px',
+        borderStyle: 'solid',
+      }}
+    >
+      {status.dot && <PulsingDot />}
+      <Text
+        size="xsmall"
+        weight="bold"
+        style={{ color: styles.textColor, letterSpacing: '0.04em' }}
+      >
+        {status.label.toUpperCase()}
+      </Text>
+    </Box>
+  );
 }
 
 function PulsingDot() {

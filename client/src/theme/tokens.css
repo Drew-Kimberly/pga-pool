@@ -28,9 +28,14 @@
   --color-even: #6b7280;
 
   /* ── Status Colors ──────────────────────────────────────── */
-  --color-status-live: #22c55e;
-  --color-status-complete: #6b7280;
-  --color-status-not-started: #9ca3af;
+  --color-status-live: #16a34a;
+  --color-status-live-bg: rgba(22, 163, 74, 0.10);
+  --color-status-official: #006747;
+  --color-status-official-bg: #006747;
+  --color-status-upcoming: #6b7280;
+  --color-status-upcoming-bg: rgba(107, 114, 128, 0.08);
+  --color-status-pending: #d97706;
+  --color-status-pending-bg: rgba(217, 119, 6, 0.10);
   --color-status-cut: #ef4444;
 
   /* ── Elevation ──────────────────────────────────────────── */
@@ -60,8 +65,13 @@
   --color-even: #9ca3af;
 
   --color-status-live: #4ade80;
-  --color-status-complete: #9ca3af;
-  --color-status-not-started: #6b7280;
+  --color-status-live-bg: rgba(74, 222, 128, 0.12);
+  --color-status-official: #22c55e;
+  --color-status-official-bg: #15803d;
+  --color-status-upcoming: #9ca3af;
+  --color-status-upcoming-bg: rgba(156, 163, 175, 0.10);
+  --color-status-pending: #fbbf24;
+  --color-status-pending-bg: rgba(251, 191, 36, 0.12);
   --color-status-cut: #f87171;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
