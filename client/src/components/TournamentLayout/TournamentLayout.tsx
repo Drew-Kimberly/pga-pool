@@ -48,7 +48,7 @@ export function TournamentLayout({ poolId, poolTournamentId }: TournamentLayoutP
           pgaPoolApi.poolTournaments.getPoolTournament({ poolId, poolTournamentId }),
           pgaPoolApi.poolTournamentField
             .getPoolTournamentField({ poolId, poolTournamentId })
-            .then(() => true)
+            .then((res) => Object.keys(res.data.player_tiers ?? {}).length > 0)
             .catch(() => false),
         ]);
 

@@ -31,7 +31,8 @@ export function PoolTournamentField() {
         });
 
         if (!isMounted) return;
-        setField(res.data);
+        const hasPlayers = Object.keys(res.data.player_tiers ?? {}).length > 0;
+        setField(hasPlayers ? res.data : undefined);
       } catch (e) {
         if (!isMounted) return;
 
