@@ -235,7 +235,7 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                     tournament={entry}
                     canNavigate={true}
                     onNavigate={() =>
-                      navigate(`/pools/${pool.id}/tournaments/${entry.id}/leaderboard`)
+                      navigate(`/pools/${pool.id}/tournaments/${entry.id}`)
                     }
                     onFieldNavigate={() =>
                       navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
