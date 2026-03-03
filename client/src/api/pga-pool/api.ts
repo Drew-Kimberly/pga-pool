@@ -4,6 +4,7 @@ import authClient from '../auth-client';
 
 import {
   Configuration,
+  PGAPlayersApi,
   PGATournamentFieldApi,
   PoolsApi,
   PoolTournamentFieldApi,
@@ -12,6 +13,7 @@ import {
   PoolUsersApi,
 } from '@drewkimberly/pga-pool-api';
 
+const pgaPlayersApi = new PGAPlayersApi(new Configuration(), '', authClient);
 const poolTournamentApi = new PoolTournamentsApi(new Configuration(), '', authClient);
 const poolTournamentUsersApi = new PoolTournamentUsersApi(new Configuration(), '', authClient);
 const poolUsersApi = new PoolUsersApi(new Configuration(), '', authClient);
@@ -20,6 +22,7 @@ const poolTournamentFieldApi = new PoolTournamentFieldApi(new Configuration(), '
 const poolsApi = new PoolsApi(new Configuration(), '', authClient);
 
 export const pgaPoolApi = {
+  pgaPlayers: pgaPlayersApi,
   pools: poolsApi,
   poolTournaments: poolTournamentApi,
   poolTournamentUsers: poolTournamentUsersApi,
