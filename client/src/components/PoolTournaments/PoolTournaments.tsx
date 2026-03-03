@@ -483,72 +483,39 @@ function TournamentCard({
             </Box>
           </Box>
 
-          <Box direction="row" align="center" gap={isDesktop ? 'medium' : 'small'} wrap={false}>
+          <CardLinks isDesktop={isDesktop}>
             {canNavigate && (
-              <Box
-                direction="row"
-                align="center"
-                gap="xxsmall"
+              <CardLink
+                label={isDesktop ? navigateLabel : (mobileNavigateLabel ?? navigateLabel)}
                 onClick={(e) => {
                   if (!onNavigate) return;
                   e.stopPropagation();
                   onNavigate();
                 }}
-                style={{ cursor: 'pointer' }}
-              >
-                <Text
-                  size="small"
-                  weight="bold"
-                  style={{ textDecoration: 'underline', whiteSpace: 'nowrap' }}
-                >
-                  {isDesktop ? navigateLabel : (mobileNavigateLabel ?? navigateLabel)}
-                </Text>
-                {isDesktop && <FormNext size="small" />}
-              </Box>
+                isDesktop={isDesktop}
+              />
             )}
             {onFieldNavigate && (
-              <Box
-                direction="row"
-                align="center"
-                gap="xxsmall"
+              <CardLink
+                label={isDesktop ? 'View field' : 'Field'}
                 onClick={(e) => {
                   e.stopPropagation();
                   onFieldNavigate();
                 }}
-                style={{ cursor: 'pointer' }}
-              >
-                <Text
-                  size="small"
-                  weight="bold"
-                  style={{ textDecoration: 'underline', whiteSpace: 'nowrap' }}
-                >
-                  {isDesktop ? 'View field' : 'Field'}
-                </Text>
-                {isDesktop && <FormNext size="small" />}
-              </Box>
+                isDesktop={isDesktop}
+              />
             )}
             {onOverviewNavigate && (
-              <Box
-                direction="row"
-                align="center"
-                gap="xxsmall"
+              <CardLink
+                label={isDesktop ? 'Event overview' : 'Overview'}
                 onClick={(e) => {
                   e.stopPropagation();
                   onOverviewNavigate();
                 }}
-                style={{ cursor: 'pointer' }}
-              >
-                <Text
-                  size="small"
-                  weight="bold"
-                  style={{ textDecoration: 'underline', whiteSpace: 'nowrap' }}
-                >
-                  {isDesktop ? 'Event overview' : 'Overview'}
-                </Text>
-                {isDesktop && <FormNext size="small" />}
-              </Box>
+                isDesktop={isDesktop}
+              />
             )}
-          </Box>
+          </CardLinks>
         </Box>
 
         {/* Right: logo centered */}
@@ -650,6 +617,57 @@ function StatusPill({ label, variant = 'default' }: StatusPillProps) {
       >
         {label.toUpperCase()}
       </Text>
+    </Box>
+  );
+}
+
+function CardLinks({ isDesktop, children }: { isDesktop: boolean; children: React.ReactNode }) {
+  const items = React.Children.toArray(children).filter(Boolean);
+
+  return (
+    <Box direction="row" align="center" wrap={false}>
+      {items.map((child, i) => (
+        <React.Fragment key={i}>
+          {child}
+          {i < items.length - 1 &&
+            (isDesktop ? (
+              <Box width="12px" />
+            ) : (
+              <Text size="small" color="text-xweak" style={{ margin: '0 8px', userSelect: 'none' }}>
+                |
+              </Text>
+            ))}
+        </React.Fragment>
+      ))}
+    </Box>
+  );
+}
+
+function CardLink({
+  label,
+  onClick,
+  isDesktop,
+}: {
+  label: string;
+  onClick: (e: React.MouseEvent) => void;
+  isDesktop: boolean;
+}) {
+  return (
+    <Box
+      direction="row"
+      align="center"
+      gap="xxsmall"
+      onClick={onClick}
+      style={{ cursor: 'pointer' }}
+    >
+      <Text
+        size="small"
+        weight="bold"
+        style={{ textDecoration: 'underline', whiteSpace: 'nowrap' }}
+      >
+        {label}
+      </Text>
+      {isDesktop && <FormNext size="small" />}
     </Box>
   );
 }
