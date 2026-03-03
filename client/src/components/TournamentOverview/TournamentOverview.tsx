@@ -1,15 +1,18 @@
 import { Box, Grid, ResponsiveContext, Text } from 'grommet';
 import React from 'react';
 
+import { pgaPoolApi } from '../../api/pga-pool/api';
 import { useTournamentLayoutContext } from '../TournamentLayout/TournamentLayout';
 
-import { PgaTournament } from '@drewkimberly/pga-pool-api';
+import { PgaPlayer, PgaTournament } from '@drewkimberly/pga-pool-api';
 
 export function TournamentOverview() {
   const { tournament } = useTournamentLayoutContext();
   const pgaTournament = tournament.pga_tournament;
   const size = React.useContext(ResponsiveContext);
   const isDesktop = size !== 'small';
+
+  const champion = useChampion(pgaTournament.previous_champion);
 
   return (
     <Box gap="medium">
@@ -44,11 +47,79 @@ export function TournamentOverview() {
       {/* Previous champion */}
       {pgaTournament.previous_champion?.name && (
         <OverviewSection title="Defending Champion">
-          <Box direction="row" align="center" gap="small">
-            <Text weight="bold">{pgaTournament.previous_champion.name}</Text>
-          </Box>
+          <ChampionDisplay name={pgaTournament.previous_champion.name} champion={champion} />
         </OverviewSection>
       )}
+    </Box>
+  );
+}
+
+function useChampion(previousChampion: PgaTournament['previous_champion']): PgaPlayer | undefined {
+  const [champion, setChampion] = React.useState<PgaPlayer | undefined>();
+  const championId = previousChampion?.id;
+
+  React.useEffect(() => {
+    if (championId == null) return;
+    let cancelled = false;
+
+    pgaPoolApi.pgaPlayers
+      .getPgaPlayer({ pgaPlayerId: championId })
+      .then((res) => {
+        if (!cancelled) setChampion(res.data);
+      })
+      .catch(() => {
+        // Player may not exist in DB — fall back to name-only display
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [championId]);
+
+  return champion;
+}
+
+interface ChampionDisplayProps {
+  name: string;
+  champion: PgaPlayer | undefined;
+}
+
+function ChampionDisplay({ name, champion }: ChampionDisplayProps) {
+  return (
+    <Box direction="row" align="center" gap="small">
+      {champion?.headshot_url && (
+        <Box
+          width="48px"
+          height="48px"
+          round="full"
+          overflow="hidden"
+          flex={false}
+          background="light-2"
+        >
+          <img
+            src={champion.headshot_url}
+            alt={name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        </Box>
+      )}
+      <Box>
+        <Text weight="bold">{name}</Text>
+        {champion?.country && (
+          <Box direction="row" align="center" gap="xxsmall">
+            {champion.country_flag_url && (
+              <img
+                src={champion.country_flag_url}
+                alt={champion.country}
+                style={{ width: '16px', height: '12px' }}
+              />
+            )}
+            <Text size="small" color="text-weak">
+              {champion.country}
+            </Text>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }
