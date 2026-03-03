@@ -238,6 +238,9 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                     onFieldNavigate={() =>
                       navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
                     }
+                    onOverviewNavigate={() =>
+                      navigate(`/pools/${pool.id}/tournaments/${entry.id}/overview`)
+                    }
                     statusLabel={status.label}
                     statusVariant={status.variant}
                   />
@@ -270,6 +273,9 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                     onFieldNavigate={() =>
                       navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
                     }
+                    onOverviewNavigate={() =>
+                      navigate(`/pools/${pool.id}/tournaments/${entry.id}/overview`)
+                    }
                     statusLabel="Official"
                     statusVariant="official"
                     navigateLabel="View results"
@@ -288,6 +294,9 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                     key={entry.id}
                     tournament={entry}
                     canNavigate={false}
+                    onOverviewNavigate={() =>
+                      navigate(`/pools/${pool.id}/tournaments/${entry.id}/overview`)
+                    }
                     statusLabel={status.label}
                     statusVariant={status.variant}
                   />
@@ -392,6 +401,7 @@ interface TournamentCardProps {
   onNavigate?: () => void;
   navigateLabel?: string;
   onFieldNavigate?: () => void;
+  onOverviewNavigate?: () => void;
 }
 
 function TournamentCard({
@@ -402,6 +412,7 @@ function TournamentCard({
   onNavigate,
   navigateLabel = 'View leaderboard',
   onFieldNavigate,
+  onOverviewNavigate,
 }: TournamentCardProps) {
   const logoUrl = tournament.pga_tournament.logo_url;
   const size = React.useContext(ResponsiveContext);
@@ -486,6 +497,23 @@ function TournamentCard({
               >
                 <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
                   View field
+                </Text>
+                <FormNext size="small" />
+              </Box>
+            )}
+            {onOverviewNavigate && (
+              <Box
+                direction="row"
+                align="center"
+                gap="xsmall"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOverviewNavigate();
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <Text size="small" weight="bold" style={{ textDecoration: 'underline' }}>
+                  Event overview
                 </Text>
                 <FormNext size="small" />
               </Box>
