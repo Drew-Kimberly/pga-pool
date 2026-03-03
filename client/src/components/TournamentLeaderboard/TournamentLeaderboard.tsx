@@ -178,9 +178,9 @@ export function TournamentLeaderboard({
           onClick={() => navigate(`/pools/${resolvedPoolId}/tournaments`)}
           style={{ alignSelf: 'flex-start' }}
         >
-          <Box direction="row" align="center" gap="xxsmall">
+          <Box direction="row" align="center" gap="xsmall">
             <FormPrevious size="small" />
-            <Text size="small" color="text-weak">
+            <Text size="small" weight="bold">
               All tournaments
             </Text>
           </Box>
