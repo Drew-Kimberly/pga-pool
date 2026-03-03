@@ -273,7 +273,7 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                       navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
                     }
                     statusLabel="Official"
-                    statusVariant="complete"
+                    statusVariant="official"
                     navigateLabel="View results"
                   />
                 ))}
@@ -536,29 +536,38 @@ function TournamentCard({
   );
 }
 
-type StatusVariant = 'live' | 'complete' | 'not-started' | 'default';
+type StatusVariant = 'live' | 'official' | 'upcoming' | 'pending' | 'default';
 
 interface StatusPillProps {
   label: string;
   variant?: StatusVariant;
 }
 
-const STATUS_STYLES: Record<StatusVariant, { color: string; bg: string }> = {
+const STATUS_STYLES: Record<StatusVariant, { color: string; bg: string; textColor: string }> = {
   live: {
     color: 'var(--color-status-live)',
-    bg: 'rgba(34, 197, 94, 0.12)',
+    bg: 'var(--color-status-live-bg)',
+    textColor: 'var(--color-status-live)',
   },
-  complete: {
-    color: 'var(--color-status-complete)',
-    bg: 'rgba(107, 114, 128, 0.10)',
+  official: {
+    color: 'var(--color-status-official)',
+    bg: 'var(--color-status-official-bg)',
+    textColor: '#ffffff',
   },
-  'not-started': {
-    color: 'var(--color-status-not-started)',
-    bg: 'rgba(156, 163, 175, 0.10)',
+  upcoming: {
+    color: 'var(--color-status-upcoming)',
+    bg: 'var(--color-status-upcoming-bg)',
+    textColor: 'var(--color-status-upcoming)',
+  },
+  pending: {
+    color: 'var(--color-status-pending)',
+    bg: 'var(--color-status-pending-bg)',
+    textColor: 'var(--color-status-pending)',
   },
   default: {
     color: 'inherit',
     bg: 'transparent',
+    textColor: 'inherit',
   },
 };
 
@@ -568,12 +577,16 @@ function StatusPill({ label, variant = 'default' }: StatusPillProps) {
   return (
     <Box
       pad={{ horizontal: 'small', vertical: 'xxsmall' }}
-      round="small"
+      round="xsmall"
       border={{ size: 'xsmall', color: variant === 'default' ? 'border' : styles.color }}
       flex={false}
       style={{ backgroundColor: styles.bg }}
     >
-      <Text size="xsmall" weight="bold" style={{ color: styles.color }}>
+      <Text
+        size="xsmall"
+        weight="bold"
+        style={{ color: styles.textColor, letterSpacing: '0.04em' }}
+      >
         {label.toUpperCase()}
       </Text>
     </Box>
@@ -609,11 +622,11 @@ function toCurrentStatus(tournament: PoolTournament): { label: string; variant: 
   if (
     tournament.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.NotStarted
   ) {
-    return { label: 'This Week', variant: 'not-started' };
+    return { label: 'This Week', variant: 'upcoming' };
   }
 
   return tournament.scores_are_official
-    ? { label: 'Official', variant: 'complete' }
+    ? { label: 'Official', variant: 'official' }
     : { label: 'In Progress', variant: 'live' };
 }
 
@@ -621,10 +634,10 @@ function toFutureStatus(tournament: PoolTournament): { label: string; variant: S
   if (
     tournament.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.NotStarted
   ) {
-    return { label: 'Upcoming', variant: 'not-started' };
+    return { label: 'Upcoming', variant: 'upcoming' };
   }
 
-  return { label: 'Pending', variant: 'not-started' };
+  return { label: 'Pending', variant: 'pending' };
 }
 
 function toFedexCupLabel(points: number | null): string {
