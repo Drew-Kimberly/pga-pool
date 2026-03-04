@@ -1,4 +1,4 @@
-import { Accordion, Anchor, Box, Notification, ResponsiveContext, Text } from 'grommet';
+import { Accordion, Anchor, Box, Notification, Text } from 'grommet';
 import { CircleInformation } from 'grommet-icons';
 import React from 'react';
 
@@ -11,7 +11,6 @@ import { PgaPlayerName } from './PgaPlayerName';
 import { PlayerHeadshot } from './PlayerHeadshot';
 import { PoolUserPanel } from './PoolUserPanel';
 import {
-  buildPoolMeta,
   buildScoreMeta,
   getEffectiveFedexCupPoints,
   getScoreColor,
@@ -50,8 +49,6 @@ export function TournamentLeaderboard() {
   const [pollErrorCount, setPollErrorCount] = React.useState(0);
   const [activeIndices, setActiveIndices] = React.useState<number[]>([]);
 
-  const responsive = React.useContext(ResponsiveContext);
-  const isMobile = responsive === 'small';
   const scoringFormat = tournament.pool?.settings?.scoring_format ?? 'strokes';
   const isStrokesPool = scoringFormat === 'strokes';
   const timezone = tournament.pga_tournament.date.timezone;
@@ -154,10 +151,7 @@ export function TournamentLeaderboard() {
                   ? getScoreColor(player.score_total)
                   : undefined;
 
-                const poolMeta = buildPoolMeta({
-                  tier: pick.tier,
-                  odds: pick.odds ?? null,
-                }).filter((p) => !(isMobile && p.label === 'Tier'));
+                const odds = pick.odds ?? null;
 
                 const scoreMeta = buildScoreMeta({
                   player,
@@ -187,12 +181,24 @@ export function TournamentLeaderboard() {
 
                       {/* Name + metadata column */}
                       <Box flex style={{ minWidth: 0 }}>
-                        {/* Row 1: Name + pool metadata */}
-                        <Box direction="row" align="baseline" gap="small" wrap>
+                        {/* Row 1: Name + odds chip */}
+                        <Box direction="row" align="center" gap="xsmall">
                           <PgaPlayerName player={player} />
-                          {poolMeta.map((pair) => (
-                            <MetaLabel key={pair.label} pair={pair} />
-                          ))}
+                          {odds && (
+                            <Box
+                              round="large"
+                              pad={{ horizontal: 'xsmall', vertical: '1px' }}
+                              flex={false}
+                              style={{
+                                backgroundColor: 'var(--color-status-upcoming-bg)',
+                                border: '1px solid var(--color-tab-border)',
+                              }}
+                            >
+                              <Text size="xsmall" weight="bold" style={{ lineHeight: 1.3 }}>
+                                {odds}
+                              </Text>
+                            </Box>
+                          )}
                         </Box>
 
                         {/* Row 2: Score metadata */}
