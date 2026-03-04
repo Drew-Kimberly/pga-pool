@@ -4,7 +4,7 @@ import { useContext } from 'react';
 
 import { ParentComponentProps } from '../../types';
 import { PlayerHeadshot } from '../PlayerHeadshot';
-import { getScoreColor, isCutOrWithdrawn, toFedexCupPointsString, toScoreString } from '../utils';
+import { getScoreColor, toFedexCupPointsString, toScoreString } from '../utils';
 
 import { getRoundStatus } from './getRoundStatus';
 import { StartDuration } from './StartDuration';
@@ -42,31 +42,33 @@ function CompactRoundStatus({ roundStatus }: { roundStatus: ReturnType<typeof ge
   );
 }
 
-function HeadshotChips({
-  user,
-  isStrokes,
-  size,
-}: {
-  user: PoolTournamentUser;
-  isStrokes: boolean;
-  size: number;
-}) {
+function HeadshotChips({ user, size }: { user: PoolTournamentUser; size: number }) {
   return (
     <Box direction="row" gap="xsmall" align="center" justify="center">
       {user.picks.map((pick) => {
         const player = pick.pga_tournament_player;
-        const isCut = isCutOrWithdrawn(player);
-        const chipScoreColor = isStrokes ? getScoreColor(player.score_total) : undefined;
+        const isCut = player.current_position === 'CUT' || player.status === 'cut';
+        const isWd = player.withdrawn || player.status === 'wd';
+        const hasStarted =
+          isCut ||
+          isWd ||
+          player.active ||
+          player.is_round_complete ||
+          (player.score_thru ?? 0) > 0;
 
         return (
-          <Box key={player.id} style={{ opacity: isCut ? 0.5 : 1 }}>
-            <PlayerHeadshot
-              src={player.pga_player.headshot_url}
-              name={player.pga_player.name}
-              size={size}
-              borderColor={chipScoreColor}
-            />
-          </Box>
+          <PlayerHeadshot
+            key={player.id}
+            src={player.pga_player.headshot_url}
+            name={player.pga_player.name}
+            size={size}
+            badge={{
+              score: player.score_total,
+              isCut,
+              isWithdrawn: isWd,
+              hasStarted,
+            }}
+          />
         );
       })}
     </Box>
@@ -126,7 +128,7 @@ function _PoolUserPanel({
 
         {/* Center: Headshot chips — larger on desktop */}
         <Box flex align="center" justify="center">
-          <HeadshotChips user={user} isStrokes={isStrokes} size={40} />
+          <HeadshotChips user={user} size={40} />
         </Box>
 
         {/* Right: Score + Chevron */}
@@ -208,7 +210,7 @@ function _PoolUserPanel({
 
       {/* Line 2: Headshot chips */}
       <Box direction="row" gap="xsmall" margin={{ top: 'xsmall', left: '36px' }}>
-        <HeadshotChips user={user} isStrokes={isStrokes} size={24} />
+        <HeadshotChips user={user} size={24} />
       </Box>
     </Box>
   );
