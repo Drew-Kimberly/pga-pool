@@ -126,9 +126,9 @@ export function TournamentLeaderboard() {
 
                 const poolScore = isStrokesPool
                   ? toScoreString(player.score_total)
-                  : `${toFedexCupPointsString(
+                  : toFedexCupPointsString(
                       getEffectiveFedexCupPoints(tournament.pga_tournament, player)
-                    )} pts`;
+                    );
                 const poolScoreColor = isStrokesPool
                   ? getScoreColor(player.score_total)
                   : undefined;

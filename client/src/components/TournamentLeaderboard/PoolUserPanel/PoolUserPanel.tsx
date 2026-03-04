@@ -1,5 +1,6 @@
-import { AccordionPanel, Box, Text } from 'grommet';
+import { AccordionPanel, Box, ResponsiveContext, Text } from 'grommet';
 import { FormCheckmark, FormDown } from 'grommet-icons';
+import { useContext } from 'react';
 
 import { ParentComponentProps } from '../../types';
 import { PlayerHeadshot } from '../PlayerHeadshot';
@@ -18,6 +19,60 @@ export interface PoolUserPanelProps extends ParentComponentProps {
   rank: string;
 }
 
+function CompactRoundStatus({ roundStatus }: { roundStatus: ReturnType<typeof getRoundStatus> }) {
+  if (roundStatus.status === 'not_started') {
+    return <StartDuration time={roundStatus.teetimes[0] ?? null} size="xsmall" color="text-weak" />;
+  }
+
+  if (roundStatus.status === 'in_progress') {
+    return (
+      <Text size="xsmall" color="text-weak">
+        {roundStatus.percentComplete}%
+      </Text>
+    );
+  }
+
+  return (
+    <Box direction="row" align="center" gap="xxsmall">
+      <Text size="xsmall" color="text-weak">
+        Complete
+      </Text>
+      <FormCheckmark color="var(--color-status-live)" size="small" />
+    </Box>
+  );
+}
+
+function HeadshotChips({
+  user,
+  isStrokes,
+  size,
+}: {
+  user: PoolTournamentUser;
+  isStrokes: boolean;
+  size: number;
+}) {
+  return (
+    <Box direction="row" gap="xsmall" align="center" justify="center">
+      {user.picks.map((pick) => {
+        const player = pick.pga_tournament_player;
+        const isCut = isCutOrWithdrawn(player);
+        const chipScoreColor = isStrokes ? getScoreColor(player.score_total) : undefined;
+
+        return (
+          <Box key={player.id} style={{ opacity: isCut ? 0.5 : 1 }}>
+            <PlayerHeadshot
+              src={player.pga_player.headshot_url}
+              name={player.pga_player.name}
+              size={size}
+              borderColor={chipScoreColor}
+            />
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}
+
 function _PoolUserPanel({
   user,
   pgaTournament,
@@ -25,6 +80,8 @@ function _PoolUserPanel({
   isOpen,
   rank,
 }: Omit<PoolUserPanelProps, 'children'>) {
+  const responsive = useContext(ResponsiveContext);
+  const isDesktop = responsive !== 'small';
   const roundStatus = getRoundStatus(
     user.picks.map((pick) => pick.pga_tournament_player),
     pgaTournament
@@ -33,12 +90,76 @@ function _PoolUserPanel({
   const isStrokes = scoringFormat === 'strokes';
   const scoreDisplay = isStrokes
     ? toScoreString(user.score)
-    : `${toFedexCupPointsString(user.fedex_cup_points)} pts`;
+    : toFedexCupPointsString(user.fedex_cup_points);
   const scoreColor = isStrokes ? getScoreColor(user.score) : undefined;
 
+  if (isDesktop) {
+    return (
+      <Box
+        direction="row"
+        align="center"
+        pad={{ vertical: 'small', horizontal: 'small' }}
+        gap="small"
+      >
+        {/* Left: Rank + Name/Status */}
+        <Box direction="row" align="center" gap="small" style={{ minWidth: 0, flex: '0 1 auto' }}>
+          <Box
+            width="28px"
+            height="28px"
+            round="full"
+            background="rank-badge"
+            align="center"
+            justify="center"
+            flex={false}
+          >
+            <Text size="xsmall" color="white" weight="bold">
+              {rank}
+            </Text>
+          </Box>
+          <Box style={{ minWidth: 0 }}>
+            <Text weight="bold" size="medium" truncate>
+              {user.user.nickname}
+            </Text>
+            <CompactRoundStatus roundStatus={roundStatus} />
+          </Box>
+        </Box>
+
+        {/* Center: Headshot chips — larger on desktop */}
+        <Box flex align="center" justify="center">
+          <HeadshotChips user={user} isStrokes={isStrokes} size={40} />
+        </Box>
+
+        {/* Right: Score + Chevron */}
+        <Box direction="row" align="center" gap="small" flex={false}>
+          <Text
+            weight="bold"
+            size="xlarge"
+            color={scoreColor}
+            style={{
+              fontFamily: 'var(--font-display)',
+              minWidth: 'fit-content',
+            }}
+          >
+            {scoreDisplay}
+          </Text>
+          <Box
+            flex={false}
+            style={{
+              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+            }}
+          >
+            <FormDown size="medium" color="text-weak" />
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Mobile layout: stacked
   return (
     <Box pad={{ vertical: 'small', horizontal: 'small' }}>
-      {/* Line 1: Rank + Nickname + Round Status + Score + Chevron */}
+      {/* Line 1: Rank + Nickname + Score + Chevron */}
       <Box direction="row" align="center" gap="small">
         <Box
           width="28px"
@@ -54,28 +175,11 @@ function _PoolUserPanel({
           </Text>
         </Box>
 
-        <Text weight="bold" size="medium" style={{ flex: 1, minWidth: 0 }} truncate>
-          {user.user.nickname}
-        </Text>
-
-        {/* Compact round status */}
-        <Box flex={false}>
-          {roundStatus.status === 'not_started' && (
-            <StartDuration time={roundStatus.teetimes[0] ?? null} size="xsmall" color="text-weak" />
-          )}
-          {roundStatus.status === 'in_progress' && (
-            <Text size="xsmall" color="text-weak">
-              {roundStatus.percentComplete}%
-            </Text>
-          )}
-          {roundStatus.status === 'complete' && (
-            <Box direction="row" align="center" gap="xxsmall">
-              <Text size="xsmall" color="text-weak">
-                Complete
-              </Text>
-              <FormCheckmark color="var(--color-status-live)" size="small" />
-            </Box>
-          )}
+        <Box style={{ flex: 1, minWidth: 0 }}>
+          <Text weight="bold" size="medium" truncate>
+            {user.user.nickname}
+          </Text>
+          <CompactRoundStatus roundStatus={roundStatus} />
         </Box>
 
         <Text
@@ -103,22 +207,7 @@ function _PoolUserPanel({
 
       {/* Line 2: Headshot chips */}
       <Box direction="row" gap="xsmall" margin={{ top: 'xsmall', left: '36px' }}>
-        {user.picks.map((pick) => {
-          const player = pick.pga_tournament_player;
-          const isCut = isCutOrWithdrawn(player);
-          const chipScoreColor = isStrokes ? getScoreColor(player.score_total) : undefined;
-
-          return (
-            <Box key={player.id} style={{ opacity: isCut ? 0.5 : 1 }}>
-              <PlayerHeadshot
-                src={player.pga_player.headshot_url}
-                name={player.pga_player.name}
-                size={24}
-                borderColor={chipScoreColor}
-              />
-            </Box>
-          );
-        })}
+        <HeadshotChips user={user} isStrokes={isStrokes} size={24} />
       </Box>
     </Box>
   );

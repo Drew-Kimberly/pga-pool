@@ -141,7 +141,10 @@ export function TournamentLayout({ poolId, poolTournamentId }: TournamentLayoutP
         </Box>
 
         {/* Simplified header */}
-        <TournamentHeader tournament={tournament.pga_tournament} />
+        <TournamentHeader
+          tournament={tournament.pga_tournament}
+          scoringFormat={tournament.pool?.settings?.scoring_format}
+        />
 
         {/* Tab bar */}
         <Box
