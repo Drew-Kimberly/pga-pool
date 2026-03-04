@@ -7,7 +7,7 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 
 import { PoolTournamentField, PoolTournamentPlayer } from '@drewkimberly/pga-pool-api';
 
-type ViewMode = 'tier' | 'name' | 'odds';
+type ViewMode = 'tier' | 'name';
 
 export interface PoolTournamentFieldDisplayProps {
   field: PoolTournamentField;
@@ -48,7 +48,7 @@ export function PoolTournamentFieldDisplay({ field }: PoolTournamentFieldDisplay
 
   const searchActive = searchQuery.trim().length > 0;
 
-  const hasOdds = useMemo(
+  const areOddsAvailable = useMemo(
     () => allPlayers.some((p) => p.odds != null && p.odds !== ''),
     [allPlayers]
   );
@@ -136,17 +136,22 @@ export function PoolTournamentFieldDisplay({ field }: PoolTournamentFieldDisplay
             onViewChange={setViewMode}
             darkMode={darkMode}
             compact={!isDesktop}
-            showOdds={hasOdds}
           />
         )}
       </Box>
 
       {viewMode === 'tier' ? (
-        <TierView playerTiers={filteredTiers} isDesktop={isDesktop} />
-      ) : viewMode === 'odds' ? (
-        <OddsView players={filteredByName} isDesktop={isDesktop} />
+        <TierView
+          playerTiers={filteredTiers}
+          isDesktop={isDesktop}
+          areOddsAvailable={areOddsAvailable}
+        />
       ) : (
-        <NameView players={filteredByName} isDesktop={isDesktop} />
+        <NameView
+          players={filteredByName}
+          isDesktop={isDesktop}
+          areOddsAvailable={areOddsAvailable}
+        />
       )}
     </Box>
   );
@@ -157,10 +162,9 @@ interface ViewToggleProps {
   onViewChange: (view: ViewMode) => void;
   darkMode: boolean;
   compact?: boolean;
-  showOdds?: boolean;
 }
 
-function ViewToggle({ activeView, onViewChange, darkMode, compact, showOdds }: ViewToggleProps) {
+function ViewToggle({ activeView, onViewChange, darkMode, compact }: ViewToggleProps) {
   const activeBg = darkMode ? '#2b62c8' : 'brand';
   const activeBorder = darkMode ? '#8eb3ff' : '#273344';
   const inactiveText = darkMode ? 'light-3' : 'text-weak';
@@ -168,7 +172,6 @@ function ViewToggle({ activeView, onViewChange, darkMode, compact, showOdds }: V
   const tabs: { key: ViewMode; label: string }[] = [
     { key: 'tier', label: 'By Tier' },
     { key: 'name', label: 'By Name' },
-    ...(showOdds ? [{ key: 'odds' as ViewMode, label: 'By Odds' }] : []),
   ];
 
   return (
@@ -214,20 +217,40 @@ function ViewToggle({ activeView, onViewChange, darkMode, compact, showOdds }: V
   );
 }
 
+function parseOddsToNumber(odds: string | null | undefined): number {
+  if (!odds) return Infinity;
+  const cleaned = odds.replace(/[^0-9+-]/g, '');
+  const num = parseInt(cleaned, 10);
+  return isNaN(num) ? Infinity : num;
+}
+
+function sortPlayers(
+  players: PoolTournamentPlayer[],
+  areOddsAvailable: boolean
+): PoolTournamentPlayer[] {
+  return [...players].sort((a, b) => {
+    if (areOddsAvailable) {
+      const oddsA = parseOddsToNumber(a.odds);
+      const oddsB = parseOddsToNumber(b.odds);
+      if (oddsA !== oddsB) return oddsA - oddsB;
+    }
+    return a.pga_tournament_player.pga_player.first_name.localeCompare(
+      b.pga_tournament_player.pga_player.first_name
+    );
+  });
+}
+
 interface TierViewProps {
   playerTiers: { [key: string]: PoolTournamentPlayer[] };
   isDesktop: boolean;
+  areOddsAvailable: boolean;
 }
 
-function TierView({ playerTiers, isDesktop }: TierViewProps) {
+function TierView({ playerTiers, isDesktop, areOddsAvailable }: TierViewProps) {
   return (
     <Box gap="medium">
       {Object.entries(playerTiers).map(([tier, players]) => {
-        const sorted = [...players].sort((a, b) =>
-          a.pga_tournament_player.pga_player.first_name.localeCompare(
-            b.pga_tournament_player.pga_player.first_name
-          )
-        );
+        const sorted = sortPlayers(players, areOddsAvailable);
         return (
           <Box key={tier} gap="small">
             <Heading level={3} margin="none">
@@ -242,7 +265,12 @@ function TierView({ playerTiers, isDesktop }: TierViewProps) {
             ) : (
               <Grid columns={{ count: isDesktop ? 2 : 1, size: 'auto' }} gap="xsmall">
                 {sorted.map((p) => (
-                  <PlayerEntry key={p.id} player={p} isDesktop={isDesktop} />
+                  <PlayerEntry
+                    key={p.id}
+                    player={p}
+                    showOdds={areOddsAvailable}
+                    isDesktop={isDesktop}
+                  />
                 ))}
               </Grid>
             )}
@@ -256,9 +284,10 @@ function TierView({ playerTiers, isDesktop }: TierViewProps) {
 interface NameViewProps {
   players: PoolTournamentPlayer[];
   isDesktop: boolean;
+  areOddsAvailable: boolean;
 }
 
-function NameView({ players, isDesktop }: NameViewProps) {
+function NameView({ players, isDesktop, areOddsAvailable }: NameViewProps) {
   const sorted = useMemo(
     () =>
       [...players].sort((a, b) =>
@@ -282,47 +311,13 @@ function NameView({ players, isDesktop }: NameViewProps) {
   return (
     <Grid columns={{ count: isDesktop ? 2 : 1, size: 'auto' }} gap="xsmall">
       {sorted.map((p) => (
-        <PlayerEntry key={p.id} player={p} showTier isDesktop={isDesktop} />
-      ))}
-    </Grid>
-  );
-}
-
-function parseOddsToNumber(odds: string | null | undefined): number {
-  if (!odds) return Infinity;
-  const cleaned = odds.replace(/[^0-9+-]/g, '');
-  const num = parseInt(cleaned, 10);
-  return isNaN(num) ? Infinity : num;
-}
-
-function OddsView({ players, isDesktop }: NameViewProps) {
-  const sorted = useMemo(
-    () =>
-      [...players].sort((a, b) => {
-        const oddsA = parseOddsToNumber(a.odds);
-        const oddsB = parseOddsToNumber(b.odds);
-        if (oddsA !== oddsB) return oddsA - oddsB;
-        return a.pga_tournament_player.pga_player.name.localeCompare(
-          b.pga_tournament_player.pga_player.name
-        );
-      }),
-    [players]
-  );
-
-  if (sorted.length === 0) {
-    return (
-      <Box pad="medium" align="center">
-        <Text size="small" color="text-weak">
-          No players found.
-        </Text>
-      </Box>
-    );
-  }
-
-  return (
-    <Grid columns={{ count: isDesktop ? 2 : 1, size: 'auto' }} gap="xsmall">
-      {sorted.map((p) => (
-        <PlayerEntry key={p.id} player={p} showTier isDesktop={isDesktop} />
+        <PlayerEntry
+          key={p.id}
+          player={p}
+          showTier
+          showOdds={areOddsAvailable}
+          isDesktop={isDesktop}
+        />
       ))}
     </Grid>
   );
@@ -331,10 +326,11 @@ function OddsView({ players, isDesktop }: NameViewProps) {
 interface PlayerEntryProps {
   player: PoolTournamentPlayer;
   showTier?: boolean;
+  showOdds?: boolean;
   isDesktop?: boolean;
 }
 
-function PlayerEntry({ player, showTier, isDesktop }: PlayerEntryProps) {
+function PlayerEntry({ player, showTier, showOdds, isDesktop }: PlayerEntryProps) {
   const pgaPlayer = player.pga_tournament_player.pga_player;
   const odds = player.odds;
 
@@ -405,7 +401,7 @@ function PlayerEntry({ player, showTier, isDesktop }: PlayerEntryProps) {
             </Text>
           )}
         </Text>
-        {odds && (
+        {showOdds && odds && (
           <Box
             round="large"
             pad={{ horizontal: 'xsmall', vertical: '1px' }}
