@@ -44,6 +44,9 @@
   --color-tab-active: #1a1a1a;
   --color-tab-border: #e5e7eb;
 
+  /* ── Headshot Badge ────────────────────────────────────── */
+  --color-headshot-badge-border: #ffffff;
+
   /* ── Elevation ──────────────────────────────────────────── */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
@@ -84,6 +87,8 @@
 
   --color-tab-active: #f0f0f0;
   --color-tab-border: #374151;
+
+  --color-headshot-badge-border: #1a1a1a;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
