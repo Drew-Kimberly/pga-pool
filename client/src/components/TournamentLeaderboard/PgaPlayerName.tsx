@@ -19,7 +19,7 @@ export function PgaPlayerName({ player, ...textProps }: PgaPlayerProps) {
         {player.pga_player.name}
       </Text>
       {status && (
-        <Text size="xsmall" margin={{ right: 'xsmall' }} color="#FF003F">
+        <Text size="xsmall" margin={{ right: 'xsmall' }} color="var(--color-status-cut)">
           {status}
         </Text>
       )}

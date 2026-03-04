@@ -1,20 +1,20 @@
-import { Accordion, Anchor, Box, Notification, ResponsiveContext, Text } from 'grommet';
+import { Accordion, Anchor, Box, Notification, Text } from 'grommet';
 import { CircleInformation } from 'grommet-icons';
 import React from 'react';
 
 import { pgaPoolApi } from '../../api/pga-pool';
-import { LocalStorage } from '../../api/storage';
-import { useInterval, usePersistedState } from '../../hooks';
+import { useInterval } from '../../hooks';
 import { Spinner } from '../Spinner';
-import { Toggle } from '../Toggle';
 import { useTournamentLayoutContext } from '../TournamentLayout/TournamentLayout';
 
 import { PgaPlayerName } from './PgaPlayerName';
+import { PlayerHeadshot } from './PlayerHeadshot';
 import { PoolUserPanel } from './PoolUserPanel';
-import { RankType } from './types';
 import {
-  formatTeeTimeLocal,
+  buildPickMetadata,
   getEffectiveFedexCupPoints,
+  getScoreColor,
+  isCutOrWithdrawn,
   toFedexCupPointsString,
   toScoreString,
 } from './utils';
@@ -26,12 +26,14 @@ const USERS_POLL_INTERVAL = 30 * 1000; // 30s
 export function TournamentLeaderboard() {
   const { tournament, poolId } = useTournamentLayoutContext();
   const [poolUsers, setPoolUsers] = React.useState<PoolTournamentUser[]>([]);
-  const [rankType, setRankType] = usePersistedState<RankType>('score', `rank-type-selection`);
   const [isLoading, setIsLoading] = React.useState(true);
   const [initialFetchError, setInitialFetchError] = React.useState<Error | undefined>(undefined);
   const [pollErrorCount, setPollErrorCount] = React.useState(0);
   const [activeIndices, setActiveIndices] = React.useState<number[]>([]);
-  const size = React.useContext(ResponsiveContext);
+
+  const scoringFormat = tournament.pool?.settings?.scoring_format ?? 'strokes';
+  const isStrokesPool = scoringFormat === 'strokes';
+  const timezone = tournament.pga_tournament.date.timezone;
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -40,12 +42,6 @@ export function TournamentLeaderboard() {
       setPollErrorCount(0);
 
       try {
-        const rankTypeStorage = new LocalStorage();
-        const storedRankType = rankTypeStorage.get<RankType>('rank-type-selection');
-        if (!storedRankType && tournament.pool?.settings?.scoring_format === 'fedex_cup_points') {
-          setRankType('fedex_cup_points');
-        }
-
         const usersResponse = await pgaPoolApi.poolTournamentUsers.listPoolTournamentUsers({
           poolId,
           poolTournamentId: tournament.id,
@@ -62,7 +58,7 @@ export function TournamentLeaderboard() {
     }
 
     fetchUsers();
-  }, [poolId, tournament.id, setRankType, tournament.pool?.settings?.scoring_format]);
+  }, [poolId, tournament.id]);
 
   useInterval(async () => {
     try {
@@ -79,8 +75,6 @@ export function TournamentLeaderboard() {
       }
     }
   }, USERS_POLL_INTERVAL);
-
-  const round = poolUsers[0]?.picks[0]?.pga_tournament_player?.current_round ?? undefined;
 
   if (isLoading) {
     return <Spinner />;
@@ -108,26 +102,6 @@ export function TournamentLeaderboard() {
         <Notification status="critical" message="Error refreshing tournament scores" />
       )}
 
-      <Box
-        fill="horizontal"
-        align={size === 'small' ? 'start' : 'end'}
-        pad={size === 'small' ? { top: 'medium', bottom: 'small' } : undefined}
-      >
-        <Box
-          pad={{ vertical: 'small', horizontal: 'small' }}
-          style={{ minHeight: '44px' }}
-          justify="center"
-        >
-          <Toggle
-            label={
-              <Text size="small">{size !== 'small' ? 'FedEx Cup Points' : 'FedEx Points'}</Text>
-            }
-            checked={rankType === 'fedex_cup_points'}
-            onChange={(event) => setRankType(event.target.checked ? 'fedex_cup_points' : 'score')}
-          />
-        </Box>
-      </Box>
-
       <Accordion
         margin={{ bottom: 'medium', top: 'medium' }}
         activeIndex={activeIndices}
@@ -139,58 +113,73 @@ export function TournamentLeaderboard() {
             rank={user.rank}
             user={user}
             pgaTournament={tournament.pga_tournament}
-            tournamentRound={round ?? undefined}
-            rankType={rankType}
+            scoringFormat={scoringFormat}
             isOpen={activeIndices.includes(index)}
           >
             <Box
               background="background-contrast"
-              pad={{ vertical: 'xsmall', horizontal: 'small' }}
               border={{ side: 'bottom', color: 'border', size: 'small' }}
             >
-              {user.picks.map((pick) => {
+              {user.picks.map((pick, pickIndex) => {
                 const player = pick.pga_tournament_player;
-                const tournamentRound =
-                  round ?? tournament.pga_tournament.current_round ?? player.current_round ?? 1;
-                const isRoundOne = tournamentRound === 1;
-                const isActive =
-                  player.active ||
-                  player.status === 'complete' ||
-                  player.is_round_complete ||
-                  (player.score_thru ?? 0) > 0;
-                const isCutOrWithdrawn =
-                  player.withdrawn ||
-                  player.current_position === 'CUT' ||
-                  player.status === 'cut' ||
-                  player.status === 'wd';
-                const shouldShowScore = !isRoundOne || isActive;
-                const shouldShowTeeTime = !isActive && !isCutOrWithdrawn && !!player.tee_time;
-                const teeTimeLabel =
-                  shouldShowTeeTime && player.tee_time
-                    ? formatTeeTimeLocal(player.tee_time, tournament.pga_tournament.date.timezone)
-                    : null;
+                const isCut = isCutOrWithdrawn(player);
+
+                const poolScore = isStrokesPool
+                  ? toScoreString(player.score_total)
+                  : `${toFedexCupPointsString(
+                      getEffectiveFedexCupPoints(tournament.pga_tournament, player)
+                    )} pts`;
+                const poolScoreColor = isStrokesPool
+                  ? getScoreColor(player.score_total)
+                  : undefined;
+
+                const metadata = buildPickMetadata({
+                  player,
+                  tier: pick.tier,
+                  odds: pick.odds ?? null,
+                  timezone,
+                  isStrokesPool,
+                  isCutOrWithdrawn: isCut,
+                });
 
                 return (
-                  <Box key={player.id} pad="small" direction="row" align="center" gap="small">
-                    <Box direction="column" gap="xxsmall" flex>
-                      <Box direction="row" align="baseline" gap="xsmall" wrap>
-                        <PgaPlayerName player={player} />
-                        {shouldShowScore && (
-                          <Text weight={'bold'}>
-                            {rankType === 'score'
-                              ? toScoreString(player.score_total)
-                              : toFedexCupPointsString(
-                                  getEffectiveFedexCupPoints(player.pga_tournament, player)
-                                )}
-                          </Text>
-                        )}
+                  <Box
+                    key={player.id}
+                    pad={{ vertical: 'small', horizontal: 'small' }}
+                    style={{ opacity: isCut ? 0.5 : 1 }}
+                    border={
+                      pickIndex < user.picks.length - 1
+                        ? { side: 'bottom', color: 'var(--color-tab-border)', size: '1px' }
+                        : undefined
+                    }
+                  >
+                    {/* Line 1: Headshot + Name + Score */}
+                    <Box direction="row" align="center" gap="small">
+                      <PlayerHeadshot
+                        src={player.pga_player.headshot_url}
+                        name={player.pga_player.name}
+                        size={32}
+                      />
+                      <Box flex style={{ minWidth: 0 }}>
+                        <PgaPlayerName player={player} truncate />
                       </Box>
-                      {teeTimeLabel && (
-                        <Text size="xsmall" color="dark-4" weight="bold">
-                          {`Tees off at ${teeTimeLabel}`}
-                        </Text>
-                      )}
+                      <Text
+                        weight="bold"
+                        color={poolScoreColor}
+                        style={{ minWidth: 'fit-content' }}
+                      >
+                        {poolScore}
+                      </Text>
                     </Box>
+
+                    {/* Line 2: Labeled metadata */}
+                    {metadata.length > 0 && (
+                      <Box margin={{ left: '44px', top: 'xxsmall' }}>
+                        <Text size="xsmall" color="text-weak">
+                          {metadata.join('  \u00b7  ')}
+                        </Text>
+                      </Box>
+                    )}
                   </Box>
                 );
               })}

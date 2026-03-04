@@ -1,10 +1,9 @@
-import { AccordionPanel, Box, Meter, ResponsiveContext, Text, Tip } from 'grommet';
+import { AccordionPanel, Box, Text } from 'grommet';
 import { FormCheckmark, FormDown } from 'grommet-icons';
-import { useContext } from 'react';
 
 import { ParentComponentProps } from '../../types';
-import { RankType } from '../types';
-import { toFedexCupPointsString, toScoreString } from '../utils';
+import { PlayerHeadshot } from '../PlayerHeadshot';
+import { getScoreColor, isCutOrWithdrawn, toFedexCupPointsString, toScoreString } from '../utils';
 
 import { getRoundStatus } from './getRoundStatus';
 import { StartDuration } from './StartDuration';
@@ -14,120 +13,112 @@ import { PgaTournament, PoolTournamentUser } from '@drewkimberly/pga-pool-api';
 export interface PoolUserPanelProps extends ParentComponentProps {
   user: PoolTournamentUser;
   pgaTournament: PgaTournament;
-  tournamentRound?: number;
-  rankType: RankType;
+  scoringFormat: string;
   isOpen?: boolean;
   rank: string;
 }
 
-/**
- * @TODO
- * - Score trends
- */
 function _PoolUserPanel({
   user,
   pgaTournament,
-  rankType,
+  scoringFormat,
   isOpen,
   rank,
 }: Omit<PoolUserPanelProps, 'children'>) {
-  const size = useContext(ResponsiveContext);
   const roundStatus = getRoundStatus(
     user.picks.map((pick) => pick.pga_tournament_player),
     pgaTournament
   );
 
+  const isStrokes = scoringFormat === 'strokes';
+  const scoreDisplay = isStrokes
+    ? toScoreString(user.score)
+    : `${toFedexCupPointsString(user.fedex_cup_points)} pts`;
+  const scoreColor = isStrokes ? getScoreColor(user.score) : undefined;
+
   return (
-    <Box direction="row" height="100%">
-      <Box
-        width="32px"
-        height="32px"
-        round="full"
-        background="rank-badge"
-        align="center"
-        justify="center"
-        flex={false}
-        alignSelf="center"
-        margin={{ left: 'small' }}
-      >
-        <Text size="xsmall" color="white" weight="bold">
-          {rank}
-        </Text>
-      </Box>
-      <Box pad="small" alignSelf="center" fill="horizontal">
-        <Text weight="bold" size="medium">
+    <Box pad={{ vertical: 'small', horizontal: 'small' }}>
+      {/* Line 1: Rank + Nickname + Round Status + Score + Chevron */}
+      <Box direction="row" align="center" gap="small">
+        <Box
+          width="28px"
+          height="28px"
+          round="full"
+          background="rank-badge"
+          align="center"
+          justify="center"
+          flex={false}
+        >
+          <Text size="xsmall" color="white" weight="bold">
+            {rank}
+          </Text>
+        </Box>
+
+        <Text weight="bold" size="medium" style={{ flex: 1, minWidth: 0 }} truncate>
           {user.user.nickname}
         </Text>
+
+        {/* Compact round status */}
+        <Box flex={false}>
+          {roundStatus.status === 'not_started' && (
+            <StartDuration time={roundStatus.teetimes[0] ?? null} size="xsmall" color="text-weak" />
+          )}
+          {roundStatus.status === 'in_progress' && (
+            <Text size="xsmall" color="text-weak">
+              {roundStatus.percentComplete}%
+            </Text>
+          )}
+          {roundStatus.status === 'complete' && (
+            <Box direction="row" align="center" gap="xxsmall">
+              <Text size="xsmall" color="text-weak">
+                Complete
+              </Text>
+              <FormCheckmark color="var(--color-status-live)" size="small" />
+            </Box>
+          )}
+        </Box>
+
+        <Text
+          weight="bold"
+          size="xlarge"
+          color={scoreColor}
+          style={{
+            fontFamily: 'var(--font-display)',
+            minWidth: 'fit-content',
+          }}
+        >
+          {scoreDisplay}
+        </Text>
+
+        <Box
+          flex={false}
+          style={{
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease',
+          }}
+        >
+          <FormDown size="medium" color="text-weak" />
+        </Box>
       </Box>
-      {roundStatus.status === 'not_started' && (
-        <Box direction="row" fill="horizontal" align="center" pad={{ left: 'small' }}>
-          <StartDuration time={roundStatus.teetimes[0] ?? null} size="small" />
-        </Box>
-      )}
-      {roundStatus.status === 'complete' && (
-        <Box direction="row" fill="horizontal" align="center" pad={{ left: 'small' }}>
-          <Text size="small">Round Complete</Text>
-          <FormCheckmark color="#32de84" />
-        </Box>
-      )}
-      {roundStatus.status === 'in_progress' && (
-        <Box fill="horizontal">
-          <Box pad={{ left: 'small', top: 'small', bottom: 'xsmall' }} direction="row">
-            <Text size="small">{size === 'small' ? 'Progress:' : 'Round Progress:'}</Text>
-            <Tip
-              plain={true}
-              dropProps={{ align: { bottom: 'top', left: 'left' } }}
-              content={
-                <Box
-                  pad="xxsmall"
-                  elevation="small"
-                  background="#EDEDED" // no opacity
-                  round="xsmall"
-                  margin="xsmall"
-                  overflow="hidden"
-                >
-                  <Text size="small">{`${roundStatus.percentComplete}% complete`}</Text>
-                </Box>
-              }
-            >
-              <Meter
-                type="bar"
-                background="light-2"
-                values={[{ value: roundStatus.percentComplete }]}
-                size="xxsmall"
-                thickness="xsmall"
-                alignSelf="center"
-                margin={{ left: 'small' }}
+
+      {/* Line 2: Headshot chips */}
+      <Box direction="row" gap="xsmall" margin={{ top: 'xsmall', left: '36px' }}>
+        {user.picks.map((pick) => {
+          const player = pick.pga_tournament_player;
+          const isCut = isCutOrWithdrawn(player);
+          const chipScoreColor = isStrokes ? getScoreColor(player.score_total) : undefined;
+
+          return (
+            <Box key={player.id} style={{ opacity: isCut ? 0.5 : 1 }}>
+              <PlayerHeadshot
+                src={player.pga_player.headshot_url}
+                name={player.pga_player.name}
+                size={24}
+                borderColor={chipScoreColor}
               />
-            </Tip>
-          </Box>
-          <Box pad={{ bottom: 'small', left: 'small' }} direction="row">
-            <Text size="small">{size === 'small' ? 'Players:' : 'Players Active:'}</Text>
-            <Text
-              size="small"
-              margin={{ left: 'small' }}
-              style={{ minWidth: 'fit-content' }}
-            >{`${roundStatus.playersActive.length} of ${user.picks.length}`}</Text>
-          </Box>
-        </Box>
-      )}
-      <Box pad="small" alignSelf="center" fill="horizontal">
-        <Text weight="bold" size="xlarge" alignSelf="end">{`${
-          rankType === 'score'
-            ? toScoreString(user.score)
-            : toFedexCupPointsString(user.fedex_cup_points)
-        }`}</Text>
-      </Box>
-      <Box
-        alignSelf="center"
-        flex={false}
-        pad={{ right: 'small' }}
-        style={{
-          transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.2s ease',
-        }}
-      >
-        <FormDown size="medium" color="text-weak" />
+            </Box>
+          );
+        })}
       </Box>
     </Box>
   );
