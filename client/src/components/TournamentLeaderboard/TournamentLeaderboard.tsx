@@ -11,10 +11,12 @@ import { PgaPlayerName } from './PgaPlayerName';
 import { PlayerHeadshot } from './PlayerHeadshot';
 import { PoolUserPanel } from './PoolUserPanel';
 import {
-  buildPickMetadata,
+  buildPoolMeta,
+  buildScoreMeta,
   getEffectiveFedexCupPoints,
   getScoreColor,
   isCutOrWithdrawn,
+  MetaPair,
   toFedexCupPointsString,
   toScoreString,
 } from './utils';
@@ -22,6 +24,23 @@ import {
 import { PoolTournamentUser } from '@drewkimberly/pga-pool-api';
 
 const USERS_POLL_INTERVAL = 30 * 1000; // 30s
+
+function MetaLabel({ pair }: { pair: MetaPair }) {
+  return (
+    <Box direction="row" align="baseline" gap="xxsmall">
+      <Text
+        size="xsmall"
+        color="text-weak"
+        style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}
+      >
+        {pair.label}
+      </Text>
+      <Text size="xsmall" weight="bold">
+        {pair.value}
+      </Text>
+    </Box>
+  );
+}
 
 export function TournamentLeaderboard() {
   const { tournament, poolId } = useTournamentLayoutContext();
@@ -133,10 +152,13 @@ export function TournamentLeaderboard() {
                   ? getScoreColor(player.score_total)
                   : undefined;
 
-                const metadata = buildPickMetadata({
-                  player,
+                const poolMeta = buildPoolMeta({
                   tier: pick.tier,
                   odds: pick.odds ?? null,
+                });
+
+                const scoreMeta = buildScoreMeta({
+                  player,
                   timezone,
                   isStrokesPool,
                   isCutOrWithdrawn: isCut,
@@ -153,33 +175,47 @@ export function TournamentLeaderboard() {
                         : undefined
                     }
                   >
-                    {/* Line 1: Headshot + Name + Score */}
                     <Box direction="row" align="center" gap="small">
+                      {/* Headshot */}
                       <PlayerHeadshot
                         src={player.pga_player.headshot_url}
                         name={player.pga_player.name}
-                        size={32}
+                        size={40}
                       />
+
+                      {/* Name + metadata column */}
                       <Box flex style={{ minWidth: 0 }}>
-                        <PgaPlayerName player={player} truncate />
+                        {/* Row 1: Name + pool metadata */}
+                        <Box direction="row" align="baseline" gap="small" wrap>
+                          <PgaPlayerName player={player} />
+                          {poolMeta.map((pair) => (
+                            <MetaLabel key={pair.label} pair={pair} />
+                          ))}
+                        </Box>
+
+                        {/* Row 2: Score metadata */}
+                        {scoreMeta.length > 0 && (
+                          <Box direction="row" gap="small" margin={{ top: 'xxsmall' }}>
+                            {scoreMeta.map((pair) => (
+                              <MetaLabel key={pair.label} pair={pair} />
+                            ))}
+                          </Box>
+                        )}
                       </Box>
+
+                      {/* Pool score — right aligned */}
                       <Text
                         weight="bold"
                         color={poolScoreColor}
-                        style={{ minWidth: 'fit-content' }}
+                        style={{
+                          minWidth: 'fit-content',
+                          fontFamily: 'var(--font-display)',
+                          fontSize: 'var(--text-lg)',
+                        }}
                       >
                         {poolScore}
                       </Text>
                     </Box>
-
-                    {/* Line 2: Labeled metadata */}
-                    {metadata.length > 0 && (
-                      <Box margin={{ left: '44px', top: 'xxsmall' }}>
-                        <Text size="xsmall" color="text-weak">
-                          {metadata.join('  \u00b7  ')}
-                        </Text>
-                      </Box>
-                    )}
                   </Box>
                 );
               })}
