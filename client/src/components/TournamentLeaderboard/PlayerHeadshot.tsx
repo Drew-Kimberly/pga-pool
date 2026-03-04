@@ -119,7 +119,7 @@ export function PlayerHeadshot({ src, name, size = 28, badge }: PlayerHeadshotPr
 
   if (showFallback) {
     return (
-      <div style={wrapperStyle}>
+      <div style={wrapperStyle} title={name}>
         <div style={containerStyle}>
           <span
             style={{
@@ -139,7 +139,7 @@ export function PlayerHeadshot({ src, name, size = 28, badge }: PlayerHeadshotPr
   }
 
   return (
-    <div style={wrapperStyle}>
+    <div style={wrapperStyle} title={name}>
       <div style={containerStyle}>
         <img
           src={optimizedSrc!}
