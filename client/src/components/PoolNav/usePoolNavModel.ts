@@ -18,6 +18,7 @@ export interface PoolNavModel {
 
 /**
  * Returns true if the tournament has started or starts today (morning of round 1).
+ * Uses string comparison on YYYY-MM-DD to avoid UTC→local timezone shift bugs.
  */
 function isTournamentLive(tournament: PoolTournament): boolean {
   const status = tournament.pga_tournament.tournament_status;
@@ -27,16 +28,22 @@ function isTournamentLive(tournament: PoolTournament): boolean {
   }
 
   if (status === PgaTournamentTournamentStatusEnum.NotStarted) {
-    const startDate = new Date(tournament.pga_tournament.date.start);
+    const startDateStr = tournament.pga_tournament.date.start.slice(0, 10);
     const now = new Date();
-    // Show leaderboard tab starting the morning of round 1
-    const morningOfStart = new Date(startDate);
-    morningOfStart.setHours(0, 0, 0, 0);
-    return now >= morningOfStart;
+    const todayStr = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0'),
+    ].join('-');
+    return todayStr >= startDateStr;
   }
 
   return false;
 }
+
+// Module-level cache to prevent flicker when usePoolNavModel remounts across page navigations
+let cachedLiveTournament: PoolTournament | null = null;
+let cachedPoolId: string | null = null;
 
 function resolveSection(pathname: string): { poolId: string; section: PoolNavSection } | null {
   // Leaderboard detail
@@ -87,9 +94,11 @@ function resolveSection(pathname: string): { poolId: string; section: PoolNavSec
 export function usePoolNavModel(): PoolNavModel | null {
   const location = useLocation();
   const resolved = resolveSection(location.pathname);
-  const [liveTournament, setLiveTournament] = React.useState<PoolTournament | null>(null);
-
   const poolId = resolved?.poolId ?? null;
+
+  const [liveTournament, setLiveTournament] = React.useState<PoolTournament | null>(
+    poolId && poolId === cachedPoolId ? cachedLiveTournament : null
+  );
 
   React.useEffect(() => {
     if (!poolId) return;
@@ -98,14 +107,17 @@ export function usePoolNavModel(): PoolNavModel | null {
     resolveDefaultTournament(poolId)
       .then((tournament) => {
         if (cancelled) return;
-        if (tournament && isTournamentLive(tournament)) {
-          setLiveTournament(tournament);
-        } else {
-          setLiveTournament(null);
-        }
+        const live = tournament && isTournamentLive(tournament) ? tournament : null;
+        setLiveTournament(live);
+        cachedLiveTournament = live;
+        cachedPoolId = poolId;
       })
       .catch(() => {
-        if (!cancelled) setLiveTournament(null);
+        if (!cancelled) {
+          setLiveTournament(null);
+          cachedLiveTournament = null;
+          cachedPoolId = poolId;
+        }
       });
 
     return () => {
