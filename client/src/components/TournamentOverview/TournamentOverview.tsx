@@ -2,6 +2,7 @@ import { Box, Grid, ResponsiveContext, Text } from 'grommet';
 import React from 'react';
 
 import { pgaPoolApi } from '../../api/pga-pool/api';
+import { getOptimizedHeadshotUrl } from '../../cloudinary';
 import { useTournamentLayoutContext } from '../TournamentLayout/TournamentLayout';
 
 import { PgaPlayer, PgaTournament } from '@drewkimberly/pga-pool-api';
@@ -117,7 +118,7 @@ function ChampionDisplay({ name, champion }: ChampionDisplayProps) {
           background="light-2"
         >
           <img
-            src={champion.headshot_url}
+            src={getOptimizedHeadshotUrl(champion.headshot_url, 48)}
             alt={name}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />

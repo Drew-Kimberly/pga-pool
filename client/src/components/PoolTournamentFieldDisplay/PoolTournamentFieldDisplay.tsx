@@ -2,6 +2,7 @@ import { Box, Button, Grid, Heading, ResponsiveContext, Text, TextInput } from '
 import { Search, User as UserIcon } from 'grommet-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
+import { getOptimizedHeadshotUrl } from '../../cloudinary';
 import { useThemeContext } from '../../contexts/ThemeContext';
 
 import { PoolTournamentField, PoolTournamentPlayer } from '@drewkimberly/pga-pool-api';
@@ -304,7 +305,7 @@ function PlayerEntry({ player, showTier, isDesktop }: PlayerEntryProps) {
           style={{ flexShrink: 0 }}
         >
           <img
-            src={pgaPlayer.headshot_url}
+            src={getOptimizedHeadshotUrl(pgaPlayer.headshot_url, 40)}
             alt=""
             style={{ width: '40px', height: '40px', objectFit: 'cover' }}
           />
