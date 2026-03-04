@@ -1,4 +1,4 @@
-import { Accordion, Anchor, Box, Notification, Text } from 'grommet';
+import { Accordion, Anchor, Box, Notification, ResponsiveContext, Text } from 'grommet';
 import { CircleInformation } from 'grommet-icons';
 import React from 'react';
 
@@ -50,6 +50,8 @@ export function TournamentLeaderboard() {
   const [pollErrorCount, setPollErrorCount] = React.useState(0);
   const [activeIndices, setActiveIndices] = React.useState<number[]>([]);
 
+  const responsive = React.useContext(ResponsiveContext);
+  const isMobile = responsive === 'small';
   const scoringFormat = tournament.pool?.settings?.scoring_format ?? 'strokes';
   const isStrokesPool = scoringFormat === 'strokes';
   const timezone = tournament.pga_tournament.date.timezone;
@@ -155,7 +157,7 @@ export function TournamentLeaderboard() {
                 const poolMeta = buildPoolMeta({
                   tier: pick.tier,
                   odds: pick.odds ?? null,
-                });
+                }).filter((p) => !(isMobile && p.label === 'Tier'));
 
                 const scoreMeta = buildScoreMeta({
                   player,
