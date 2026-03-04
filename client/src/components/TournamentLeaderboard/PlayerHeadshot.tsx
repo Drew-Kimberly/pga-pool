@@ -1,4 +1,6 @@
-import { CSSProperties, useState } from 'react';
+import { CSSProperties, useMemo, useState } from 'react';
+
+import { getOptimizedHeadshotUrl } from '../../cloudinary';
 
 import { getPlayerInitials } from './utils';
 
@@ -12,7 +14,8 @@ export interface PlayerHeadshotProps {
 export function PlayerHeadshot({ src, name, size = 28, borderColor }: PlayerHeadshotProps) {
   const [imgError, setImgError] = useState(false);
   const initials = getPlayerInitials(name);
-  const showFallback = !src || imgError;
+  const optimizedSrc = useMemo(() => (src ? getOptimizedHeadshotUrl(src, size) : null), [src, size]);
+  const showFallback = !optimizedSrc || imgError;
 
   const containerStyle: CSSProperties = {
     width: size,
@@ -49,7 +52,7 @@ export function PlayerHeadshot({ src, name, size = 28, borderColor }: PlayerHead
   return (
     <div style={containerStyle}>
       <img
-        src={src}
+        src={optimizedSrc!}
         alt={name}
         onError={() => setImgError(true)}
         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
