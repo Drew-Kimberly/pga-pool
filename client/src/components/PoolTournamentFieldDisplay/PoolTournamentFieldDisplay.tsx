@@ -7,7 +7,7 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 
 import { PoolTournamentField, PoolTournamentPlayer } from '@drewkimberly/pga-pool-api';
 
-type ViewMode = 'tier' | 'name';
+type ViewMode = 'tier' | 'name' | 'odds';
 
 export interface PoolTournamentFieldDisplayProps {
   field: PoolTournamentField;
@@ -47,6 +47,11 @@ export function PoolTournamentFieldDisplay({ field }: PoolTournamentFieldDisplay
   }, [field.player_tiers]);
 
   const searchActive = searchQuery.trim().length > 0;
+
+  const hasOdds = useMemo(
+    () => allPlayers.some((p) => p.odds != null && p.odds !== ''),
+    [allPlayers]
+  );
 
   const filteredByName = useMemo(() => {
     if (!searchActive) return allPlayers;
@@ -131,12 +136,15 @@ export function PoolTournamentFieldDisplay({ field }: PoolTournamentFieldDisplay
             onViewChange={setViewMode}
             darkMode={darkMode}
             compact={!isDesktop}
+            showOdds={hasOdds}
           />
         )}
       </Box>
 
       {viewMode === 'tier' ? (
         <TierView playerTiers={filteredTiers} isDesktop={isDesktop} />
+      ) : viewMode === 'odds' ? (
+        <OddsView players={filteredByName} isDesktop={isDesktop} />
       ) : (
         <NameView players={filteredByName} isDesktop={isDesktop} />
       )}
@@ -149,9 +157,10 @@ interface ViewToggleProps {
   onViewChange: (view: ViewMode) => void;
   darkMode: boolean;
   compact?: boolean;
+  showOdds?: boolean;
 }
 
-function ViewToggle({ activeView, onViewChange, darkMode, compact }: ViewToggleProps) {
+function ViewToggle({ activeView, onViewChange, darkMode, compact, showOdds }: ViewToggleProps) {
   const activeBg = darkMode ? '#2b62c8' : 'brand';
   const activeBorder = darkMode ? '#8eb3ff' : '#273344';
   const inactiveText = darkMode ? 'light-3' : 'text-weak';
@@ -159,6 +168,7 @@ function ViewToggle({ activeView, onViewChange, darkMode, compact }: ViewToggleP
   const tabs: { key: ViewMode; label: string }[] = [
     { key: 'tier', label: 'By Tier' },
     { key: 'name', label: 'By Name' },
+    ...(showOdds ? [{ key: 'odds' as ViewMode, label: 'By Odds' }] : []),
   ];
 
   return (
@@ -278,6 +288,46 @@ function NameView({ players, isDesktop }: NameViewProps) {
   );
 }
 
+function parseOddsToNumber(odds: string | null | undefined): number {
+  if (!odds) return Infinity;
+  const cleaned = odds.replace(/[^0-9+-]/g, '');
+  const num = parseInt(cleaned, 10);
+  return isNaN(num) ? Infinity : num;
+}
+
+function OddsView({ players, isDesktop }: NameViewProps) {
+  const sorted = useMemo(
+    () =>
+      [...players].sort((a, b) => {
+        const oddsA = parseOddsToNumber(a.odds);
+        const oddsB = parseOddsToNumber(b.odds);
+        if (oddsA !== oddsB) return oddsA - oddsB;
+        return a.pga_tournament_player.pga_player.name.localeCompare(
+          b.pga_tournament_player.pga_player.name
+        );
+      }),
+    [players]
+  );
+
+  if (sorted.length === 0) {
+    return (
+      <Box pad="medium" align="center">
+        <Text size="small" color="text-weak">
+          No players found.
+        </Text>
+      </Box>
+    );
+  }
+
+  return (
+    <Grid columns={{ count: isDesktop ? 2 : 1, size: 'auto' }} gap="xsmall">
+      {sorted.map((p) => (
+        <PlayerEntry key={p.id} player={p} showTier isDesktop={isDesktop} />
+      ))}
+    </Grid>
+  );
+}
+
 interface PlayerEntryProps {
   player: PoolTournamentPlayer;
   showTier?: boolean;
@@ -286,6 +336,7 @@ interface PlayerEntryProps {
 
 function PlayerEntry({ player, showTier, isDesktop }: PlayerEntryProps) {
   const pgaPlayer = player.pga_tournament_player.pga_player;
+  const odds = player.odds;
 
   return (
     <Box
@@ -335,22 +386,41 @@ function PlayerEntry({ player, showTier, isDesktop }: PlayerEntryProps) {
         </Box>
       )}
 
-      <Text size="small" weight={500}>
-        <Text
-          size="small"
-          weight={500}
-          style={
-            player.pga_tournament_player.withdrawn ? { textDecoration: 'line-through' } : undefined
-          }
-        >
-          {pgaPlayer.first_name} {pgaPlayer.last_name}
-        </Text>
-        {player.pga_tournament_player.withdrawn && (
-          <Text size="xsmall" margin={{ left: 'xxsmall' }} color="#FF003F">
-            WD
+      <Box direction="row" align="center" gap="xsmall" style={{ minWidth: 0 }}>
+        <Text size="small" weight={500}>
+          <Text
+            size="small"
+            weight={500}
+            style={
+              player.pga_tournament_player.withdrawn
+                ? { textDecoration: 'line-through' }
+                : undefined
+            }
+          >
+            {pgaPlayer.first_name} {pgaPlayer.last_name}
           </Text>
+          {player.pga_tournament_player.withdrawn && (
+            <Text size="xsmall" margin={{ left: 'xxsmall' }} color="#FF003F">
+              WD
+            </Text>
+          )}
+        </Text>
+        {odds && (
+          <Box
+            round="large"
+            pad={{ horizontal: 'xsmall', vertical: '1px' }}
+            flex={false}
+            style={{
+              backgroundColor: 'var(--color-status-upcoming-bg)',
+              border: '1px solid var(--color-tab-border)',
+            }}
+          >
+            <Text size="xsmall" weight="bold" style={{ lineHeight: 1.3 }}>
+              {odds}
+            </Text>
+          </Box>
         )}
-      </Text>
+      </Box>
 
       {showTier && (
         <Box
