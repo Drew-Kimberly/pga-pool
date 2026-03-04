@@ -43,6 +43,6 @@ export class PoolTournamentPlayerController extends ControllerBase {
       active: 'pga_tournament_player.active',
     });
 
-    return { ...result, data: result.data.map(PoolTournamentPlayerDto.fromEntity) };
+    return { ...result, data: result.data.map((p) => PoolTournamentPlayerDto.fromEntity(p)) };
   }
 }

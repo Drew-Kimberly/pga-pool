@@ -1,5 +1,7 @@
 import { ControllerBase } from '../../common/api';
 import { UUIDValidationPipe } from '../../common/api/validation';
+import { RoundSummaryDto } from '../../pga-tournament-player-hole/api/pga-tournament-player-hole.dto';
+import { PgaTournamentPlayerHoleService } from '../../pga-tournament-player-hole/lib/pga-tournament-player-hole.service';
 import { PoolTournamentDto } from '../../pool-tournament/api/pool-tournament.dto';
 import { PoolTournamentService } from '../../pool-tournament/lib/pool-tournament.service';
 import { PoolTournamentPlayerDto } from '../../pool-tournament-player/api/pool-tournament-player.dto';
@@ -21,6 +23,7 @@ export class PoolTournamentFieldController extends ControllerBase {
   constructor(
     private readonly poolTournamentService: PoolTournamentService,
     private readonly poolTournamentPlayerService: PoolTournamentPlayerService,
+    private readonly holeService: PgaTournamentPlayerHoleService,
     @Optional()
     protected readonly logger: LoggerService = new Logger(PoolTournamentFieldController.name)
   ) {
@@ -43,6 +46,13 @@ export class PoolTournamentFieldController extends ControllerBase {
       poolTournamentId: poolTournament.id,
     });
 
+    const playerIds = players.map((p) => p.pga_tournament_player.id);
+    const rawRoundsMap = await this.holeService.getRoundSummariesBatch(playerIds);
+    const roundsMap = new Map<string, RoundSummaryDto[]>();
+    for (const [id, rounds] of rawRoundsMap) {
+      roundsMap.set(id, rounds.map(RoundSummaryDto.from));
+    }
+
     const createdAt = poolTournament.field_published_at
       ? poolTournament.field_published_at.toISOString()
       : null;
@@ -53,7 +63,7 @@ export class PoolTournamentFieldController extends ControllerBase {
       if (!Array.isArray(dto.player_tiers[player.tier])) {
         dto.player_tiers[player.tier] = [];
       }
-      dto.player_tiers[player.tier].push(PoolTournamentPlayerDto.fromEntity(player));
+      dto.player_tiers[player.tier].push(PoolTournamentPlayerDto.fromEntity(player, roundsMap));
     });
 
     return dto;
