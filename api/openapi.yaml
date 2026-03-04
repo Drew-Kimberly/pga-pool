@@ -1042,6 +1042,10 @@ components:
           example: 500.0
         withdrawn:
           type: boolean
+        rounds:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoundSummary'
         pga_player:
           $ref: '#/components/schemas/PgaPlayer'
         pga_tournament:
@@ -1059,6 +1063,7 @@ components:
         - score_thru
         - current_position
         - withdrawn
+        - rounds
         - pga_player
         - pga_tournament
     PgaTournamentField:

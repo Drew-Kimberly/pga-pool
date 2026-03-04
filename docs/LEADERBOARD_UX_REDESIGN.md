@@ -310,31 +310,40 @@ page navigation. Font pairing finalized as **Fraunces + Bricolage Grotesque** ("
 champion for completed tournaments, not the defending champion. Requires a DB migration and
 backend work to properly snapshot the defending champion at tournament creation time.
 
-#### PR 5 — Scoring + Pool user row + Pick row redesign 🔄 In Progress
+#### PR 5 — Scoring + Pool user row + Pick row redesign ✅ Merged (#255)
 
 Combined original PRs 5 (scoring/toggle removal) and 6 (pool user row redesign). Client-only —
 all data needed (headshots, tiers, odds, positions, thru, round status) already present in API.
 
 **Implemented:**
 - **FedEx toggle removed**: `scoringFormat` derived from pool settings, no toggle UI
+- **Scoring format badge**: Gray pill badge in tournament header showing "Strokes" or "FedEx Cup Pts"
 - **Scoring color system**: `getScoreColor()` utility returns CSS custom properties
   (birdie/even/bogey). CUT players use `--color-status-cut` token.
-- **PlayerHeadshot component**: Reusable circular headshot with initials fallback (`getPlayerInitials()`),
-  optional 2px colored border ring for score status, `onError` fallback to initials.
-- **Pool user header redesign** (two-line accordion header):
-  - Line 1: Rank badge + Nickname + Compact round status + Score (Fraunces display font) + Chevron
-  - Line 2: Row of 24px headshot chips per pick, score-colored border rings, CUT/WD reduced opacity
+- **PlayerHeadshot component**: Reusable circular headshot with Cloudinary optimization
+  (`getOptimizedHeadshotUrl` for face-cropped, DPR-aware URLs), initials fallback
+  (`getPlayerInitials()`), `onError` fallback to initials, `title` tooltip on hover.
+  Optional `ScoreBadge` overlay: overlapping circle in bottom-right showing color-coded
+  score (under par = red bg, over par = blue bg, even = gray bg), "C" for CUT, "WD" for
+  withdrawn. Badge scales at ~42% of headshot diameter. Hidden when player hasn't teed off.
+- **Pool user header redesign** (responsive desktop/mobile layouts):
+  - **Desktop**: 3-column layout — left (200px fixed: rank badge + nickname + compact round
+    status), center (flex: 40px headshot chips with score badges), right (score in Fraunces
+    display font + animated chevron)
+  - **Mobile**: Single row — rank badge + nickname + compact round status + score + chevron
+    (no headshot chips — not enough room at mobile widths)
   - Round status compacted: `"Starts in Xh Ym"` | `"XX%"` | `"Complete ✓"` (no Meter/Tip)
-- **Pick row redesign** (labeled metadata, no ambiguous floating values):
-  - Line 1: 32px headshot circle + `PgaPlayerName` (fills space) + right-aligned color-coded pool score
-  - Line 2: Labeled metadata joined by ` · `: `Pos T3`, `Thru 15`, `Tier 1`, `Odds +550`
-  - FedEx pools: `To Par -8` in metadata when pool score differs from golf score
-  - CUT/WD: reduced opacity (0.5), only Tier + Odds metadata
-  - Not started: `Starts in Xh Ym` or `Not Started` in metadata
-  - Round complete: `Round Complete ✓` in metadata
+- **Pick row redesign** (styled key/value metadata):
+  - Line 1: 40px headshot + `PgaPlayerName` + inline odds chip (rounded pill) +
+    right-aligned color-coded pool score (Fraunces display font)
+  - Line 2: Styled key/value `MetaLabel` pairs (uppercase muted label + bold value):
+    `Pos T3`, `Total -8` (color-coded, FedEx pools only), `Thru 15` / `Thru F`
+  - CUT/WD: reduced opacity (0.5), metadata hidden
   - Subtle bottom border between picks using `--color-tab-border`
-- **Utility functions**: `isCutOrWithdrawn()`, `getPlayerInitials()`, `getPickStatusLabel()`,
-  `buildPickMetadata()` — pure functions for testable presentation logic
+- **Design token**: `--color-headshot-badge-border` (white light / #1a1a1a dark)
+- **Utility functions**: `isCutOrWithdrawn()`, `getPlayerInitials()`, `getThruValue()`,
+  `buildScoreMeta()`, `MetaPair` interface (with optional `color`) — pure functions for
+  testable presentation logic
 - **Cleanup**: Removed `Meter`, `Tip` imports from PoolUserPanel; removed `tournamentRound` prop;
   removed `round` variable derivation from TournamentLeaderboard
 

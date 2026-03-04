@@ -1,5 +1,6 @@
 import { PgaPlayerDto } from '../../pga-player/api/pga-player.dto';
 import { PgaTournamentDto } from '../../pga-tournament/api/pga-tournament.dto';
+import { RoundSummaryDto } from '../../pga-tournament-player-hole/api/pga-tournament-player-hole.dto';
 import { PgaTournamentPlayer } from '../lib/pga-tournament-player.entity';
 import { PlayerStatus } from '../lib/pga-tournament-player.interface';
 
@@ -20,10 +21,14 @@ export class PgaTournamentPlayerDto {
   projected_fedex_cup_points: number;
   official_fedex_cup_points: number | null;
   withdrawn: boolean;
+  rounds: RoundSummaryDto[];
   pga_player: PgaPlayerDto;
   pga_tournament: PgaTournamentDto;
 
-  static fromEntity(p: PgaTournamentPlayer): PgaTournamentPlayerDto {
+  static fromEntity(
+    p: PgaTournamentPlayer,
+    rounds: RoundSummaryDto[] = []
+  ): PgaTournamentPlayerDto {
     const dto = new PgaTournamentPlayerDto();
 
     dto.id = p.id;
@@ -40,6 +45,7 @@ export class PgaTournamentPlayerDto {
     dto.projected_fedex_cup_points = p.projected_fedex_cup_points;
     dto.official_fedex_cup_points = p.official_fedex_cup_points;
     dto.withdrawn = p.status === PlayerStatus.Withdrawn;
+    dto.rounds = rounds;
     dto.pga_player = PgaPlayerDto.fromEntity(p.pga_player);
     dto.pga_tournament = PgaTournamentDto.fromEntity(p.pga_tournament);
 

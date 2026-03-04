@@ -25,6 +25,46 @@ export class PgaTournamentPlayerHoleService {
     private readonly logger: LoggerService = new Logger(PgaTournamentPlayerHoleService.name)
   ) {}
 
+  async getRoundSummariesBatch(
+    pgaTournamentPlayerIds: string[]
+  ): Promise<Map<string, { round_number: number; strokes: number; to_par: number }[]>> {
+    if (pgaTournamentPlayerIds.length === 0) {
+      return new Map();
+    }
+
+    const results = await this.holeRepo
+      .createQueryBuilder('hole')
+      .select('hole.pga_tournament_player_id', 'pga_tournament_player_id')
+      .addSelect('hole.round_number', 'round_number')
+      .addSelect('SUM(hole.score)', 'strokes')
+      .addSelect('SUM(hole.to_par)', 'to_par')
+      .where('hole.pga_tournament_player_id IN (:...ids)', { ids: pgaTournamentPlayerIds })
+      .groupBy('hole.pga_tournament_player_id')
+      .addGroupBy('hole.round_number')
+      .orderBy('hole.pga_tournament_player_id', 'ASC')
+      .addOrderBy('hole.round_number', 'ASC')
+      .getRawMany<{
+        pga_tournament_player_id: string;
+        round_number: number;
+        strokes: string;
+        to_par: string;
+      }>();
+
+    const map = new Map<string, { round_number: number; strokes: number; to_par: number }[]>();
+    for (const r of results) {
+      const playerId = r.pga_tournament_player_id;
+      if (!map.has(playerId)) {
+        map.set(playerId, []);
+      }
+      map.get(playerId)!.push({
+        round_number: r.round_number,
+        strokes: Number(r.strokes),
+        to_par: Number(r.to_par),
+      });
+    }
+    return map;
+  }
+
   async getRoundSummaries(
     pgaTournamentPlayerId: string
   ): Promise<{ round_number: number; strokes: number; to_par: number }[]> {

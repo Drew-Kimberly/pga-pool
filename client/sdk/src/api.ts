@@ -828,6 +828,12 @@ export interface PgaTournamentPlayer {
     'withdrawn': boolean;
     /**
      * 
+     * @type {Array<RoundSummary>}
+     * @memberof PgaTournamentPlayer
+     */
+    'rounds': Array<RoundSummary>;
+    /**
+     * 
      * @type {PgaPlayer}
      * @memberof PgaTournamentPlayer
      */

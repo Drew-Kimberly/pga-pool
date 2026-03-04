@@ -2,6 +2,8 @@ import { ControllerBase } from '../../common/api';
 import { IListParams, List, ListParams, PaginatedCollection } from '../../common/api/list';
 import { PgaTournament } from '../../pga-tournament/lib/pga-tournament.entity';
 import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
+import { RoundSummaryDto } from '../../pga-tournament-player-hole/api/pga-tournament-player-hole.dto';
+import { PgaTournamentPlayerHoleService } from '../../pga-tournament-player-hole/lib/pga-tournament-player-hole.service';
 import { PgaTournamentPlayer } from '../lib/pga-tournament-player.entity';
 import { PgaTournamentPlayerService } from '../lib/pga-tournament-player.service';
 
@@ -21,6 +23,7 @@ export class PgaTournamentPlayerController extends ControllerBase {
   constructor(
     private readonly pgaTournamentPlayerService: PgaTournamentPlayerService,
     private readonly pgaTournamentService: PgaTournamentService,
+    private readonly holeService: PgaTournamentPlayerHoleService,
     @Optional()
     protected readonly logger: LoggerService = new Logger(PgaTournamentPlayerController.name)
   ) {
@@ -59,9 +62,17 @@ export class PgaTournamentPlayerController extends ControllerBase {
       }
     )) as PaginatedCollection<PgaTournamentPlayer>;
 
+    const playerIds = result.data.map((p) => p.id);
+    const rawRoundsMap = await this.holeService.getRoundSummariesBatch(playerIds);
+
     return {
       ...result,
-      data: result.data.map(PgaTournamentPlayerDto.fromEntity),
+      data: result.data.map((p) =>
+        PgaTournamentPlayerDto.fromEntity(
+          p,
+          (rawRoundsMap.get(p.id) ?? []).map(RoundSummaryDto.from)
+        )
+      ),
     };
   }
 }
