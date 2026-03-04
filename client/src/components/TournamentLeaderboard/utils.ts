@@ -80,6 +80,7 @@ export function getPlayerInitials(name: string): string {
 export interface MetaPair {
   label: string;
   value: string;
+  color?: string;
 }
 
 /**
@@ -145,7 +146,11 @@ export function buildScoreMeta(opts: {
   }
 
   if (!isStrokesPool && !isCut) {
-    pairs.push({ label: 'Total', value: toScoreString(player.score_total) });
+    pairs.push({
+      label: 'Total',
+      value: toScoreString(player.score_total),
+      color: getScoreColor(player.score_total),
+    });
   }
 
   if (!isCut) {
