@@ -208,10 +208,6 @@ function _PoolUserPanel({
         </Box>
       </Box>
 
-      {/* Line 2: Headshot chips */}
-      <Box direction="row" gap="xsmall" margin={{ top: 'xsmall', left: '36px' }}>
-        <HeadshotChips user={user} size={24} />
-      </Box>
     </Box>
   );
 }
