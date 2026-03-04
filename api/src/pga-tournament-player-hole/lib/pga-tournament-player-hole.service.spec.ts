@@ -256,6 +256,69 @@ describe('PgaTournamentPlayerHoleService', () => {
     });
   });
 
+  describe('getRoundSummariesBatch', () => {
+    it('returns empty map for empty input', async () => {
+      const { service } = createMocks();
+      const result = await service.getRoundSummariesBatch([]);
+      expect(result).toEqual(new Map());
+    });
+
+    it('groups round summaries by player ID', async () => {
+      const { service, holeRepo } = createMocks();
+
+      const qb = {
+        select: vi.fn().mockReturnThis(),
+        addSelect: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        groupBy: vi.fn().mockReturnThis(),
+        addGroupBy: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        addOrderBy: vi.fn().mockReturnThis(),
+        getRawMany: vi.fn().mockResolvedValue([
+          { pga_tournament_player_id: 'p1-T1', round_number: 1, strokes: '66', to_par: '-5' },
+          { pga_tournament_player_id: 'p1-T1', round_number: 2, strokes: '70', to_par: '-1' },
+          { pga_tournament_player_id: 'p2-T1', round_number: 1, strokes: '72', to_par: '1' },
+        ]),
+      } as unknown as SelectQueryBuilder<PgaTournamentPlayerHole>;
+
+      vi.spyOn(holeRepo, 'createQueryBuilder').mockReturnValue(qb);
+
+      const result = await service.getRoundSummariesBatch(['p1-T1', 'p2-T1']);
+
+      expect(result.size).toBe(2);
+      expect(result.get('p1-T1')).toEqual([
+        { round_number: 1, strokes: 66, to_par: -5 },
+        { round_number: 2, strokes: 70, to_par: -1 },
+      ]);
+      expect(result.get('p2-T1')).toEqual([{ round_number: 1, strokes: 72, to_par: 1 }]);
+
+      expect(qb.where).toHaveBeenCalledWith('hole.pga_tournament_player_id IN (:...ids)', {
+        ids: ['p1-T1', 'p2-T1'],
+      });
+    });
+
+    it('returns empty entries for players with no hole data', async () => {
+      const { service, holeRepo } = createMocks();
+
+      const qb = {
+        select: vi.fn().mockReturnThis(),
+        addSelect: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        groupBy: vi.fn().mockReturnThis(),
+        addGroupBy: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        addOrderBy: vi.fn().mockReturnThis(),
+        getRawMany: vi.fn().mockResolvedValue([]),
+      } as unknown as SelectQueryBuilder<PgaTournamentPlayerHole>;
+
+      vi.spyOn(holeRepo, 'createQueryBuilder').mockReturnValue(qb);
+
+      const result = await service.getRoundSummariesBatch(['p1-T1']);
+      expect(result.size).toBe(0);
+      expect(result.get('p1-T1')).toBeUndefined();
+    });
+  });
+
   describe('getRoundSummaries', () => {
     it('returns aggregated round summaries', async () => {
       const { service, holeRepo } = createMocks();

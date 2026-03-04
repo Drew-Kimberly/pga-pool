@@ -1,6 +1,8 @@
 import { ControllerBase } from '../../common/api';
 import { IListParams, List, ListParams, PaginatedCollection } from '../../common/api/list';
 import { UUIDValidationPipe } from '../../common/api/validation';
+import { RoundSummaryDto } from '../../pga-tournament-player-hole/api/pga-tournament-player-hole.dto';
+import { PgaTournamentPlayerHoleService } from '../../pga-tournament-player-hole/lib/pga-tournament-player-hole.service';
 import { PoolScoringFormat } from '../../pool/lib/pool.interface';
 import { PoolTournamentService } from '../../pool-tournament/lib/pool-tournament.service';
 import { PoolTournamentUser } from '../lib/pool-tournament-user.entity';
@@ -14,7 +16,8 @@ import { Controller, NotFoundException } from '@nestjs/common';
 export class PoolTournamentUserController extends ControllerBase {
   constructor(
     private readonly poolTournamentService: PoolTournamentService,
-    private readonly poolTournamentUserService: PoolTournamentUserService
+    private readonly poolTournamentUserService: PoolTournamentUserService,
+    private readonly holeService: PgaTournamentPlayerHoleService
   ) {
     super();
   }
@@ -41,13 +44,39 @@ export class PoolTournamentUserController extends ControllerBase {
       scoreOrder,
       scoreField
     );
-    return { ...result, data: toRankedDtos(result.data, scoreField) };
+
+    const playerIds = extractPlayerIds(result.data);
+    const rawRoundsMap = await this.holeService.getRoundSummariesBatch(playerIds);
+    const roundsMap = toRoundSummaryDtoMap(rawRoundsMap);
+
+    return { ...result, data: toRankedDtos(result.data, scoreField, roundsMap) };
   }
+}
+
+function extractPlayerIds(users: PoolTournamentUser[]): string[] {
+  const ids = new Set<string>();
+  for (const user of users) {
+    for (const pick of user.picks) {
+      ids.add(pick.pool_tournament_player.pga_tournament_player.id);
+    }
+  }
+  return [...ids];
+}
+
+function toRoundSummaryDtoMap(
+  raw: Map<string, { round_number: number; strokes: number; to_par: number }[]>
+): Map<string, RoundSummaryDto[]> {
+  const map = new Map<string, RoundSummaryDto[]>();
+  for (const [id, rounds] of raw) {
+    map.set(id, rounds.map(RoundSummaryDto.from));
+  }
+  return map;
 }
 
 function toRankedDtos(
   users: PoolTournamentUser[],
-  scoreField: 'tournament_score' | 'fedex_cup_points'
+  scoreField: 'tournament_score' | 'fedex_cup_points',
+  roundsMap?: Map<string, RoundSummaryDto[]>
 ): PoolTournamentUserDto[] {
   let previousScore: number | null = null;
   let rank = 0;
@@ -69,5 +98,5 @@ function toRankedDtos(
     return isTied ? `T${r}` : `${r}`;
   });
 
-  return users.map((user, idx) => PoolTournamentUserDto.fromEntity(user, ranks[idx]));
+  return users.map((user, idx) => PoolTournamentUserDto.fromEntity(user, ranks[idx], roundsMap));
 }
