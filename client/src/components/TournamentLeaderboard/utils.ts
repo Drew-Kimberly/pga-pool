@@ -77,13 +77,22 @@ export function getPlayerInitials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-export function getPickStatusLabel(player: PgaTournamentPlayer, timezone: string): string | null {
-  if (isCutOrWithdrawn(player)) return null;
+export interface MetaPair {
+  label: string;
+  value: string;
+}
 
-  if (player.is_round_complete) return 'Round Complete \u2713';
+/**
+ * Returns the "Thru" value for a player:
+ * "F" (round complete), "15" (active), "Starting Soon", "Starts in 2h 15m", or "--"
+ */
+export function getThruValue(player: PgaTournamentPlayer, timezone: string): string {
+  if (isCutOrWithdrawn(player)) return '--';
+
+  if (player.is_round_complete) return 'F';
 
   if (player.active && (player.score_thru ?? 0) > 0) {
-    return `Thru ${player.score_thru}`;
+    return `${player.score_thru}`;
   }
 
   if (player.tee_time) {
@@ -97,42 +106,54 @@ export function getPickStatusLabel(player: PgaTournamentPlayer, timezone: string
       if (Math.abs(duration.hours) > 0) {
         output = `${Math.abs(Math.round(duration.hours))}h ${output}`;
       }
-      return `Starts in ${output}`;
+      return output;
     }
   }
 
-  return 'Not Started';
+  return '--';
 }
 
-export function buildPickMetadata(opts: {
+/**
+ * Pool-level metadata: tier and odds.
+ * Shown next to the player name.
+ */
+export function buildPoolMeta(opts: { tier: number; odds: string | null }): MetaPair[] {
+  const pairs: MetaPair[] = [{ label: 'Tier', value: `${opts.tier}` }];
+
+  if (opts.odds) {
+    pairs.push({ label: 'Odds', value: opts.odds });
+  }
+
+  return pairs;
+}
+
+/**
+ * Tournament/score metadata: position, total, thru.
+ * Shown below the player name.
+ */
+export function buildScoreMeta(opts: {
   player: PgaTournamentPlayer;
-  tier: number;
-  odds: string | null;
   timezone: string;
   isStrokesPool: boolean;
   isCutOrWithdrawn: boolean;
-}): string[] {
-  const { player, tier, odds, timezone, isStrokesPool, isCutOrWithdrawn: isCut } = opts;
-  const parts: string[] = [];
+}): MetaPair[] {
+  const { player, timezone, isStrokesPool, isCutOrWithdrawn: isCut } = opts;
+  const pairs: MetaPair[] = [];
 
   if (!isCut && player.current_position) {
-    parts.push(`Pos ${player.current_position}`);
+    pairs.push({ label: 'Pos', value: player.current_position });
   }
 
   if (!isStrokesPool && !isCut) {
-    parts.push(`To Par ${toScoreString(player.score_total)}`);
+    pairs.push({ label: 'Total', value: toScoreString(player.score_total) });
   }
 
   if (!isCut) {
-    const statusLabel = getPickStatusLabel(player, timezone);
-    if (statusLabel) parts.push(statusLabel);
+    const thru = getThruValue(player, timezone);
+    if (thru !== '--') {
+      pairs.push({ label: 'Thru', value: thru });
+    }
   }
 
-  parts.push(`Tier ${tier}`);
-
-  if (odds) {
-    parts.push(`Odds ${odds}`);
-  }
-
-  return parts;
+  return pairs;
 }
