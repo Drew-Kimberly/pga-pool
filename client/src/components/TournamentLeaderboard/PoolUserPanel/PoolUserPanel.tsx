@@ -1,15 +1,15 @@
-import { AccordionPanel, Box, ResponsiveContext, Text } from 'grommet';
-import { FormCheckmark, FormDown } from 'grommet-icons';
-import { useContext } from 'react';
+import { AccordionPanel, Box, ResponsiveContext, Text } from "grommet";
+import { FormCheckmark, FormDown } from "grommet-icons";
+import { useContext } from "react";
 
-import { ParentComponentProps } from '../../types';
-import { PlayerHeadshot } from '../PlayerHeadshot';
-import { getScoreColor, toFedexCupPointsString, toScoreString } from '../utils';
+import { ParentComponentProps } from "../../types";
+import { PlayerHeadshot } from "../PlayerHeadshot";
+import { getScoreColor, toFedexCupPointsString, toScoreString } from "../utils";
 
-import { getRoundStatus } from './getRoundStatus';
-import { StartDuration } from './StartDuration';
+import { getRoundStatus } from "./getRoundStatus";
+import { StartDuration } from "./StartDuration";
 
-import { PgaTournament, PoolTournamentUser } from '@drewkimberly/pga-pool-api';
+import { PgaTournament, PoolTournamentUser } from "@drewkimberly/pga-pool-api";
 
 export interface PoolUserPanelProps extends ParentComponentProps {
   user: PoolTournamentUser;
@@ -19,12 +19,22 @@ export interface PoolUserPanelProps extends ParentComponentProps {
   rank: string;
 }
 
-function CompactRoundStatus({ roundStatus }: { roundStatus: ReturnType<typeof getRoundStatus> }) {
-  if (roundStatus.status === 'not_started') {
-    return <StartDuration time={roundStatus.teetimes[0] ?? null} size="xsmall" color="text-weak" />;
+function CompactRoundStatus({
+  roundStatus,
+}: {
+  roundStatus: ReturnType<typeof getRoundStatus>;
+}) {
+  if (roundStatus.status === "not_started") {
+    return (
+      <StartDuration
+        time={roundStatus.teetimes[0] ?? null}
+        size="xsmall"
+        color="text-weak"
+      />
+    );
   }
 
-  if (roundStatus.status === 'in_progress') {
+  if (roundStatus.status === "in_progress") {
     return (
       <Text size="xsmall" color="text-weak">
         {roundStatus.percentComplete}%
@@ -42,13 +52,20 @@ function CompactRoundStatus({ roundStatus }: { roundStatus: ReturnType<typeof ge
   );
 }
 
-function HeadshotChips({ user, size }: { user: PoolTournamentUser; size: number }) {
+function HeadshotChips({
+  user,
+  size,
+}: {
+  user: PoolTournamentUser;
+  size: number;
+}) {
   return (
     <Box direction="row" gap="xsmall" align="center" justify="center">
       {user.picks.map((pick) => {
         const player = pick.pga_tournament_player;
-        const isCut = player.current_position === 'CUT' || player.status === 'cut';
-        const isWd = player.withdrawn || player.status === 'wd';
+        const isCut =
+          player.current_position === "CUT" || player.status === "cut";
+        const isWd = player.withdrawn || player.status === "wd";
         const hasStarted =
           isCut ||
           isWd ||
@@ -81,15 +98,15 @@ function _PoolUserPanel({
   scoringFormat,
   isOpen,
   rank,
-}: Omit<PoolUserPanelProps, 'children'>) {
+}: Omit<PoolUserPanelProps, "children">) {
   const responsive = useContext(ResponsiveContext);
-  const isDesktop = responsive !== 'small';
+  const isDesktop = responsive !== "small";
   const roundStatus = getRoundStatus(
     user.picks.map((pick) => pick.pga_tournament_player),
-    pgaTournament
+    pgaTournament,
   );
 
-  const isStrokes = scoringFormat === 'strokes';
+  const isStrokes = scoringFormat === "strokes";
   const scoreDisplay = isStrokes
     ? toScoreString(user.score)
     : toFedexCupPointsString(user.fedex_cup_points);
@@ -100,11 +117,18 @@ function _PoolUserPanel({
       <Box
         direction="row"
         align="center"
-        pad={{ vertical: 'small', horizontal: 'small' }}
+        pad={{ vertical: "small", horizontal: "small" }}
         gap="small"
       >
         {/* Left: Rank + Name/Status — fixed width for column alignment */}
-        <Box direction="row" align="center" gap="small" width="200px" flex={false} style={{ minWidth: 0 }}>
+        <Box
+          direction="row"
+          align="center"
+          gap="small"
+          width="200px"
+          flex={false}
+          style={{ minWidth: 0 }}
+        >
           <Box
             width="28px"
             height="28px"
@@ -138,9 +162,9 @@ function _PoolUserPanel({
             size="xlarge"
             color={scoreColor}
             style={{
-              fontFamily: 'var(--font-display)',
-              minWidth: '80px',
-              textAlign: 'right',
+              fontFamily: "var(--font-display)",
+              minWidth: "80px",
+              textAlign: "right",
             }}
           >
             {scoreDisplay}
@@ -148,8 +172,8 @@ function _PoolUserPanel({
           <Box
             flex={false}
             style={{
-              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s ease',
+              transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.2s ease",
             }}
           >
             <FormDown size="medium" color="text-weak" />
@@ -161,7 +185,7 @@ function _PoolUserPanel({
 
   // Mobile layout: stacked
   return (
-    <Box pad={{ vertical: 'small', horizontal: 'small' }}>
+    <Box pad={{ vertical: "small", horizontal: "small" }}>
       {/* Line 1: Rank + Nickname + Score + Chevron */}
       <Box direction="row" align="center" gap="small">
         <Box
@@ -190,8 +214,8 @@ function _PoolUserPanel({
           size="xlarge"
           color={scoreColor}
           style={{
-            fontFamily: 'var(--font-display)',
-            minWidth: 'fit-content',
+            fontFamily: "var(--font-display)",
+            minWidth: "fit-content",
           }}
         >
           {scoreDisplay}
@@ -200,18 +224,21 @@ function _PoolUserPanel({
         <Box
           flex={false}
           style={{
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease',
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.2s ease",
           }}
         >
           <FormDown size="medium" color="text-weak" />
         </Box>
       </Box>
-
     </Box>
   );
 }
 
 export function PoolUserPanel({ children, ...rest }: PoolUserPanelProps) {
-  return <AccordionPanel header={<_PoolUserPanel {...rest} />}>{children}</AccordionPanel>;
+  return (
+    <AccordionPanel header={<_PoolUserPanel {...rest} />}>
+      {children}
+    </AccordionPanel>
+  );
 }
