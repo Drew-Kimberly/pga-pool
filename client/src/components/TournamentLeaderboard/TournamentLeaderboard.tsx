@@ -35,7 +35,7 @@ function MetaLabel({ pair }: { pair: MetaPair }) {
       >
         {pair.label}
       </Text>
-      <Text size="xsmall" weight="bold">
+      <Text size="xsmall" weight="bold" color={pair.color}>
         {pair.value}
       </Text>
     </Box>
