@@ -101,8 +101,8 @@ function _PoolUserPanel({
         pad={{ vertical: 'small', horizontal: 'small' }}
         gap="small"
       >
-        {/* Left: Rank + Name/Status */}
-        <Box direction="row" align="center" gap="small" style={{ minWidth: 0, flex: '0 1 auto' }}>
+        {/* Left: Rank + Name/Status — fixed width for column alignment */}
+        <Box direction="row" align="center" gap="small" width="200px" flex={false} style={{ minWidth: 0 }}>
           <Box
             width="28px"
             height="28px"
@@ -137,7 +137,8 @@ function _PoolUserPanel({
             color={scoreColor}
             style={{
               fontFamily: 'var(--font-display)',
-              minWidth: 'fit-content',
+              minWidth: '80px',
+              textAlign: 'right',
             }}
           >
             {scoreDisplay}
