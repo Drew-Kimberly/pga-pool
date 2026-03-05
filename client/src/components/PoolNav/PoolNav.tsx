@@ -28,7 +28,7 @@ export function PoolNav({ model, mobile }: PoolNavProps) {
   if (model.showLeaderboard && model.leaderboardPath) {
     items.push({
       key: 'leaderboard',
-      label: 'Live',
+      label: 'Leaderboard',
       href: model.leaderboardPath,
     });
   }
