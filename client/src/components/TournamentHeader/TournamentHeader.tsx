@@ -87,7 +87,6 @@ export function TournamentHeader({ tournament, round, scoringFormat }: Tournamen
 interface ResolvedStatus {
   label: string;
   variant: 'live' | 'official' | 'thisweek' | 'upcoming' | 'pending';
-  dot?: boolean;
 }
 
 function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatus {
@@ -102,7 +101,6 @@ function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatu
     return {
       label: [roundLabel, suffix].filter(Boolean).join(' \u00B7 '),
       variant: 'live',
-      dot: isRoundActive,
     };
   }
 
@@ -175,7 +173,6 @@ function InlineStatusBadge({ status }: InlineStatusBadgeProps) {
         borderStyle: 'solid',
       }}
     >
-      {status.dot && <PulsingDot />}
       <Text
         size="xsmall"
         weight="bold"
@@ -221,20 +218,5 @@ function ScoringFormatBadge({ format }: { format: string }) {
         {label.toUpperCase()}
       </Text>
     </Box>
-  );
-}
-
-function PulsingDot() {
-  return (
-    <Box
-      flex={false}
-      width="6px"
-      height="6px"
-      round="full"
-      style={{
-        backgroundColor: 'var(--color-status-live)',
-        animation: 'pulse-live 2s ease-in-out infinite',
-      }}
-    />
   );
 }

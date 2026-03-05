@@ -1,5 +1,4 @@
 import { Box, Button, Text } from 'grommet';
-import React from 'react';
 import { useNavigate } from 'react-router';
 
 import { useThemeContext } from '../../contexts/ThemeContext';
@@ -15,7 +14,6 @@ interface PoolNavItem {
   key: 'leaderboard' | 'tournaments' | 'standings';
   label: string;
   href: string;
-  icon?: React.ReactNode;
 }
 
 export function PoolNav({ model, mobile }: PoolNavProps) {
@@ -32,7 +30,6 @@ export function PoolNav({ model, mobile }: PoolNavProps) {
       key: 'leaderboard',
       label: 'Live',
       href: model.leaderboardPath,
-      icon: <LiveDot />,
     });
   }
 
@@ -66,7 +63,6 @@ export function PoolNav({ model, mobile }: PoolNavProps) {
                   : undefined
               }
             >
-              {item.icon}
               <Text
                 size={mobile ? 'small' : 'medium'}
                 weight={active ? 'bold' : undefined}
@@ -122,20 +118,5 @@ export function PoolNav({ model, mobile }: PoolNavProps) {
         {navItems}
       </Box>
     </>
-  );
-}
-
-function LiveDot() {
-  return (
-    <Box
-      flex={false}
-      width="8px"
-      height="8px"
-      round="full"
-      style={{
-        backgroundColor: 'var(--color-status-live)',
-        animation: 'pulse-live 2s ease-in-out infinite',
-      }}
-    />
   );
 }
