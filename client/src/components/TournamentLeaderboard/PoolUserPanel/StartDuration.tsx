@@ -15,13 +15,13 @@ export function StartDuration({ time, ...textProps }: StartDurationProps) {
   let output = '';
 
   if (duration.minutes <= 0) {
-    output = 'Starting Soon';
+    output = 'Teeing off';
   } else {
     output = `${duration.minutes}m`;
     if (duration.hours > 0) {
       output = `${duration.hours}h ${output}`;
     }
-    output = `Starts in ${output}`;
+    output = `Tees off in ${output}`;
   }
 
   return <Text {...textProps}>{output}</Text>;

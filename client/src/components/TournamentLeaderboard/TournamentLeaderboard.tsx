@@ -157,6 +157,7 @@ export function TournamentLeaderboard() {
                   timezone,
                   isStrokesPool,
                   isCutOrWithdrawn: isCut,
+                  currentRound: tournament.pga_tournament.current_round,
                 });
 
                 return (
