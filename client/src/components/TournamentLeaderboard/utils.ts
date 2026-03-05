@@ -84,6 +84,36 @@ export interface MetaPair {
 }
 
 /**
+ * Returns whether a player has started their current round.
+ */
+export function hasPlayerStarted(player: PgaTournamentPlayer): boolean {
+  if (isCutOrWithdrawn(player)) return true;
+  return player.is_round_complete || player.active || (player.score_thru ?? 0) > 0;
+}
+
+/**
+ * Returns a formatted "Tees off in" duration string for a player's tee time.
+ * Returns null if no tee time is available.
+ */
+export function getTeeOffValue(player: PgaTournamentPlayer, timezone: string): string | null {
+  if (!player.tee_time) return null;
+
+  const parsed = teeTimeToDate(player.tee_time, timezone);
+  if (!parsed) return null;
+
+  const duration = parsed.diffNow().rescale();
+  if (duration.minutes <= 0 && duration.hours <= 0) {
+    return 'Teeing off';
+  }
+
+  let output = `${Math.abs(Math.round(duration.minutes))}m`;
+  if (Math.abs(duration.hours) > 0) {
+    output = `${Math.abs(Math.round(duration.hours))}h ${output}`;
+  }
+  return output;
+}
+
+/**
  * Returns the "Thru" value for a player:
  * "F" (round complete), "15" (active), "Starting Soon", "Starts in 2h 15m", or "--"
  */
@@ -96,20 +126,8 @@ export function getThruValue(player: PgaTournamentPlayer, timezone: string): str
     return `${player.score_thru}`;
   }
 
-  if (player.tee_time) {
-    const parsed = teeTimeToDate(player.tee_time, timezone);
-    if (parsed) {
-      const duration = parsed.diffNow().rescale();
-      if (duration.minutes <= 0 && duration.hours <= 0) {
-        return 'Starting Soon';
-      }
-      let output = `${Math.abs(Math.round(duration.minutes))}m`;
-      if (Math.abs(duration.hours) > 0) {
-        output = `${Math.abs(Math.round(duration.hours))}h ${output}`;
-      }
-      return output;
-    }
-  }
+  const teeOff = getTeeOffValue(player, timezone);
+  if (teeOff) return teeOff;
 
   return '--';
 }
@@ -131,15 +149,35 @@ export function buildPoolMeta(opts: { tier: number; odds: string | null }): Meta
 /**
  * Tournament/score metadata: position, total, thru.
  * Shown below the player name.
+ *
+ * Round-aware behavior for players who haven't started:
+ * - Round 1: hide Pos, Total, and Thru; show "Tees off in" only
+ * - Rounds 2+: show Pos/Total but replace Thru with "Tees off in"
  */
 export function buildScoreMeta(opts: {
   player: PgaTournamentPlayer;
   timezone: string;
   isStrokesPool: boolean;
   isCutOrWithdrawn: boolean;
+  currentRound: number | null;
 }): MetaPair[] {
-  const { player, timezone, isStrokesPool, isCutOrWithdrawn: isCut } = opts;
+  const { player, timezone, isStrokesPool, isCutOrWithdrawn: isCut, currentRound } = opts;
   const pairs: MetaPair[] = [];
+  const started = hasPlayerStarted(player);
+  const isRound1 = (currentRound ?? 1) === 1;
+
+  // For round 1 players who haven't started, only show "Tees off in"
+  if (!started && isRound1) {
+    const teeOff = getTeeOffValue(player, timezone);
+    if (teeOff) {
+      pairs.push(
+        teeOff === 'Teeing off'
+          ? { label: 'Teeing off', value: '' }
+          : { label: 'Tees off in', value: teeOff }
+      );
+    }
+    return pairs;
+  }
 
   if (!isCut && player.current_position) {
     pairs.push({ label: 'Pos', value: player.current_position });
@@ -153,10 +191,22 @@ export function buildScoreMeta(opts: {
     });
   }
 
+  // For rounds 2+, not-started players get "Tees off in" instead of "Thru"
   if (!isCut) {
-    const thru = getThruValue(player, timezone);
-    if (thru !== '--') {
-      pairs.push({ label: 'Thru', value: thru });
+    if (!started) {
+      const teeOff = getTeeOffValue(player, timezone);
+      if (teeOff) {
+        pairs.push(
+        teeOff === 'Teeing off'
+          ? { label: 'Teeing off', value: '' }
+          : { label: 'Tees off in', value: teeOff }
+      );
+      }
+    } else {
+      const thru = getThruValue(player, timezone);
+      if (thru !== '--') {
+        pairs.push({ label: 'Thru', value: thru });
+      }
     }
   }
 
