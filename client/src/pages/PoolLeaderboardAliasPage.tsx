@@ -9,6 +9,8 @@ import { resolveDefaultTournament } from '../components/TournamentLeaderboard/re
 
 import { withPageLayout } from './withPageLayout';
 
+import { PgaTournamentTournamentStatusEnum } from '@drewkimberly/pga-pool-api';
+
 function _PoolLeaderboardAliasPage() {
   const params = useParams();
   const poolId = params.poolId;
@@ -42,7 +44,16 @@ function _PoolLeaderboardAliasPage() {
           return;
         }
 
-        setRedirectPath(`/pools/${poolId}/tournaments/${tournament.id}`);
+        const status = tournament.pga_tournament.tournament_status;
+        const subTab =
+          status === PgaTournamentTournamentStatusEnum.InProgress
+            ? 'leaderboard'
+            : status === PgaTournamentTournamentStatusEnum.Completed
+              ? 'results'
+              : null;
+
+        const basePath = `/pools/${poolId}/tournaments/${tournament.id}`;
+        setRedirectPath(subTab ? `${basePath}/${subTab}` : basePath);
       } catch (e) {
         if (!isMounted) {
           return;
