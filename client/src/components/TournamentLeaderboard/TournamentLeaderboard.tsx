@@ -1,4 +1,4 @@
-import { Accordion, Anchor, Box, Notification, Text } from 'grommet';
+import { Accordion, Box, Notification, Text } from 'grommet';
 import { CircleInformation } from 'grommet-icons';
 import React from 'react';
 
@@ -107,9 +107,8 @@ export function TournamentLeaderboard() {
       <Box height="medium" round="small" align="center" justify="center">
         <CircleInformation size="large" />
         <Text size="large" textAlign="center" margin="small">
-          This tournament is not live yet. Picks have not been submitted.
+          Picks have not been submitted yet. Check back soon!
         </Text>
-        <Anchor href="/pga-tournaments/weekly-field" label="View the weekly field" />
       </Box>
     );
   }
