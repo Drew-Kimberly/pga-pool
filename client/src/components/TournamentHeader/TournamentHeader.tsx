@@ -10,10 +10,9 @@ import {
 export interface TournamentHeaderProps {
   tournament: PgaTournament;
   round?: number;
-  scoringFormat?: string;
 }
 
-export function TournamentHeader({ tournament, round, scoringFormat }: TournamentHeaderProps) {
+export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
   const size = React.useContext(ResponsiveContext);
   const isDesktop = size !== 'small';
   const circleSize = isDesktop ? '116px' : '90px';
@@ -73,10 +72,9 @@ export function TournamentHeader({ tournament, round, scoringFormat }: Tournamen
             {tournament.date.display}
           </Text>
 
-          {/* Status + scoring format badges */}
-          <Box direction="row" gap="xsmall" align="center" wrap>
+          {/* Status badge */}
+          <Box direction="row">
             <InlineStatusBadge status={status} />
-            {scoringFormat && <ScoringFormatBadge format={scoringFormat} />}
           </Box>
         </Box>
       </Box>
@@ -184,39 +182,3 @@ function InlineStatusBadge({ status }: InlineStatusBadgeProps) {
   );
 }
 
-const SCORING_FORMAT_LABELS: Record<string, string> = {
-  strokes: 'Strokes',
-  fedex_cup_points: 'FedEx Cup Pts',
-};
-
-function ScoringFormatBadge({ format }: { format: string }) {
-  const label = SCORING_FORMAT_LABELS[format] ?? format;
-
-  return (
-    <Box
-      direction="row"
-      align="center"
-      pad={{ horizontal: 'xsmall', vertical: 'xxsmall' }}
-      round="xsmall"
-      flex={false}
-      style={{
-        backgroundColor: 'var(--color-status-upcoming-bg)',
-        borderColor: 'var(--color-status-upcoming)',
-        borderWidth: '1px',
-        borderStyle: 'solid',
-      }}
-    >
-      <Text
-        size="xsmall"
-        weight="bold"
-        style={{
-          color: 'var(--color-status-upcoming)',
-          letterSpacing: '0.04em',
-          fontSize: '0.75rem',
-        }}
-      >
-        {label.toUpperCase()}
-      </Text>
-    </Box>
-  );
-}
