@@ -27,7 +27,7 @@ function CompactRoundStatus({ roundStatus }: { roundStatus: ReturnType<typeof ge
   if (roundStatus.status === 'in_progress') {
     return (
       <Text size="xsmall" color="text-weak">
-        {roundStatus.percentComplete}%
+        Round {roundStatus.percentComplete}% complete
       </Text>
     );
   }
