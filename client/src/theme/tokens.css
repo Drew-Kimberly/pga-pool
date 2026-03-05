@@ -53,17 +53,6 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
 }
 
-/* ── Animations ───────────────────────────────────────────── */
-@keyframes pulse-live {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
-}
-
 /* ── Dark Mode Overrides ──────────────────────────────────── */
 [data-theme='dark'] {
   --color-eagle: #facc15;
