@@ -10,10 +10,9 @@ export type PoolNavSection = 'leaderboard' | 'tournaments' | 'standings';
 export interface PoolNavModel {
   poolId: string;
   activeSection: PoolNavSection;
-  leaderboardPath: string | null;
+  leaderboardPath: string;
   tournamentsPath: string;
   standingsPath: string;
-  showLeaderboard: boolean;
 }
 
 /**
@@ -127,10 +126,9 @@ export function usePoolNavModel(): PoolNavModel | null {
 
   if (!resolved) return null;
 
-  const showLeaderboard = liveTournament !== null;
   const leaderboardPath = liveTournament
     ? `/pools/${resolved.poolId}/tournaments/${liveTournament.id}/leaderboard`
-    : null;
+    : `/pools/${resolved.poolId}/leaderboard`;
 
   return {
     poolId: resolved.poolId,
@@ -138,6 +136,5 @@ export function usePoolNavModel(): PoolNavModel | null {
     leaderboardPath,
     tournamentsPath: `/pools/${resolved.poolId}/tournaments`,
     standingsPath: `/pools/${resolved.poolId}/standings`,
-    showLeaderboard,
   };
 }

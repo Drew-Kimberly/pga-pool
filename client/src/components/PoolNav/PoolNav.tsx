@@ -23,18 +23,11 @@ export function PoolNav({ model, mobile }: PoolNavProps) {
   const activeBorder = darkMode ? '#8eb3ff' : '#273344';
   const inactiveTextColor = darkMode ? 'light-3' : undefined;
 
-  const items: PoolNavItem[] = [];
-
-  if (model.showLeaderboard && model.leaderboardPath) {
-    items.push({
-      key: 'leaderboard',
-      label: 'Leaderboard',
-      href: model.leaderboardPath,
-    });
-  }
-
-  items.push({ key: 'tournaments', label: 'Tournaments', href: model.tournamentsPath });
-  items.push({ key: 'standings', label: 'Standings', href: model.standingsPath });
+  const items: PoolNavItem[] = [
+    { key: 'leaderboard', label: 'Leaderboard', href: model.leaderboardPath },
+    { key: 'tournaments', label: 'Tournaments', href: model.tournamentsPath },
+    { key: 'standings', label: 'Standings', href: model.standingsPath },
+  ];
 
   const navItems = items.map((item) => {
     const active = model.activeSection === item.key;
