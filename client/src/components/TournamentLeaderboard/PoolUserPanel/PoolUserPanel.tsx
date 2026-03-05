@@ -185,11 +185,16 @@ function _PoolUserPanel({
           </Text>
         </Box>
 
-        <Box style={{ flex: 1, minWidth: 0 }}>
+        <Box style={{ minWidth: 0 }} flex={false}>
           <Text weight="bold" size="medium" truncate>
             {user.user.nickname}
           </Text>
           <CompactRoundStatus roundStatus={roundStatus} />
+        </Box>
+
+        {/* Headshot chips — fill remaining space */}
+        <Box flex align="center" justify="center">
+          <HeadshotChips user={user} size={28} />
         </Box>
 
         <Text
