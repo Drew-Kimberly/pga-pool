@@ -711,6 +711,7 @@ export const PgaTournamentRoundStatusEnum = {
     Upcoming: 'UPCOMING',
     GroupingsOfficial: 'GROUPINGS_OFFICIAL',
     InProgress: 'IN_PROGRESS',
+    Suspended: 'SUSPENDED',
     Complete: 'COMPLETE',
     Official: 'OFFICIAL'
 } as const;

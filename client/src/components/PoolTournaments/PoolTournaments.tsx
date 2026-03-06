@@ -706,7 +706,7 @@ function toCurrentStatus(tournament: PoolTournament): { label: string; variant: 
 
   return tournament.scores_are_official
     ? { label: 'Official', variant: 'official' }
-    : { label: 'In Progress', variant: 'live' };
+    : { label: 'Pending', variant: 'pending' };
 }
 
 function toFutureStatus(tournament: PoolTournament): { label: string; variant: StatusVariant } {

@@ -197,10 +197,10 @@ export function buildScoreMeta(opts: {
       const teeOff = getTeeOffValue(player, timezone);
       if (teeOff) {
         pairs.push(
-        teeOff === 'Teeing off'
-          ? { label: 'Teeing off', value: '' }
-          : { label: 'Tees off in', value: teeOff }
-      );
+          teeOff === 'Teeing off'
+            ? { label: 'Teeing off', value: '' }
+            : { label: 'Tees off in', value: teeOff }
+        );
       }
     } else {
       const thru = getThruValue(player, timezone);
