@@ -1,6 +1,7 @@
 import React from 'react';
 import { matchPath, useLocation } from 'react-router';
 
+import { isInPostTournamentWindow } from '../../utils/postTournamentWindow';
 import { resolveDefaultTournament } from '../TournamentLeaderboard/resolveTournament';
 
 import { PgaTournamentTournamentStatusEnum, PoolTournament } from '@drewkimberly/pga-pool-api';
@@ -35,6 +36,13 @@ function isTournamentLive(tournament: PoolTournament): boolean {
       String(now.getDate()).padStart(2, '0'),
     ].join('-');
     return todayStr >= startDateStr;
+  }
+
+  if (
+    status === PgaTournamentTournamentStatusEnum.Completed &&
+    isInPostTournamentWindow(tournament.pga_tournament.date.end)
+  ) {
+    return true;
   }
 
   return false;

@@ -1,4 +1,5 @@
 import { pgaPoolApi } from '../../api/pga-pool';
+import { isInPostTournamentWindow } from '../../utils/postTournamentWindow';
 
 import {
   PgaTournamentTournamentStatusEnum,
@@ -49,6 +50,15 @@ export function resolveDefaultTournamentFromList(
   );
   if (inProgress) {
     return inProgress;
+  }
+
+  const completedInWindow = tournaments.find(
+    (entry) =>
+      entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed &&
+      isInPostTournamentWindow(entry.pga_tournament.date.end)
+  );
+  if (completedInWindow) {
+    return completedInWindow;
   }
 
   const upcoming = tournaments.find(
