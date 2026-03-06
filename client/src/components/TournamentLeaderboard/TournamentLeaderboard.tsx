@@ -21,7 +21,11 @@ import {
   toScoreString,
 } from './utils';
 
-import { PoolTournamentUser, PoolTournamentUserPick } from '@drewkimberly/pga-pool-api';
+import {
+  PgaTournamentTournamentStatusEnum,
+  PoolTournamentUser,
+  PoolTournamentUserPick,
+} from '@drewkimberly/pga-pool-api';
 
 const USERS_POLL_INTERVAL = 30 * 1000; // 30s
 
@@ -54,6 +58,8 @@ export function TournamentLeaderboard() {
   const scoringFormat = tournament.pool?.settings?.scoring_format ?? 'strokes';
   const isStrokesPool = scoringFormat === 'strokes';
   const timezone = tournament.pga_tournament.date.timezone;
+  const isCompleted =
+    tournament.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed;
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -237,7 +243,13 @@ export function TournamentLeaderboard() {
         ))}
       </Accordion>
 
-      {selectedPick && <PlayerPanel pick={selectedPick} onClose={() => setSelectedPick(null)} />}
+      {selectedPick && (
+        <PlayerPanel
+          pick={selectedPick}
+          onClose={() => setSelectedPick(null)}
+          isCompleted={isCompleted}
+        />
+      )}
     </>
   );
 }

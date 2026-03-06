@@ -2,6 +2,7 @@ import { Box, Text } from 'grommet';
 import { CSSProperties } from 'react';
 
 import { Spinner } from '../../Spinner';
+import { toScoreString } from '../utils';
 
 import { Scorecard, ScorecardHole, ScorecardHoleStatusEnum } from '@drewkimberly/pga-pool-api';
 
@@ -23,13 +24,13 @@ function getHoleScoreColor(status: ScorecardHoleStatusEnum): string | undefined 
 function getHoleScoreBg(status: ScorecardHoleStatusEnum): string | undefined {
   switch (status) {
     case ScorecardHoleStatusEnum.Eagle:
-      return 'rgba(212, 160, 23, 0.12)';
+      return 'var(--color-eagle-bg)';
     case ScorecardHoleStatusEnum.Birdie:
-      return 'rgba(185, 28, 28, 0.08)';
+      return 'var(--color-birdie-bg)';
     case ScorecardHoleStatusEnum.Bogey:
-      return 'rgba(37, 99, 235, 0.08)';
+      return 'var(--color-bogey-bg)';
     case ScorecardHoleStatusEnum.DoubleBogey:
-      return 'rgba(29, 78, 216, 0.12)';
+      return 'var(--color-double-bogey-bg)';
     default:
       return undefined;
   }
@@ -67,7 +68,13 @@ function NineHoleGrid({
 }) {
   return (
     <Box style={{ overflowX: 'auto' }}>
-      <table style={{ borderCollapse: 'collapse', width: '100%', tableLayout: 'fixed' }}>
+      <table
+        style={{
+          borderCollapse: 'collapse',
+          width: '100%',
+          tableLayout: holes.length < 9 ? 'auto' : 'fixed',
+        }}
+      >
         <thead>
           <tr>
             <th style={labelStyle}>
@@ -114,7 +121,7 @@ function NineHoleGrid({
           <tr>
             <td style={labelStyle}>
               <Text size="xsmall" weight="bold">
-                SCR
+                SCORE
               </Text>
             </td>
             {holes.map((h) => {
@@ -207,13 +214,7 @@ export function PlayerPanelScorecard({ scorecard, isLoading, error }: PlayerPane
       {front9.length > 0 && back9.length > 0 && (
         <Box direction="row" justify="end" pad={{ horizontal: 'small' }}>
           <Text size="small" weight="bold" style={{ fontFamily: 'var(--font-display)' }}>
-            Total: {scorecard.strokes} (
-            {scorecard.to_par === 0
-              ? 'E'
-              : scorecard.to_par > 0
-                ? `+${scorecard.to_par}`
-                : scorecard.to_par}
-            )
+            Total: {scorecard.strokes} ({toScoreString(scorecard.to_par)})
           </Text>
         </Box>
       )}
