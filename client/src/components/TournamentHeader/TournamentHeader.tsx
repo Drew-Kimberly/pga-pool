@@ -10,14 +10,15 @@ import {
 export interface TournamentHeaderProps {
   tournament: PgaTournament;
   round?: number;
+  scoresAreOfficial?: boolean;
 }
 
-export function TournamentHeader({ tournament, round }: TournamentHeaderProps) {
+export function TournamentHeader({ tournament, round, scoresAreOfficial }: TournamentHeaderProps) {
   const size = React.useContext(ResponsiveContext);
   const isDesktop = size !== 'small';
   const circleSize = isDesktop ? '116px' : '90px';
   const imgSize = isDesktop ? '110px' : '78px';
-  const status = resolveStatus(tournament, round);
+  const status = resolveStatus(tournament, round, scoresAreOfficial);
 
   const locationParts: string[] = [];
   if (tournament.course_name) locationParts.push(tournament.course_name);
@@ -87,14 +88,33 @@ interface ResolvedStatus {
   variant: 'live' | 'official' | 'thisweek' | 'upcoming' | 'pending';
 }
 
-function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatus {
+function resolveRoundSuffix(roundStatus: PgaTournament['round_status']): string {
+  switch (roundStatus) {
+    case PgaTournamentRoundStatusEnum.InProgress:
+      return 'LIVE';
+    case PgaTournamentRoundStatusEnum.Suspended:
+      return 'SUSPENDED';
+    case PgaTournamentRoundStatusEnum.Complete:
+    case PgaTournamentRoundStatusEnum.Official:
+      return 'COMPLETE';
+    case PgaTournamentRoundStatusEnum.Upcoming:
+    case PgaTournamentRoundStatusEnum.GroupingsOfficial:
+    default:
+      return 'STARTING SOON';
+  }
+}
+
+function resolveStatus(
+  tournament: PgaTournament,
+  round?: number,
+  scoresAreOfficial?: boolean
+): ResolvedStatus {
   const { tournament_status, round_status, current_round } = tournament;
   const displayRound = round ?? current_round;
 
   if (tournament_status === PgaTournamentTournamentStatusEnum.InProgress) {
-    const isRoundActive = round_status === PgaTournamentRoundStatusEnum.InProgress;
-    const roundLabel = displayRound ? `Round ${displayRound}` : '';
-    const suffix = isRoundActive ? 'Live' : 'Suspended';
+    const roundLabel = displayRound ? `ROUND ${displayRound}` : '';
+    const suffix = resolveRoundSuffix(round_status);
 
     return {
       label: [roundLabel, suffix].filter(Boolean).join(' \u00B7 '),
@@ -103,7 +123,10 @@ function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatu
   }
 
   if (tournament_status === PgaTournamentTournamentStatusEnum.Completed) {
-    return { label: 'Official', variant: 'official' };
+    if (scoresAreOfficial === false) {
+      return { label: 'Scores Pending', variant: 'pending' };
+    }
+    return { label: 'OFFICIAL', variant: 'official' };
   }
 
   // NOT_STARTED: determine if this is "this week" or further out
@@ -112,10 +135,10 @@ function resolveStatus(tournament: PgaTournament, round?: number): ResolvedStatu
   const daysUntilStart = (startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
 
   if (daysUntilStart <= 7) {
-    return { label: 'This Week', variant: 'thisweek' };
+    return { label: 'THIS WEEK', variant: 'thisweek' };
   }
 
-  return { label: 'Upcoming', variant: 'upcoming' };
+  return { label: 'UPCOMING', variant: 'upcoming' };
 }
 
 const BADGE_STYLES: Record<
@@ -176,7 +199,7 @@ function InlineStatusBadge({ status }: InlineStatusBadgeProps) {
         weight="bold"
         style={{ color: styles.textColor, letterSpacing: '0.04em', fontSize: '0.75rem' }}
       >
-        {status.label.toUpperCase()}
+        {status.label}
       </Text>
     </Box>
   );

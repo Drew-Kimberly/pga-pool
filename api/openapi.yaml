@@ -877,6 +877,7 @@ components:
             - UPCOMING
             - GROUPINGS_OFFICIAL
             - IN_PROGRESS
+            - SUSPENDED
             - COMPLETE
             - OFFICIAL
         current_round:
