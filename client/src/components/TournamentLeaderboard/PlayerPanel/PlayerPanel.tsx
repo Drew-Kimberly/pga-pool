@@ -78,7 +78,7 @@ function RoundTab({
         R{roundNumber}
       </Text>
       {hasSummary ? (
-        <Text weight="bold" color={scoreColor} style={{ fontFamily: 'var(--font-display)' }}>
+        <Text weight="bold" style={{ fontFamily: 'var(--font-display)' }}>
           {roundSummary.strokes}
         </Text>
       ) : (
@@ -196,7 +196,6 @@ export function PlayerPanel({ pick, onClose, isCompleted = false }: PlayerPanelP
     }
   }, [isDragging, dragY, handleClose]);
 
-  const scoreColor = getScoreColor(player.score_total);
   const odds = pick.odds;
 
   const roundsMap = new Map<number, RoundSummary>();
@@ -345,6 +344,23 @@ export function PlayerPanel({ pick, onClose, isCompleted = false }: PlayerPanelP
                     </Text>
                   )}
                 </Box>
+                {odds && (
+                  <Box direction="row" align="center" margin={{ top: '2px' }}>
+                    <Box
+                      round="large"
+                      pad={{ horizontal: 'xsmall', vertical: '1px' }}
+                      flex={false}
+                      style={{
+                        backgroundColor: 'var(--color-status-upcoming-bg)',
+                        border: '1px solid var(--color-tab-border)',
+                      }}
+                    >
+                      <Text size="xsmall" weight="bold" style={{ lineHeight: 1.3 }}>
+                        {odds}
+                      </Text>
+                    </Box>
+                  </Box>
+                )}
               </Box>
             </Box>
 
@@ -359,7 +375,7 @@ export function PlayerPanel({ pick, onClose, isCompleted = false }: PlayerPanelP
               }}
             >
               <StatBox label="Pos" value={player.current_position ?? '--'} />
-              <StatBox label="Total" value={toScoreString(player.score_total)} color={scoreColor} />
+              <StatBox label="Total" value={toScoreString(player.score_total)} />
               {!isCompleted && todayRound && (
                 <StatBox
                   label="Today"
@@ -373,7 +389,6 @@ export function PlayerPanel({ pick, onClose, isCompleted = false }: PlayerPanelP
                   value={player.is_round_complete ? 'F' : (player.score_thru ?? '--')}
                 />
               )}
-              {odds && <StatBox label="Odds" value={odds} />}
             </Box>
           </Box>
 

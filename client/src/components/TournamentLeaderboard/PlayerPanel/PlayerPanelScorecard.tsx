@@ -21,16 +21,65 @@ function getHoleScoreColor(status: ScorecardHoleStatusEnum): string | undefined 
   }
 }
 
-function getHoleScoreBg(status: ScorecardHoleStatusEnum): string | undefined {
+/**
+ * Returns CSS for idiomatic golf scorecard symbols:
+ * - Birdie: single circle
+ * - Eagle (or better): double circle
+ * - Bogey: single square
+ * - Double bogey (or worse): double square
+ */
+function getScoreSymbolStyle(status: ScorecardHoleStatusEnum): CSSProperties | undefined {
+  const birdieColor = 'var(--color-birdie)';
+  const bogeyColor = 'var(--color-bogey)';
+  const eagleColor = 'var(--color-eagle)';
+
   switch (status) {
-    case ScorecardHoleStatusEnum.Eagle:
-      return 'var(--color-eagle-bg)';
     case ScorecardHoleStatusEnum.Birdie:
-      return 'var(--color-birdie-bg)';
+      return {
+        border: `1.5px solid ${birdieColor}`,
+        borderRadius: '50%',
+        width: 22,
+        height: 22,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      };
+    case ScorecardHoleStatusEnum.Eagle:
+      return {
+        border: `1.5px solid ${eagleColor}`,
+        borderRadius: '50%',
+        outline: `1.5px solid ${eagleColor}`,
+        outlineOffset: 2,
+        outlineStyle: 'solid',
+        width: 22,
+        height: 22,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      };
     case ScorecardHoleStatusEnum.Bogey:
-      return 'var(--color-bogey-bg)';
+      return {
+        border: `1.5px solid ${bogeyColor}`,
+        borderRadius: 2,
+        width: 22,
+        height: 22,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      };
     case ScorecardHoleStatusEnum.DoubleBogey:
-      return 'var(--color-double-bogey-bg)';
+      return {
+        border: `1.5px solid ${bogeyColor}`,
+        borderRadius: 2,
+        outline: `1.5px solid ${bogeyColor}`,
+        outlineOffset: 2,
+        outlineStyle: 'solid',
+        width: 22,
+        height: 22,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      };
     default:
       return undefined;
   }
@@ -38,8 +87,8 @@ function getHoleScoreBg(status: ScorecardHoleStatusEnum): string | undefined {
 
 const cellStyle: CSSProperties = {
   textAlign: 'center',
-  minWidth: 24,
   padding: '4px 2px',
+  verticalAlign: 'middle',
 };
 
 const headerCellStyle: CSSProperties = {
@@ -47,12 +96,15 @@ const headerCellStyle: CSSProperties = {
   backgroundColor: 'var(--color-scorecard-header)',
 };
 
+const LABEL_WIDTH = 50;
+
 const labelStyle: CSSProperties = {
   ...cellStyle,
-  minWidth: 32,
+  width: LABEL_WIDTH,
+  minWidth: LABEL_WIDTH,
   fontWeight: 700,
   textAlign: 'left',
-  paddingLeft: 6,
+  paddingLeft: 8,
 };
 
 function NineHoleGrid({
@@ -126,19 +178,20 @@ function NineHoleGrid({
             </td>
             {holes.map((h) => {
               const color = getHoleScoreColor(h.status);
-              const bg = getHoleScoreBg(h.status);
+              const symbolStyle = getScoreSymbolStyle(h.status);
               return (
-                <td
-                  key={h.hole_number}
-                  style={{
-                    ...cellStyle,
-                    backgroundColor: bg,
-                    borderRadius: bg ? 4 : undefined,
-                  }}
-                >
-                  <Text size="xsmall" weight="bold" color={color}>
-                    {h.score}
-                  </Text>
+                <td key={h.hole_number} style={{ ...cellStyle, padding: '5px 1px' }}>
+                  {symbolStyle ? (
+                    <span style={symbolStyle}>
+                      <Text size="xsmall" weight="bold" color={color}>
+                        {h.score}
+                      </Text>
+                    </span>
+                  ) : (
+                    <Text size="xsmall" weight="bold">
+                      {h.score}
+                    </Text>
+                  )}
                 </td>
               );
             })}
@@ -198,6 +251,13 @@ export function PlayerPanelScorecard({ scorecard, isLoading, error }: PlayerPane
   const back9Par = back9.reduce((sum, h) => sum + h.par, 0);
   const back9Strokes = back9.reduce((sum, h) => sum + h.score, 0);
 
+  const toParColor =
+    scorecard.to_par < 0
+      ? 'var(--color-birdie)'
+      : scorecard.to_par > 0
+        ? 'var(--color-bogey)'
+        : undefined;
+
   return (
     <Box gap="small">
       {front9.length > 0 && (
@@ -214,7 +274,10 @@ export function PlayerPanelScorecard({ scorecard, isLoading, error }: PlayerPane
       {front9.length > 0 && back9.length > 0 && (
         <Box direction="row" justify="end" pad={{ horizontal: 'small' }}>
           <Text size="small" weight="bold" style={{ fontFamily: 'var(--font-display)' }}>
-            Total: {scorecard.strokes} ({toScoreString(scorecard.to_par)})
+            Total: {scorecard.strokes}{' '}
+            <span style={{ color: toParColor ?? undefined }}>
+              ({toScoreString(scorecard.to_par)})
+            </span>
           </Text>
         </Box>
       )}
