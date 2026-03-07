@@ -7,6 +7,7 @@ import { useInterval } from '../../hooks';
 import { Spinner } from '../Spinner';
 import { useTournamentLayoutContext } from '../TournamentLayout/TournamentLayout';
 
+import { PlayerPanel } from './PlayerPanel/PlayerPanel';
 import { PgaPlayerName } from './PgaPlayerName';
 import { PlayerHeadshot } from './PlayerHeadshot';
 import { PoolUserPanel } from './PoolUserPanel';
@@ -20,7 +21,11 @@ import {
   toScoreString,
 } from './utils';
 
-import { PoolTournamentUser } from '@drewkimberly/pga-pool-api';
+import {
+  PgaTournamentTournamentStatusEnum,
+  PoolTournamentUser,
+  PoolTournamentUserPick,
+} from '@drewkimberly/pga-pool-api';
 
 const USERS_POLL_INTERVAL = 30 * 1000; // 30s
 
@@ -48,10 +53,13 @@ export function TournamentLeaderboard() {
   const [initialFetchError, setInitialFetchError] = React.useState<Error | undefined>(undefined);
   const [pollErrorCount, setPollErrorCount] = React.useState(0);
   const [activeIndices, setActiveIndices] = React.useState<number[]>([]);
+  const [selectedPick, setSelectedPick] = React.useState<PoolTournamentUserPick | null>(null);
 
   const scoringFormat = tournament.pool?.settings?.scoring_format ?? 'strokes';
   const isStrokesPool = scoringFormat === 'strokes';
   const timezone = tournament.pga_tournament.date.timezone;
+  const isCompleted =
+    tournament.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed;
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -164,12 +172,15 @@ export function TournamentLeaderboard() {
                   <Box
                     key={player.id}
                     pad={{ vertical: 'small', horizontal: 'small' }}
-                    style={{ opacity: isCut ? 0.5 : 1 }}
+                    style={{ opacity: isCut ? 0.5 : 1, cursor: 'pointer' }}
                     border={
                       pickIndex < user.picks.length - 1
                         ? { side: 'bottom', color: 'var(--color-tab-border)', size: '1px' }
                         : undefined
                     }
+                    onClick={() => setSelectedPick(pick)}
+                    hoverIndicator="background-contrast"
+                    focusIndicator={false}
                   >
                     <Box direction="row" align="center" gap="small">
                       {/* Headshot */}
@@ -231,6 +242,14 @@ export function TournamentLeaderboard() {
           </PoolUserPanel>
         ))}
       </Accordion>
+
+      {selectedPick && (
+        <PlayerPanel
+          pick={selectedPick}
+          onClose={() => setSelectedPick(null)}
+          isCompleted={isCompleted}
+        />
+      )}
     </>
   );
 }
