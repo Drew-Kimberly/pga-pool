@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router';
 
 import { pgaPoolApi } from '../../api/pga-pool';
 import { useThemeContext } from '../../contexts/ThemeContext';
+import { isInPostTournamentWindow } from '../../utils/postTournamentWindow';
 import { Spinner } from '../Spinner';
 import { resolveDefaultTournamentFromList } from '../TournamentLeaderboard/resolveTournament';
 
@@ -94,41 +95,53 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
   }, [poolId]);
 
   const currentTournaments = React.useMemo(() => {
-    if (!tournaments.length) {
-      return [];
-    }
+    if (!tournaments.length) return [];
 
-    const current: PoolTournament[] = [];
+    // Priority 1: In-progress tournament
+    const inProgress = tournaments.find(
+      (entry) =>
+        entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.InProgress
+    );
+    if (inProgress) return [inProgress];
 
-    if (weeklyTournamentId) {
-      const weekly = tournaments.find((entry) => entry.pga_tournament.id === weeklyTournamentId);
-      if (weekly) {
-        current.push(weekly);
-      }
-    }
-
-    if (!current.length) {
-      const resolved = resolveDefaultTournamentFromList(tournaments);
-      if (resolved) {
-        current.push(resolved);
-      }
-    }
-
-    // In-progress and completed-pending tournaments always belong in Current Week
-    const currentIds = new Set(current.map((t) => t.id));
-    tournaments
+    // Priority 2: Most recently completed tournament awaiting official scores
+    const completedPending = tournaments
       .filter(
         (entry) =>
-          !currentIds.has(entry.id) &&
-          (entry.pga_tournament.tournament_status ===
-            PgaTournamentTournamentStatusEnum.InProgress ||
-            (!entry.scores_are_official &&
-              entry.pga_tournament.tournament_status ===
-                PgaTournamentTournamentStatusEnum.Completed))
+          !entry.scores_are_official &&
+          entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed
       )
-      .forEach((entry) => current.push(entry));
+      .sort(
+        (a, b) =>
+          new Date(b.pga_tournament.date.start).getTime() -
+          new Date(a.pga_tournament.date.start).getTime()
+      );
+    if (completedPending.length) return [completedPending[0]];
 
-    return current;
+    // Priority 3: Official tournament still within the post-tournament window
+    const officialInWindow = tournaments
+      .filter(
+        (entry) =>
+          entry.scores_are_official &&
+          entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed &&
+          isInPostTournamentWindow(entry.pga_tournament.date.end)
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.pga_tournament.date.start).getTime() -
+          new Date(a.pga_tournament.date.start).getTime()
+      );
+    if (officialInWindow.length) return [officialInWindow[0]];
+
+    // Priority 4: This week's tournament from the weekly-field API
+    if (weeklyTournamentId) {
+      const weekly = tournaments.find((entry) => entry.pga_tournament.id === weeklyTournamentId);
+      if (weekly) return [weekly];
+    }
+
+    // Priority 5: Fallback resolver
+    const resolved = resolveDefaultTournamentFromList(tournaments);
+    return resolved ? [resolved] : [];
   }, [tournaments, weeklyTournamentId]);
 
   const currentTournamentIds = React.useMemo(

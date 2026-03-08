@@ -13,10 +13,11 @@ export function isInPostTournamentWindow(endDateStr: string, now = new Date()): 
   const endDate = new Date(endDateStr + 'T23:59:59');
   if (isNaN(endDate.getTime())) return false;
 
-  // Find the next Monday at 8 AM CT after the end date.
-  // Start from the day after the end date and advance until we hit Monday.
+  // Find the first Monday on or after the end date.
+  // For normal Sunday finishes this is the next day (Monday).
+  // For Monday playoff finishes the cutoff is the same day at 8 AM CT,
+  // which has already passed — so the window closes immediately.
   const candidate = new Date(endDate);
-  candidate.setDate(candidate.getDate() + 1);
   while (candidate.getDay() !== MONDAY) {
     candidate.setDate(candidate.getDate() + 1);
   }
