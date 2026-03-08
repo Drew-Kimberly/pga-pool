@@ -250,12 +250,7 @@ export function TournamentLeaderboard() {
           isCompleted={isCompleted}
           fedexCupPoints={
             isCompleted
-              ? toFedexCupPointsString(
-                  getEffectiveFedexCupPoints(
-                    tournament.pga_tournament,
-                    selectedPick.pga_tournament_player
-                  )
-                )
+              ? toFedexCupPointsString(selectedPick.pga_tournament_player.official_fedex_cup_points)
               : undefined
           }
         />
