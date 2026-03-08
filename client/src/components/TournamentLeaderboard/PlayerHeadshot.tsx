@@ -51,7 +51,7 @@ function ScoreBadge({ badge, headshotSize }: { badge: ScoreBadgeData; headshotSi
       color = '#fff';
     } else if (isOverPar) {
       bg = scoreColor;
-      color = '#fff';
+      color = 'var(--color-headshot-badge-overpar-text)';
     } else {
       // Even par — neutral
       bg = 'var(--color-even)';
