@@ -397,7 +397,7 @@ export function PlayerPanel({
                 />
               )}
               {isCompleted && fedexCupPoints && (
-                <StatBox label="FedEx Pts" value={fedexCupPoints} />
+                <StatBox label="FedEx Cup" value={fedexCupPoints} />
               )}
             </Box>
           </Box>
