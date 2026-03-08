@@ -114,14 +114,17 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
       }
     }
 
-    // Completed tournaments with pending official scores belong in Current Week
+    // In-progress and completed-pending tournaments always belong in Current Week
     const currentIds = new Set(current.map((t) => t.id));
     tournaments
       .filter(
         (entry) =>
           !currentIds.has(entry.id) &&
-          !entry.scores_are_official &&
-          entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed
+          (entry.pga_tournament.tournament_status ===
+            PgaTournamentTournamentStatusEnum.InProgress ||
+            (!entry.scores_are_official &&
+              entry.pga_tournament.tournament_status ===
+                PgaTournamentTournamentStatusEnum.Completed))
       )
       .forEach((entry) => current.push(entry));
 
@@ -150,7 +153,7 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
         (entry) =>
           !entry.scores_are_official &&
           !currentTournamentIds.has(entry.id) &&
-          entry.pga_tournament.tournament_status !== PgaTournamentTournamentStatusEnum.Completed
+          entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.NotStarted
       )
       .sort((a, b) => {
         return (
