@@ -46,6 +46,7 @@
 
   /* ── Headshot Badge ────────────────────────────────────── */
   --color-headshot-badge-border: #ffffff;
+  --color-headshot-badge-overpar-text: #ffffff;
 
   /* ── Player Panel ──────────────────────────────────────── */
   --color-panel-bg: #ffffff;
@@ -93,6 +94,7 @@
   --color-tab-border: #374151;
 
   --color-headshot-badge-border: #1a1a1a;
+  --color-headshot-badge-overpar-text: #1a1a1a;
 
   --color-panel-bg: #1a1a1a;
   --color-panel-backdrop: rgba(0, 0, 0, 0.6);

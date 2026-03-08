@@ -6,24 +6,38 @@ import { toScoreString } from '../utils';
 
 import { Scorecard, ScorecardHole, ScorecardHoleStatusEnum } from '@drewkimberly/pga-pool-api';
 
+/** A hole slot that may be played (ScorecardHole) or empty (placeholder). */
+type HoleSlot = ScorecardHole | { hole_number: number; par: null; score: null; status: null };
+
+/**
+ * Pad a partial set of holes to a full 9-hole half.
+ * Missing holes get placeholder slots with null par/score.
+ */
+function padToNine(holes: ScorecardHole[], startHole: number): HoleSlot[] {
+  const byNumber = new Map(holes.map((h) => [h.hole_number, h]));
+  return Array.from({ length: 9 }, (_, i) => {
+    const holeNum = startHole + i;
+    return byNumber.get(holeNum) ?? { hole_number: holeNum, par: null, score: null, status: null };
+  });
+}
+
 /**
  * Returns CSS for idiomatic golf scorecard symbols:
- * - Birdie: single red circle
- * - Eagle (or better): double red circle
- * - Bogey: single square (default text color)
- * - Double bogey (or worse): double square (default text color)
+ * - Birdie: single circle
+ * - Eagle (or better): double circle
+ * - Bogey: single square
+ * - Double bogey (or worse): double square
  *
- * All score numbers remain default text color — only birdie/eagle
- * circles are red, bogey/double-bogey squares are neutral.
+ * All symbols and numbers use default text color (currentColor).
  */
-function getScoreSymbolStyle(status: ScorecardHoleStatusEnum): CSSProperties | undefined {
-  const birdieColor = 'var(--color-birdie)';
+function getScoreSymbolStyle(status: ScorecardHoleStatusEnum | null): CSSProperties | undefined {
+  const circleColor = 'currentColor';
   const bogeyColor = 'var(--color-bogey)';
 
   switch (status) {
     case ScorecardHoleStatusEnum.Birdie:
       return {
-        border: `1.5px solid ${birdieColor}`,
+        border: `1.5px solid ${circleColor}`,
         borderRadius: '50%',
         width: 22,
         height: 22,
@@ -33,9 +47,9 @@ function getScoreSymbolStyle(status: ScorecardHoleStatusEnum): CSSProperties | u
       };
     case ScorecardHoleStatusEnum.Eagle:
       return {
-        border: `1.5px solid ${birdieColor}`,
+        border: `1.5px solid ${circleColor}`,
         borderRadius: '50%',
-        outline: `1.5px solid ${birdieColor}`,
+        outline: `1.5px solid ${circleColor}`,
         outlineOffset: 2,
         outlineStyle: 'solid',
         width: 22,
@@ -100,18 +114,20 @@ function NineHoleGrid({
   totalPar,
   totalStrokes,
 }: {
-  holes: ScorecardHole[];
+  holes: HoleSlot[];
   label: string;
   totalPar: number;
   totalStrokes: number;
 }) {
+  const hasAnyScores = holes.some((h) => h.score !== null);
+
   return (
     <Box style={{ overflowX: 'auto' }}>
       <table
         style={{
           borderCollapse: 'collapse',
           width: '100%',
-          tableLayout: holes.length < 9 ? 'auto' : 'fixed',
+          tableLayout: 'fixed',
         }}
       >
         <thead>
@@ -146,13 +162,13 @@ function NineHoleGrid({
             {holes.map((h) => (
               <td key={h.hole_number} style={cellStyle}>
                 <Text size="xsmall" color="text-weak">
-                  {h.par}
+                  {h.par ?? '-'}
                 </Text>
               </td>
             ))}
             <td style={cellStyle}>
               <Text size="xsmall" color="text-weak" weight="bold">
-                {totalPar}
+                {totalPar || '-'}
               </Text>
             </td>
           </tr>
@@ -164,6 +180,15 @@ function NineHoleGrid({
               </Text>
             </td>
             {holes.map((h) => {
+              if (h.score === null) {
+                return (
+                  <td key={h.hole_number} style={{ ...cellStyle, padding: '5px 1px' }}>
+                    <Text size="xsmall" color="text-weak">
+                      -
+                    </Text>
+                  </td>
+                );
+              }
               const symbolStyle = getScoreSymbolStyle(h.status);
               return (
                 <td key={h.hole_number} style={{ ...cellStyle, padding: '5px 1px' }}>
@@ -183,7 +208,7 @@ function NineHoleGrid({
             })}
             <td style={cellStyle}>
               <Text size="xsmall" weight="bold" style={{ fontFamily: 'var(--font-display)' }}>
-                {totalStrokes}
+                {hasAnyScores ? totalStrokes : '-'}
               </Text>
             </td>
           </tr>
@@ -237,28 +262,34 @@ export function PlayerPanelScorecard({ scorecard, isLoading, error }: PlayerPane
   const back9Par = back9.reduce((sum, h) => sum + h.par, 0);
   const back9Strokes = back9.reduce((sum, h) => sum + h.score, 0);
 
-  const toParColor = scorecard.to_par < 0 ? 'var(--color-birdie)' : undefined;
-
   return (
     <Box gap="small">
       {front9.length > 0 && (
         <NineHoleGrid
-          holes={front9}
+          holes={padToNine(front9, 1)}
           label="OUT"
           totalPar={front9Par}
           totalStrokes={front9Strokes}
         />
       )}
       {back9.length > 0 && (
-        <NineHoleGrid holes={back9} label="IN" totalPar={back9Par} totalStrokes={back9Strokes} />
+        <NineHoleGrid
+          holes={padToNine(back9, 10)}
+          label="IN"
+          totalPar={back9Par}
+          totalStrokes={back9Strokes}
+        />
+      )}
+      {front9.length === 0 && (
+        <NineHoleGrid holes={padToNine([], 1)} label="OUT" totalPar={0} totalStrokes={0} />
+      )}
+      {back9.length === 0 && (
+        <NineHoleGrid holes={padToNine([], 10)} label="IN" totalPar={0} totalStrokes={0} />
       )}
       {front9.length > 0 && back9.length > 0 && (
         <Box direction="row" justify="end" pad={{ horizontal: 'small' }}>
           <Text size="small" weight="bold" style={{ fontFamily: 'var(--font-display)' }}>
-            Total: {scorecard.strokes}{' '}
-            <span style={{ color: toParColor ?? undefined }}>
-              ({toScoreString(scorecard.to_par)})
-            </span>
+            Total: {scorecard.strokes} ({toScoreString(scorecard.to_par)})
           </Text>
         </Box>
       )}

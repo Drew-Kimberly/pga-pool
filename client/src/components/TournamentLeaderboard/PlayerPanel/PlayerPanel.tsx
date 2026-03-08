@@ -212,7 +212,6 @@ export function PlayerPanel({
 
   // Today's round score (for live view)
   const todayRound = roundsMap.get(player.current_round ?? 0);
-  const todayScoreColor = todayRound ? getScoreColor(todayRound.to_par) : undefined;
 
   const backdropStyle: CSSProperties = {
     position: 'fixed',
@@ -384,11 +383,7 @@ export function PlayerPanel({
               <StatBox label="Pos" value={player.current_position ?? '--'} />
               <StatBox label="Total" value={toScoreString(player.score_total)} />
               {!isCompleted && todayRound && (
-                <StatBox
-                  label="Today"
-                  value={toScoreString(todayRound.to_par)}
-                  color={todayScoreColor}
-                />
+                <StatBox label="Today" value={toScoreString(todayRound.to_par)} />
               )}
               {!isCompleted && (
                 <StatBox
