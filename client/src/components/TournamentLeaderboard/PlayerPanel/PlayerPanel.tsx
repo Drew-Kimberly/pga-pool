@@ -24,6 +24,7 @@ export interface PlayerPanelProps {
   pick: PoolTournamentUserPick;
   onClose: () => void;
   isCompleted?: boolean;
+  fedexCupPoints?: string;
 }
 
 function useIsDesktop(): boolean {
@@ -117,7 +118,12 @@ function StatBox({ label, value, color }: { label: string; value: string; color?
   );
 }
 
-export function PlayerPanel({ pick, onClose, isCompleted = false }: PlayerPanelProps) {
+export function PlayerPanel({
+  pick,
+  onClose,
+  isCompleted = false,
+  fedexCupPoints,
+}: PlayerPanelProps) {
   const player = pick.pga_tournament_player;
   const pgaPlayer = player.pga_player;
   const isCut = isCutOrWithdrawn(player);
@@ -389,6 +395,9 @@ export function PlayerPanel({ pick, onClose, isCompleted = false }: PlayerPanelP
                   label="Thru"
                   value={player.is_round_complete ? 'F' : (player.score_thru ?? '--')}
                 />
+              )}
+              {isCompleted && fedexCupPoints && (
+                <StatBox label="FedEx Pts" value={fedexCupPoints} />
               )}
             </Box>
           </Box>

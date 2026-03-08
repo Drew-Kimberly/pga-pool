@@ -248,6 +248,16 @@ export function TournamentLeaderboard() {
           pick={selectedPick}
           onClose={() => setSelectedPick(null)}
           isCompleted={isCompleted}
+          fedexCupPoints={
+            isCompleted
+              ? toFedexCupPointsString(
+                  getEffectiveFedexCupPoints(
+                    tournament.pga_tournament,
+                    selectedPick.pga_tournament_player
+                  )
+                )
+              : undefined
+          }
         />
       )}
     </>
