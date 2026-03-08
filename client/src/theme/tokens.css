@@ -20,11 +20,11 @@
   --weight-extrabold: 800;
 
   /* ── Scoring Colors ─────────────────────────────────────── */
-  --color-eagle: #d4a017;
+  --color-eagle: #b91c1c;
   --color-birdie: #b91c1c;
   --color-par: #4b5563;
-  --color-bogey: #2563eb;
-  --color-double-bogey: #1d4ed8;
+  --color-bogey: #1a1a1a;
+  --color-double-bogey: #1a1a1a;
   --color-even: #6b7280;
 
   /* ── Status Colors ──────────────────────────────────────── */
@@ -70,11 +70,11 @@
 
 /* ── Dark Mode Overrides ──────────────────────────────────── */
 [data-theme='dark'] {
-  --color-eagle: #facc15;
+  --color-eagle: #f87171;
   --color-birdie: #f87171;
   --color-par: #9ca3af;
-  --color-bogey: #60a5fa;
-  --color-double-bogey: #93c5fd;
+  --color-bogey: #e5e7eb;
+  --color-double-bogey: #e5e7eb;
   --color-even: #9ca3af;
 
   --color-status-live: #4ade80;

@@ -68,6 +68,7 @@ function RoundTab({
         borderRadius: 6,
         border: 'none',
         background: isActive ? 'var(--color-scorecard-header)' : 'transparent',
+        color: 'inherit',
         cursor: hasSummary ? 'pointer' : 'default',
         opacity: hasSummary ? 1 : 0.35,
         transition: 'background-color 0.15s ease',

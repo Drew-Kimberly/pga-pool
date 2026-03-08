@@ -6,32 +6,19 @@ import { toScoreString } from '../utils';
 
 import { Scorecard, ScorecardHole, ScorecardHoleStatusEnum } from '@drewkimberly/pga-pool-api';
 
-function getHoleScoreColor(status: ScorecardHoleStatusEnum): string | undefined {
-  switch (status) {
-    case ScorecardHoleStatusEnum.Eagle:
-      return 'var(--color-eagle)';
-    case ScorecardHoleStatusEnum.Birdie:
-      return 'var(--color-birdie)';
-    case ScorecardHoleStatusEnum.Bogey:
-      return 'var(--color-bogey)';
-    case ScorecardHoleStatusEnum.DoubleBogey:
-      return 'var(--color-double-bogey)';
-    default:
-      return undefined;
-  }
-}
-
 /**
  * Returns CSS for idiomatic golf scorecard symbols:
- * - Birdie: single circle
- * - Eagle (or better): double circle
- * - Bogey: single square
- * - Double bogey (or worse): double square
+ * - Birdie: single red circle
+ * - Eagle (or better): double red circle
+ * - Bogey: single square (default text color)
+ * - Double bogey (or worse): double square (default text color)
+ *
+ * All score numbers remain default text color — only birdie/eagle
+ * circles are red, bogey/double-bogey squares are neutral.
  */
 function getScoreSymbolStyle(status: ScorecardHoleStatusEnum): CSSProperties | undefined {
   const birdieColor = 'var(--color-birdie)';
   const bogeyColor = 'var(--color-bogey)';
-  const eagleColor = 'var(--color-eagle)';
 
   switch (status) {
     case ScorecardHoleStatusEnum.Birdie:
@@ -46,9 +33,9 @@ function getScoreSymbolStyle(status: ScorecardHoleStatusEnum): CSSProperties | u
       };
     case ScorecardHoleStatusEnum.Eagle:
       return {
-        border: `1.5px solid ${eagleColor}`,
+        border: `1.5px solid ${birdieColor}`,
         borderRadius: '50%',
-        outline: `1.5px solid ${eagleColor}`,
+        outline: `1.5px solid ${birdieColor}`,
         outlineOffset: 2,
         outlineStyle: 'solid',
         width: 22,
@@ -177,13 +164,12 @@ function NineHoleGrid({
               </Text>
             </td>
             {holes.map((h) => {
-              const color = getHoleScoreColor(h.status);
               const symbolStyle = getScoreSymbolStyle(h.status);
               return (
                 <td key={h.hole_number} style={{ ...cellStyle, padding: '5px 1px' }}>
                   {symbolStyle ? (
                     <span style={symbolStyle}>
-                      <Text size="xsmall" weight="bold" color={color}>
+                      <Text size="xsmall" weight="bold">
                         {h.score}
                       </Text>
                     </span>
@@ -251,12 +237,7 @@ export function PlayerPanelScorecard({ scorecard, isLoading, error }: PlayerPane
   const back9Par = back9.reduce((sum, h) => sum + h.par, 0);
   const back9Strokes = back9.reduce((sum, h) => sum + h.score, 0);
 
-  const toParColor =
-    scorecard.to_par < 0
-      ? 'var(--color-birdie)'
-      : scorecard.to_par > 0
-        ? 'var(--color-bogey)'
-        : undefined;
+  const toParColor = scorecard.to_par < 0 ? 'var(--color-birdie)' : undefined;
 
   return (
     <Box gap="small">
