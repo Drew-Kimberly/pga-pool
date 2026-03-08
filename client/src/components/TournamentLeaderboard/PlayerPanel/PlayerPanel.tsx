@@ -139,11 +139,16 @@ export function PlayerPanel({
   const dragStartY = useRef(0);
   const panelRef = useRef<HTMLDivElement>(null);
 
+  // Use the earliest completed round to seed course pars for all 18 holes
+  const currentRound = player.current_round ?? 1;
+  const parReferenceRound = rounds.find((r) => r.round_number < currentRound)?.round_number ?? null;
+
   const {
     data: scorecard,
     isLoading: scorecardLoading,
     error: scorecardError,
-  } = useScorecard(player.id, selectedRound);
+    coursePars,
+  } = useScorecard(player.id, selectedRound, parReferenceRound);
 
   // Animate in on mount + lock body scroll
   useEffect(() => {
@@ -212,6 +217,13 @@ export function PlayerPanel({
 
   // Today's round score (for live view)
   const todayRound = roundsMap.get(player.current_round ?? 0);
+
+  // WD players have a sentinel score_total (e.g. 9999) — display "--" instead
+  const isScoreSentinel =
+    player.score_total !== null &&
+    player.score_total !== undefined &&
+    Math.abs(Number(player.score_total)) >= 900;
+  const displayTotal = isCut && isScoreSentinel ? '--' : toScoreString(player.score_total);
 
   const backdropStyle: CSSProperties = {
     position: 'fixed',
@@ -381,11 +393,11 @@ export function PlayerPanel({
               }}
             >
               <StatBox label="Pos" value={player.current_position ?? '--'} />
-              <StatBox label="Total" value={toScoreString(player.score_total)} />
-              {!isCompleted && todayRound && (
+              <StatBox label="Total" value={displayTotal} />
+              {!isCut && !isCompleted && todayRound && (
                 <StatBox label="Today" value={toScoreString(todayRound.to_par)} />
               )}
-              {!isCompleted && (
+              {!isCut && !isCompleted && (
                 <StatBox
                   label="Thru"
                   value={player.is_round_complete ? 'F' : (player.score_thru ?? '--')}
@@ -418,6 +430,7 @@ export function PlayerPanel({
               scorecard={scorecard}
               isLoading={scorecardLoading}
               error={scorecardError}
+              coursePars={coursePars}
             />
           </Box>
         </div>

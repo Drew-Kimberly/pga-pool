@@ -11,13 +11,24 @@ type HoleSlot = ScorecardHole | { hole_number: number; par: null; score: null; s
 
 /**
  * Pad a partial set of holes to a full 9-hole half.
- * Missing holes get placeholder slots with null par/score.
+ * Missing holes get placeholder slots — par is filled from coursePars when available.
  */
-function padToNine(holes: ScorecardHole[], startHole: number): HoleSlot[] {
+function padToNine(
+  holes: ScorecardHole[],
+  startHole: number,
+  coursePars: Map<number, number>
+): HoleSlot[] {
   const byNumber = new Map(holes.map((h) => [h.hole_number, h]));
   return Array.from({ length: 9 }, (_, i) => {
     const holeNum = startHole + i;
-    return byNumber.get(holeNum) ?? { hole_number: holeNum, par: null, score: null, status: null };
+    return (
+      byNumber.get(holeNum) ?? {
+        hole_number: holeNum,
+        par: coursePars.get(holeNum) ?? null,
+        score: null,
+        status: null,
+      }
+    );
   });
 }
 
@@ -222,9 +233,15 @@ export interface PlayerPanelScorecardProps {
   scorecard: Scorecard | null;
   isLoading: boolean;
   error: string | null;
+  coursePars: Map<number, number>;
 }
 
-export function PlayerPanelScorecard({ scorecard, isLoading, error }: PlayerPanelScorecardProps) {
+export function PlayerPanelScorecard({
+  scorecard,
+  isLoading,
+  error,
+  coursePars,
+}: PlayerPanelScorecardProps) {
   if (isLoading) {
     return (
       <Box align="center" pad="small">
@@ -257,35 +274,34 @@ export function PlayerPanelScorecard({ scorecard, isLoading, error }: PlayerPane
   const front9 = sorted.filter((h) => h.hole_number <= 9);
   const back9 = sorted.filter((h) => h.hole_number > 9);
 
-  const front9Par = front9.reduce((sum, h) => sum + h.par, 0);
+  // Use coursePars for full 9-hole par totals (not just played holes)
+  const front9Padded = padToNine(front9, 1, coursePars);
+  const back9Padded = padToNine(back9, 10, coursePars);
+
+  const sumPar = (holes: HoleSlot[]) => holes.reduce((sum, h) => sum + (h.par ?? 0), 0);
+  const front9Par = sumPar(front9Padded);
+  const back9Par = sumPar(back9Padded);
   const front9Strokes = front9.reduce((sum, h) => sum + h.score, 0);
-  const back9Par = back9.reduce((sum, h) => sum + h.par, 0);
   const back9Strokes = back9.reduce((sum, h) => sum + h.score, 0);
+
+  // Par total is known if coursePars covers every hole in the half
+  const front9ParKnown = front9Padded.every((h) => h.par !== null);
+  const back9ParKnown = back9Padded.every((h) => h.par !== null);
 
   return (
     <Box gap="small">
-      {front9.length > 0 && (
-        <NineHoleGrid
-          holes={padToNine(front9, 1)}
-          label="OUT"
-          totalPar={front9Par}
-          totalStrokes={front9Strokes}
-        />
-      )}
-      {back9.length > 0 && (
-        <NineHoleGrid
-          holes={padToNine(back9, 10)}
-          label="IN"
-          totalPar={back9Par}
-          totalStrokes={back9Strokes}
-        />
-      )}
-      {front9.length === 0 && (
-        <NineHoleGrid holes={padToNine([], 1)} label="OUT" totalPar={0} totalStrokes={0} />
-      )}
-      {back9.length === 0 && (
-        <NineHoleGrid holes={padToNine([], 10)} label="IN" totalPar={0} totalStrokes={0} />
-      )}
+      <NineHoleGrid
+        holes={front9Padded}
+        label="OUT"
+        totalPar={front9ParKnown ? front9Par : 0}
+        totalStrokes={front9Strokes}
+      />
+      <NineHoleGrid
+        holes={back9Padded}
+        label="IN"
+        totalPar={back9ParKnown ? back9Par : 0}
+        totalStrokes={back9Strokes}
+      />
       {front9.length > 0 && back9.length > 0 && (
         <Box direction="row" justify="end" pad={{ horizontal: 'small' }}>
           <Text size="small" weight="bold" style={{ fontFamily: 'var(--font-display)' }}>
