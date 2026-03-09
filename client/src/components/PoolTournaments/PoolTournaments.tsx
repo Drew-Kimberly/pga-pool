@@ -264,8 +264,10 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                     }}
                     navigateLabel={isCompleted ? 'View results' : 'View leaderboard'}
                     mobileNavigateLabel={isCompleted ? 'Results' : 'Leaderboard'}
-                    onFieldNavigate={() =>
-                      navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
+                    onFieldNavigate={
+                      isLive || isCompleted
+                        ? () => navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
+                        : undefined
                     }
                     onOverviewNavigate={() =>
                       navigate(`/pools/${pool.id}/tournaments/${entry.id}/overview`)

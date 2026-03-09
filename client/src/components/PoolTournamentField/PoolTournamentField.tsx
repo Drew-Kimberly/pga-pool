@@ -86,7 +86,7 @@ export function PoolTournamentField() {
           pad={{ horizontal: 'medium', vertical: 'small' }}
           round="small"
           background="brand"
-          onClick={() => navigate('overview', { replace: true })}
+          onClick={() => navigate('../overview', { replace: true })}
           style={{ cursor: 'pointer' }}
           hoverIndicator
         >
