@@ -1,3 +1,5 @@
+import { AsyncWorkerEventBusModule } from './async-worker/async-worker.event-bus.module';
+import { AsyncWorkerModule } from './async-worker/async-worker.module';
 import { AuthModule } from './auth/auth.module';
 import { RegisteredDatabaseModule } from './database/registered-database.module';
 import { ErrorApiModule } from './error/api/error.api.module';
@@ -19,6 +21,8 @@ import { Module } from '@nestjs/common';
 @Module({
   imports: [
     RegisteredDatabaseModule,
+    AsyncWorkerEventBusModule,
+    AsyncWorkerModule,
     AuthModule,
     ErrorApiModule,
     HealthApiModule,

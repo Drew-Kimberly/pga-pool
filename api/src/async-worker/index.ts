@@ -4,7 +4,7 @@ import { PgaTournamentService } from '../pga-tournament/lib/pga-tournament.servi
 import { PgaTournamentPlayerService } from '../pga-tournament-player/lib/pga-tournament-player.service';
 import { PoolTournamentFinalizerService } from '../pool-tournament/lib/pool-tournament-finalizer.service';
 
-import { PgaPoolAsyncWorkerModule } from './async-worker.module';
+import { PgaPoolAsyncWorkerModule } from './legacy-async-worker.module';
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';

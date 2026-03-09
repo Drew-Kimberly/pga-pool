@@ -1,18 +1,14 @@
-import { RegisteredDatabaseModule } from '../database/registered-database.module';
-import { PgaPlayerModule } from '../pga-player/lib/pga-player.module';
 import { PgaTournamentModule } from '../pga-tournament/lib/pga-tournament.module';
-import { PgaTournamentPlayerModule } from '../pga-tournament-player/lib/pga-tournament-player.module';
-import { PoolTournamentModule } from '../pool-tournament/lib/pool-tournament.module';
+
+import { AsyncWorkerRegistry } from './async-worker.registry';
+import { AsyncWorkerScheduler } from './async-worker.scheduler';
 
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { DiscoveryModule } from '@nestjs/core';
 
 @Module({
-  imports: [
-    RegisteredDatabaseModule,
-    PgaPlayerModule,
-    PgaTournamentModule,
-    PgaTournamentPlayerModule,
-    PoolTournamentModule,
-  ],
+  imports: [ConfigModule, DiscoveryModule, PgaTournamentModule],
+  providers: [AsyncWorkerRegistry, AsyncWorkerScheduler],
 })
-export class PgaPoolAsyncWorkerModule {}
+export class AsyncWorkerModule {}
