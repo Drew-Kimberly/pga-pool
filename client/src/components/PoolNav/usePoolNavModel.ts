@@ -155,10 +155,13 @@ export function usePoolNavModel(): PoolNavModel | null {
     leaderboardPath = `/pools/${resolved.poolId}/leaderboard`;
   }
 
-  const showLeaderboard = !(
-    liveTournament?.scores_are_official &&
-    liveTournament.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed
-  );
+  const showLeaderboard =
+    liveTournament != null &&
+    !(
+      liveTournament.scores_are_official &&
+      liveTournament.pga_tournament.tournament_status ===
+        PgaTournamentTournamentStatusEnum.Completed
+    );
 
   return {
     poolId: resolved.poolId,
