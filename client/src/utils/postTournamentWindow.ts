@@ -10,13 +10,15 @@ const GRACE_HOUR = 8; // 8 AM CT
  * Uses Intl.DateTimeFormat for DST-aware Central Time calculation.
  */
 export function isInPostTournamentWindow(endDateStr: string, now = new Date()): boolean {
-  const endDate = new Date(endDateStr + 'T23:59:59');
+  const dateOnly = endDateStr.slice(0, 10);
+  const endDate = new Date(dateOnly + 'T23:59:59');
   if (isNaN(endDate.getTime())) return false;
 
-  // Find the next Monday at 8 AM CT after the end date.
-  // Start from the day after the end date and advance until we hit Monday.
+  // Find the first Monday on or after the end date.
+  // For normal Sunday finishes this is the next day (Monday).
+  // For Monday playoff finishes the cutoff is the same day at 8 AM CT,
+  // which has already passed — so the window closes immediately.
   const candidate = new Date(endDate);
-  candidate.setDate(candidate.getDate() + 1);
   while (candidate.getDay() !== MONDAY) {
     candidate.setDate(candidate.getDate() + 1);
   }
@@ -64,4 +66,27 @@ function ctToUtc(dateStr: string, hour: number): number {
 
   // Target: year-month-day at `hour`:00 CT → UTC = CT - offset
   return Date.UTC(year, month - 1, day, hour - offsetHours, 0, 0);
+}
+
+/**
+ * Returns true if the post-tournament display window has closed,
+ * meaning NotStarted tournaments can be labeled "This Week."
+ * The window closes Monday at GRACE_HOUR (8 AM) CT.
+ */
+export function isNewDisplayWeek(now = new Date()): boolean {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: CT_TIMEZONE,
+    weekday: 'short',
+    hour: '2-digit',
+    hour12: false,
+  });
+
+  const parts = Object.fromEntries(formatter.formatToParts(now).map((p) => [p.type, p.value]));
+
+  const day = parts.weekday;
+  const hour = parseInt(parts.hour === '24' ? '0' : parts.hour, 10);
+
+  if (day === 'Sun') return false;
+  if (day === 'Mon' && hour < GRACE_HOUR) return false;
+  return true;
 }

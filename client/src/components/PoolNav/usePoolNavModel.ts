@@ -11,6 +11,7 @@ export type PoolNavSection = 'leaderboard' | 'tournaments' | 'standings';
 export interface PoolNavModel {
   poolId: string;
   activeSection: PoolNavSection;
+  showLeaderboard: boolean;
   leaderboardPath: string;
   tournamentsPath: string;
   standingsPath: string;
@@ -51,6 +52,7 @@ function isTournamentLive(tournament: PoolTournament): boolean {
 // Module-level cache to prevent flicker when usePoolNavModel remounts across page navigations
 let cachedLiveTournament: PoolTournament | null = null;
 let cachedPoolId: string | null = null;
+let cachedIsResolved = false;
 
 function resolveSection(pathname: string): { poolId: string; section: PoolNavSection } | null {
   // Leaderboard detail
@@ -103,9 +105,12 @@ export function usePoolNavModel(): PoolNavModel | null {
   const resolved = resolveSection(location.pathname);
   const poolId = resolved?.poolId ?? null;
 
+  const hasCachedData = poolId != null && poolId === cachedPoolId && cachedIsResolved;
+
   const [liveTournament, setLiveTournament] = React.useState<PoolTournament | null>(
-    poolId && poolId === cachedPoolId ? cachedLiveTournament : null
+    hasCachedData ? cachedLiveTournament : null
   );
+  const [isResolved, setIsResolved] = React.useState(hasCachedData);
 
   React.useEffect(() => {
     if (!poolId) return;
@@ -118,12 +123,16 @@ export function usePoolNavModel(): PoolNavModel | null {
         setLiveTournament(live);
         cachedLiveTournament = live;
         cachedPoolId = poolId;
+        cachedIsResolved = true;
+        setIsResolved(true);
       })
       .catch(() => {
         if (!cancelled) {
           setLiveTournament(null);
           cachedLiveTournament = null;
           cachedPoolId = poolId;
+          cachedIsResolved = true;
+          setIsResolved(true);
         }
       });
 
@@ -132,15 +141,29 @@ export function usePoolNavModel(): PoolNavModel | null {
     };
   }, [poolId]);
 
-  if (!resolved) return null;
+  if (!resolved || !isResolved) return null;
 
-  const leaderboardPath = liveTournament
-    ? `/pools/${resolved.poolId}/tournaments/${liveTournament.id}/leaderboard`
-    : `/pools/${resolved.poolId}/leaderboard`;
+  let leaderboardPath: string;
+  if (liveTournament) {
+    const subTab =
+      liveTournament.pga_tournament.tournament_status ===
+      PgaTournamentTournamentStatusEnum.Completed
+        ? 'results'
+        : 'leaderboard';
+    leaderboardPath = `/pools/${resolved.poolId}/tournaments/${liveTournament.id}/${subTab}`;
+  } else {
+    leaderboardPath = `/pools/${resolved.poolId}/leaderboard`;
+  }
+
+  const showLeaderboard = !(
+    liveTournament?.scores_are_official &&
+    liveTournament.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed
+  );
 
   return {
     poolId: resolved.poolId,
     activeSection: resolved.section,
+    showLeaderboard,
     leaderboardPath,
     tournamentsPath: `/pools/${resolved.poolId}/tournaments`,
     standingsPath: `/pools/${resolved.poolId}/standings`,
