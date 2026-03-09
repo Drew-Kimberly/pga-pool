@@ -1,6 +1,8 @@
 import { Box, ResponsiveContext, Text } from 'grommet';
 import React from 'react';
 
+import { isNewDisplayWeek } from '../../utils/postTournamentWindow';
+
 import {
   PgaTournament,
   PgaTournamentRoundStatusEnum,
@@ -129,12 +131,12 @@ function resolveStatus(
     return { label: 'OFFICIAL', variant: 'official' };
   }
 
-  // NOT_STARTED: determine if this is "this week" or further out
+  // NOT_STARTED: "This Week" only after the post-tournament window closes (Mon 8 AM CT)
   const startDate = new Date(tournament.date.start);
   const now = new Date();
   const daysUntilStart = (startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
 
-  if (daysUntilStart <= 7) {
+  if (daysUntilStart <= 7 && isNewDisplayWeek()) {
     return { label: 'THIS WEEK', variant: 'thisweek' };
   }
 

@@ -24,7 +24,15 @@ export function PoolNav({ model, mobile }: PoolNavProps) {
   const inactiveTextColor = darkMode ? 'light-3' : undefined;
 
   const items: PoolNavItem[] = [
-    { key: 'leaderboard', label: 'Leaderboard', href: model.leaderboardPath },
+    ...(model.showLeaderboard
+      ? [
+          {
+            key: 'leaderboard' as const,
+            label: 'Leaderboard',
+            href: model.leaderboardPath,
+          },
+        ]
+      : []),
     { key: 'tournaments', label: 'Tournaments', href: model.tournamentsPath },
     { key: 'standings', label: 'Standings', href: model.standingsPath },
   ];

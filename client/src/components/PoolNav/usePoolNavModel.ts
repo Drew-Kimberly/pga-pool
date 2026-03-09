@@ -11,6 +11,7 @@ export type PoolNavSection = 'leaderboard' | 'tournaments' | 'standings';
 export interface PoolNavModel {
   poolId: string;
   activeSection: PoolNavSection;
+  showLeaderboard: boolean;
   leaderboardPath: string;
   tournamentsPath: string;
   standingsPath: string;
@@ -146,9 +147,15 @@ export function usePoolNavModel(): PoolNavModel | null {
     leaderboardPath = `/pools/${resolved.poolId}/leaderboard`;
   }
 
+  const showLeaderboard = !(
+    liveTournament?.scores_are_official &&
+    liveTournament.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed
+  );
+
   return {
     poolId: resolved.poolId,
     activeSection: resolved.section,
+    showLeaderboard,
     leaderboardPath,
     tournamentsPath: `/pools/${resolved.poolId}/tournaments`,
     standingsPath: `/pools/${resolved.poolId}/standings`,

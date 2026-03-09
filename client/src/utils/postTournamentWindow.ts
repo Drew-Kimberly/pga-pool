@@ -67,3 +67,26 @@ function ctToUtc(dateStr: string, hour: number): number {
   // Target: year-month-day at `hour`:00 CT → UTC = CT - offset
   return Date.UTC(year, month - 1, day, hour - offsetHours, 0, 0);
 }
+
+/**
+ * Returns true if the post-tournament display window has closed,
+ * meaning NotStarted tournaments can be labeled "This Week."
+ * The window closes Monday at GRACE_HOUR (8 AM) CT.
+ */
+export function isNewDisplayWeek(now = new Date()): boolean {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: CT_TIMEZONE,
+    weekday: 'short',
+    hour: '2-digit',
+    hour12: false,
+  });
+
+  const parts = Object.fromEntries(formatter.formatToParts(now).map((p) => [p.type, p.value]));
+
+  const day = parts.weekday;
+  const hour = parseInt(parts.hour === '24' ? '0' : parts.hour, 10);
+
+  if (day === 'Sun') return false;
+  if (day === 'Mon' && hour < GRACE_HOUR) return false;
+  return true;
+}

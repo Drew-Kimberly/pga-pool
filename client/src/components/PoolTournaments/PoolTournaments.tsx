@@ -248,14 +248,22 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
                 const isLive =
                   entry.pga_tournament.tournament_status ===
                   PgaTournamentTournamentStatusEnum.InProgress;
+                const isCompleted =
+                  entry.pga_tournament.tournament_status ===
+                  PgaTournamentTournamentStatusEnum.Completed;
                 return (
                   <TournamentCard
                     key={entry.id}
                     tournament={entry}
-                    canNavigate={isLive}
-                    onNavigate={() => navigate(`/pools/${pool.id}/tournaments/${entry.id}`)}
-                    navigateLabel="View leaderboard"
-                    mobileNavigateLabel="Leaderboard"
+                    canNavigate={isLive || isCompleted}
+                    onNavigate={() => {
+                      const path = isCompleted
+                        ? `/pools/${pool.id}/tournaments/${entry.id}/results`
+                        : `/pools/${pool.id}/tournaments/${entry.id}`;
+                      navigate(path);
+                    }}
+                    navigateLabel={isCompleted ? 'View results' : 'View leaderboard'}
+                    mobileNavigateLabel={isCompleted ? 'Results' : 'Leaderboard'}
                     onFieldNavigate={() =>
                       navigate(`/pools/${pool.id}/tournaments/${entry.id}/field`)
                     }
