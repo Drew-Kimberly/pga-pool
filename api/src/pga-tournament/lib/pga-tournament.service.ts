@@ -1,4 +1,4 @@
-import { Between, DataSource, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, DataSource, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import {
   defaultListParams,
@@ -72,6 +72,11 @@ export class PgaTournamentService implements Listable<PgaTournament> {
       where: { year },
       order: { start_date: 'ASC' },
     });
+  }
+
+  listByIds(ids: string[]): Promise<PgaTournament[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return this.pgaTournamentRepo.findBy({ id: In(ids) });
   }
 
   save(payload: SavePgaTournament[]): Promise<PgaTournament[]> {

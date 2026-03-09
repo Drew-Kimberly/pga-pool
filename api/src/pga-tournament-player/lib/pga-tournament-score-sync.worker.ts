@@ -1,7 +1,5 @@
 import { AsyncWorker } from '../../async-worker/async-worker.decorator';
-import { AsyncWorkerEventBus } from '../../async-worker/async-worker.event-bus';
 import { AsyncWorkerContext, AsyncWorkerHandler } from '../../async-worker/async-worker.interface';
-import { PgaTournamentStatus } from '../../pga-tournament/lib/pga-tournament.interface';
 import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
 import { PgaTournamentPlayerHoleService } from '../../pga-tournament-player-hole/lib/pga-tournament-player-hole.service';
 
@@ -16,7 +14,6 @@ export class PgaTournamentScoreSyncWorker implements AsyncWorkerHandler {
     private readonly pgaTournamentPlayerService: PgaTournamentPlayerService,
     private readonly pgaTournamentService: PgaTournamentService,
     private readonly holeService: PgaTournamentPlayerHoleService,
-    private readonly eventBus: AsyncWorkerEventBus,
     @Optional()
     private readonly logger: LoggerService = new Logger(PgaTournamentScoreSyncWorker.name)
   ) {}
@@ -30,21 +27,13 @@ export class PgaTournamentScoreSyncWorker implements AsyncWorkerHandler {
     if (!pgaTournament) return;
 
     // Update PGA tournament player scores from leaderboard
+    // → PgaTournamentPlayerService.updateScores() emits 'pga-tournament.scores-updated'
     await this.pgaTournamentPlayerService.updateScores(pgaTournament.id);
 
     // Ingest hole-by-hole and stroke data
     await this.holeService.ingestScoringData(pgaTournament);
 
-    // Emit event for pool reactions
-    this.eventBus.emit('pga-tournament.scores-updated', {
-      pgaTournamentId: pgaTournament.id,
-    });
-
-    // Emit completion event if tournament just completed
-    if (pgaTournament.tournament_status === PgaTournamentStatus.COMPLETED) {
-      this.eventBus.emit('pga-tournament.completed', {
-        pgaTournamentId: pgaTournament.id,
-      });
-    }
+    // Tournament completion is detected + emitted by the ingestion service
+    // when tournament_status transitions to COMPLETED — not here.
   }
 }

@@ -1,8 +1,8 @@
 import { DataSource } from 'typeorm';
 
-import { OnAsyncEvent } from '../../async-worker/async-worker.decorator';
-import { PgaTournamentCompletedPayload } from '../../async-worker/async-worker.event-bus';
-import { AsyncEventHandler } from '../../async-worker/async-worker.interface';
+import { OnDomainEvent } from '../../domain-events/domain-event.decorator';
+import { DomainEventHandler } from '../../domain-events/domain-event.interface';
+import { PgaTournamentCompletedPayload } from '../../pga-tournament/lib/pga-tournament.events';
 import { PoolScoringFormat } from '../../pool/lib/pool.interface';
 
 import { PoolTournament } from './pool-tournament.entity';
@@ -10,9 +10,9 @@ import { PoolTournamentService } from './pool-tournament.service';
 
 import { Injectable, Logger, LoggerService, Optional } from '@nestjs/common';
 
-@OnAsyncEvent('pga-tournament.completed')
+@OnDomainEvent('pga-tournament.completed')
 @Injectable()
-export class PoolFinalizationReactionHandler implements AsyncEventHandler<PgaTournamentCompletedPayload> {
+export class PoolFinalizationReactionHandler implements DomainEventHandler<PgaTournamentCompletedPayload> {
   constructor(
     private readonly poolTournamentService: PoolTournamentService,
     private readonly dataSource: DataSource,

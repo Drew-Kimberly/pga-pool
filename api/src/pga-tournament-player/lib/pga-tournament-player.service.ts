@@ -1,7 +1,11 @@
 import { FindOptionsOrder, FindOptionsWhere, In, Repository } from 'typeorm';
 
+// Side-effect import activates declaration merging for DomainEventMap
+import '../../pga-tournament/lib/pga-tournament.events';
+
 import { IListParams, PaginatedCollection } from '../../common/api/list';
 import { DeepPartial } from '../../common/types';
+import { DomainEventBus } from '../../domain-events/domain-event-bus';
 import { PgaPlayerService } from '../../pga-player/lib/pga-player.service';
 import { NullStringValue } from '../../pga-tour-api/lib/v2/pga-tour-api.constants';
 import {
@@ -28,6 +32,7 @@ export class PgaTournamentPlayerService {
     private readonly pgaTourApi: PgaTourApiService,
     private readonly pgaPlayerService: PgaPlayerService,
     private readonly pgaTournamentService: PgaTournamentService,
+    private readonly eventBus: DomainEventBus,
     @Optional()
     private readonly logger: LoggerService = new Logger(PgaTournamentPlayerService.name)
   ) {}
@@ -197,6 +202,8 @@ export class PgaTournamentPlayerService {
       pgaTournament.tournament_id
     );
     await this.updateScoresWithLeaderboard(pgaTournament, pgaLeaderboard, repo);
+
+    this.eventBus.emit('pga-tournament.scores-updated', { pgaTournamentId });
   }
 
   async upsertFieldForTournament(

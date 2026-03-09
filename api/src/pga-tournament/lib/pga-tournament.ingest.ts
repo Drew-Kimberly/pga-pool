@@ -1,5 +1,9 @@
 /* eslint-disable prettier/prettier */
+// Side-effect import activates declaration merging for DomainEventMap
+import './pga-tournament.events';
+
 import { strToNum } from '../../common/util';
+import { DomainEventBus } from '../../domain-events/domain-event-bus';
 import { ScheduleQuery } from '../../pga-tour-api/lib/v2/generated/graphql';
 import { PgaTourApiService } from '../../pga-tour-api/lib/v2/pga-tour-api.service';
 
@@ -17,6 +21,7 @@ export class PgaTournamentIngestor {
   constructor(
     private readonly pgaTournamentService: PgaTournamentService,
     private readonly pgaTourApi: PgaTourApiService,
+    private readonly eventBus: DomainEventBus,
     @Optional()
     private readonly logger: LoggerService = new Logger(PgaTournamentIngestor.name)
   ) {}
@@ -95,6 +100,28 @@ export class PgaTournamentIngestor {
 
     const payload = Object.values(tourneysToIngest)
     this.logger.log(`Ingesting ${payload.length} PGA Tour tournaments`);
-    return this.pgaTournamentService.save(Object.values(payload));
+
+    // Snapshot existing statuses to detect completion transitions
+    const existingTournaments = await this.pgaTournamentService.listByIds(
+      payload.map((t) => t.id)
+    );
+    const previousStatusMap = new Map(
+      existingTournaments.map((t) => [t.id, t.tournament_status])
+    );
+
+    const saved = await this.pgaTournamentService.save(payload);
+
+    // Emit completion events for tournaments that just transitioned to COMPLETED
+    for (const t of payload) {
+      if (
+        t.tournament_status === PgaTournamentStatus.COMPLETED &&
+        previousStatusMap.get(t.id) !== PgaTournamentStatus.COMPLETED
+      ) {
+        this.eventBus.emit('pga-tournament.completed', { pgaTournamentId: t.id });
+        this.logger.log(`Tournament ${t.id} transitioned to COMPLETED — emitted domain event`);
+      }
+    }
+
+    return saved;
   }
 }

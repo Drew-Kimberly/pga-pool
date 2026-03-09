@@ -19,7 +19,3 @@ export interface AsyncWorkerContext {
 export interface AsyncWorkerHandler {
   run(context: AsyncWorkerContext): Promise<void>;
 }
-
-export interface AsyncEventHandler<T = unknown> {
-  handle(payload: T): Promise<void>;
-}

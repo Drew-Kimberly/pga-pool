@@ -1,7 +1,7 @@
-import { AsyncWorkerEventBusModule } from './async-worker/async-worker.event-bus.module';
 import { AsyncWorkerModule } from './async-worker/async-worker.module';
 import { AuthModule } from './auth/auth.module';
 import { RegisteredDatabaseModule } from './database/registered-database.module';
+import { DomainEventModule } from './domain-events/domain-event.module';
 import { ErrorApiModule } from './error/api/error.api.module';
 import { HealthApiModule } from './health/api/health.api.module';
 import { PgaPlayerApiModule } from './pga-player/api/pga-player-api.module';
@@ -21,7 +21,7 @@ import { Module } from '@nestjs/common';
 @Module({
   imports: [
     RegisteredDatabaseModule,
-    AsyncWorkerEventBusModule,
+    DomainEventModule,
     AsyncWorkerModule,
     AuthModule,
     ErrorApiModule,

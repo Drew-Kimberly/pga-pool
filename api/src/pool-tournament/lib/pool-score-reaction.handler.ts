@@ -1,16 +1,16 @@
 import { DataSource } from 'typeorm';
 
-import { OnAsyncEvent } from '../../async-worker/async-worker.decorator';
-import { PgaTournamentScoresUpdatedPayload } from '../../async-worker/async-worker.event-bus';
-import { AsyncEventHandler } from '../../async-worker/async-worker.interface';
+import { OnDomainEvent } from '../../domain-events/domain-event.decorator';
+import { DomainEventHandler } from '../../domain-events/domain-event.interface';
+import { PgaTournamentScoresUpdatedPayload } from '../../pga-tournament/lib/pga-tournament.events';
 
 import { PoolTournamentService } from './pool-tournament.service';
 
 import { Injectable, Logger, LoggerService, Optional } from '@nestjs/common';
 
-@OnAsyncEvent('pga-tournament.scores-updated')
+@OnDomainEvent('pga-tournament.scores-updated')
 @Injectable()
-export class PoolScoreReactionHandler implements AsyncEventHandler<PgaTournamentScoresUpdatedPayload> {
+export class PoolScoreReactionHandler implements DomainEventHandler<PgaTournamentScoresUpdatedPayload> {
   constructor(
     private readonly poolTournamentService: PoolTournamentService,
     private readonly dataSource: DataSource,

@@ -6,7 +6,6 @@ import {
   SYNC_WINDOW_DAYS,
   WINDOW_REFRESH_INTERVAL_MS,
 } from './async-worker.constants';
-import { AsyncWorkerEventBus } from './async-worker.event-bus';
 import { AsyncWorkerContext } from './async-worker.interface';
 import { AsyncWorkerRegistry, RegisteredWorker } from './async-worker.registry';
 
@@ -37,7 +36,6 @@ export class AsyncWorkerScheduler implements OnApplicationBootstrap, OnApplicati
   constructor(
     private readonly registry: AsyncWorkerRegistry,
     private readonly pgaTournamentService: PgaTournamentService,
-    private readonly eventBus: AsyncWorkerEventBus,
     private readonly configService: ConfigService,
     @Optional()
     private readonly logger: LoggerService = new Logger(AsyncWorkerScheduler.name)
@@ -53,25 +51,7 @@ export class AsyncWorkerScheduler implements OnApplicationBootstrap, OnApplicati
     }
 
     const workers = this.registry.getWorkers();
-    const eventHandlers = this.registry.getEventHandlers();
-    this.logger.log(
-      `Discovered ${workers.length} async worker(s), ${eventHandlers.length} event handler(s)`
-    );
-
-    // Wire event handlers
-    for (const handler of eventHandlers) {
-      this.eventBus.on(handler.event as Parameters<typeof this.eventBus.on>[0], async (payload) => {
-        try {
-          await handler.instance.handle(payload);
-        } catch (error) {
-          this.logger.error(
-            `Event handler "${handler.name}" failed for "${handler.event}": ${error}`,
-            error instanceof Error ? error.stack : undefined
-          );
-        }
-      });
-      this.logger.log(`Wired event handler "${handler.name}" → "${handler.event}"`);
-    }
+    this.logger.log(`Discovered ${workers.length} async worker(s)`);
 
     // Start global workers
     for (const worker of workers.filter((w) => w.options.scope === 'global')) {
