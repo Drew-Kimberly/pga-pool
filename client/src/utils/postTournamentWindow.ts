@@ -10,7 +10,8 @@ const GRACE_HOUR = 8; // 8 AM CT
  * Uses Intl.DateTimeFormat for DST-aware Central Time calculation.
  */
 export function isInPostTournamentWindow(endDateStr: string, now = new Date()): boolean {
-  const endDate = new Date(endDateStr + 'T23:59:59');
+  const dateOnly = endDateStr.slice(0, 10);
+  const endDate = new Date(dateOnly + 'T23:59:59');
   if (isNaN(endDate.getTime())) return false;
 
   // Find the first Monday on or after the end date.

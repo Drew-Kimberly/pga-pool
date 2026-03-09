@@ -134,9 +134,17 @@ export function usePoolNavModel(): PoolNavModel | null {
 
   if (!resolved) return null;
 
-  const leaderboardPath = liveTournament
-    ? `/pools/${resolved.poolId}/tournaments/${liveTournament.id}/leaderboard`
-    : `/pools/${resolved.poolId}/leaderboard`;
+  let leaderboardPath: string;
+  if (liveTournament) {
+    const subTab =
+      liveTournament.pga_tournament.tournament_status ===
+      PgaTournamentTournamentStatusEnum.Completed
+        ? 'results'
+        : 'leaderboard';
+    leaderboardPath = `/pools/${resolved.poolId}/tournaments/${liveTournament.id}/${subTab}`;
+  } else {
+    leaderboardPath = `/pools/${resolved.poolId}/leaderboard`;
+  }
 
   return {
     poolId: resolved.poolId,
