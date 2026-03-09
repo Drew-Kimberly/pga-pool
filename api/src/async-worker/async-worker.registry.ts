@@ -1,5 +1,5 @@
 import { DEFAULT_JITTER_FACTOR } from './async-worker.constants';
-import { AsyncWorker } from './async-worker.decorator';
+import { AsyncWorker, AsyncWorkerMetadata } from './async-worker.decorator';
 import { AsyncWorkerHandler, AsyncWorkerOptions } from './async-worker.interface';
 
 import { Injectable, OnModuleInit } from '@nestjs/common';
@@ -13,7 +13,7 @@ export interface RegisteredWorker {
 
 @Injectable()
 export class AsyncWorkerRegistry implements OnModuleInit {
-  private readonly workers: RegisteredWorker[] = [];
+  private readonly workers = new Map<string, RegisteredWorker>();
 
   constructor(private readonly discovery: DiscoveryService) {}
 
@@ -21,7 +21,7 @@ export class AsyncWorkerRegistry implements OnModuleInit {
     this.discoverWorkers();
   }
 
-  getWorkers(): ReadonlyArray<RegisteredWorker> {
+  getWorkers(): ReadonlyMap<string, RegisteredWorker> {
     return this.workers;
   }
 
@@ -33,7 +33,7 @@ export class AsyncWorkerRegistry implements OnModuleInit {
     for (const wrapper of providers) {
       if (!wrapper.instance || wrapper.isNotMetatype) continue;
 
-      const metadata = this.discovery.getMetadataByDecorator(AsyncWorker, wrapper);
+      const metadata = this.discovery.getMetadataByDecorator(AsyncWorkerMetadata, wrapper);
       if (!metadata) continue;
 
       const instance = wrapper.instance as AsyncWorkerHandler;
@@ -43,12 +43,19 @@ export class AsyncWorkerRegistry implements OnModuleInit {
         );
       }
 
-      this.workers.push({
+      if (this.workers.has(wrapper.name)) {
+        throw new Error(
+          `Duplicate @AsyncWorker() registration: "${wrapper.name}" is already registered`
+        );
+      }
+
+      this.workers.set(wrapper.name, {
         instance,
         options: {
           interval: metadata.interval,
           jitter: metadata.jitter ?? DEFAULT_JITTER_FACTOR,
           scope: metadata.scope ?? 'global',
+          retry: metadata.retry ?? {},
         },
         name: wrapper.name,
       });

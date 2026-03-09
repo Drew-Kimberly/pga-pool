@@ -1,5 +1,6 @@
 import { DataSource, EntityManager } from 'typeorm';
 
+import { PgaTournament } from '../../pga-tournament/lib/pga-tournament.entity';
 import { PgaTournamentStatus } from '../../pga-tournament/lib/pga-tournament.interface';
 import { PgaTournamentPlayer } from '../../pga-tournament-player/lib/pga-tournament-player.entity';
 import { PgaTournamentPlayerService } from '../../pga-tournament-player/lib/pga-tournament-player.service';
@@ -86,8 +87,15 @@ export class PoolTournamentFinalizerService {
       return;
     }
 
+    const pgaTournament = await txManager.getRepository(PgaTournament).findOneBy({
+      id: poolTournament.pga_tournament_id,
+    });
+    if (!pgaTournament) {
+      throw new Error(`PGA Tournament ${poolTournament.pga_tournament_id} does not exist`);
+    }
+
     await this.pgaTournamentPlayerService.updateScores(
-      poolTournament.pga_tournament_id,
+      pgaTournament,
       txManager.getRepository(PgaTournamentPlayer)
     );
     this.logger.log(`Updated player scores for PGA Tournament ${poolTournament.pga_tournament_id}`);

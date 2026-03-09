@@ -2,14 +2,13 @@ import { DataSource } from 'typeorm';
 
 import { OnDomainEvent } from '../../domain-events/domain-event.decorator';
 import { DomainEventHandler } from '../../domain-events/domain-event.interface';
-import { PgaTournamentScoresUpdatedPayload } from '../../pga-tournament/lib/pga-tournament.events';
+import type { PgaTournamentScoresUpdatedPayload } from '../../pga-tournament/lib/pga-tournament.events';
 
 import { PoolTournamentService } from './pool-tournament.service';
 
-import { Injectable, Logger, LoggerService, Optional } from '@nestjs/common';
+import { Logger, LoggerService, Optional } from '@nestjs/common';
 
 @OnDomainEvent('pga-tournament.scores-updated')
-@Injectable()
 export class PoolScoreReactionHandler implements DomainEventHandler<PgaTournamentScoresUpdatedPayload> {
   constructor(
     private readonly poolTournamentService: PoolTournamentService,
@@ -20,7 +19,7 @@ export class PoolScoreReactionHandler implements DomainEventHandler<PgaTournamen
 
   async handle(payload: PgaTournamentScoresUpdatedPayload): Promise<void> {
     const poolTournaments = await this.poolTournamentService.listByPgaTournamentId(
-      payload.pgaTournamentId
+      payload.pgaTournament.id
     );
 
     if (poolTournaments.length === 0) return;

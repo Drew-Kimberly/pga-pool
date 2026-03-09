@@ -5,14 +5,14 @@ import { PgaTournamentPlayerStrokeModule } from '../../pga-tournament-player-str
 import { PgaTournamentPlayerHole } from './pga-tournament-player-hole.entity';
 import { PgaTournamentPlayerHoleService } from './pga-tournament-player-hole.service';
 
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([PgaTournamentPlayerHole]),
     PgaTourApiModule,
-    forwardRef(() => PgaTournamentPlayerModule),
+    PgaTournamentPlayerModule,
     PgaTournamentPlayerStrokeModule,
   ],
   providers: [PgaTournamentPlayerHoleService],

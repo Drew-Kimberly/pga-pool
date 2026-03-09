@@ -1,17 +1,17 @@
-// Event payloads for the PGA Tournament domain
+import type { PgaTournament } from './pga-tournament.entity';
+import type { PgaTournamentStatus } from './pga-tournament.interface';
+
+export interface PgaTournamentStatusUpdatedPayload {
+  pgaTournament: PgaTournament;
+  previousStatus: PgaTournamentStatus;
+  newStatus: PgaTournamentStatus;
+}
 
 export interface PgaTournamentScoresUpdatedPayload {
-  pgaTournamentId: string;
+  pgaTournament: PgaTournament;
 }
 
-export interface PgaTournamentCompletedPayload {
-  pgaTournamentId: string;
-}
-
-// Augment the DomainEventMap so the event bus is fully typed
-declare module '../../domain-events/domain-event-bus' {
-  interface DomainEventMap {
-    'pga-tournament.scores-updated': PgaTournamentScoresUpdatedPayload;
-    'pga-tournament.completed': PgaTournamentCompletedPayload;
-  }
-}
+export type PgaTournamentEventMap = {
+  'pga-tournament.status-updated': PgaTournamentStatusUpdatedPayload;
+  'pga-tournament.scores-updated': PgaTournamentScoresUpdatedPayload;
+};

@@ -3,30 +3,20 @@ import { EventEmitter } from 'node:events';
 import { Injectable } from '@nestjs/common';
 
 /**
- * Extensible event map. Each domain module augments this interface
- * via TypeScript declaration merging in its own `*.events.ts` file.
+ * Typed domain event bus.
+ *
+ * Each domain module exports its own event map interface.
+ * Emitters pass the map as a type parameter for compile-time safety:
  *
  * @example
- * // In pga-tournament.events.ts:
- * declare module '../../domain-events/domain-event-bus' {
- *   interface DomainEventMap {
- *     'pga-tournament.scores-updated': PgaTournamentScoresUpdatedPayload;
- *   }
- * }
+ * this.eventBus.emit<PgaTournamentEventMap>('pga-tournament.scores-updated', { pgaTournament });
  */
-
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface DomainEventMap {}
-
-export type DomainEventName = keyof DomainEventMap & string;
-
 @Injectable()
 export class DomainEventBus extends EventEmitter {
-  emit<E extends DomainEventName>(event: E, payload: DomainEventMap[E]): boolean {
+  emit<TMap extends Record<string, unknown> = Record<string, unknown>>(
+    ...args: { [K in keyof TMap & string]: [event: K, payload: TMap[K]] }[keyof TMap & string]
+  ): boolean {
+    const [event, payload] = args;
     return super.emit(event, payload);
-  }
-
-  on<E extends DomainEventName>(event: E, listener: (payload: DomainEventMap[E]) => void): this {
-    return super.on(event, listener);
   }
 }

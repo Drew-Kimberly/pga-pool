@@ -2,17 +2,17 @@ import { DataSource } from 'typeorm';
 
 import { OnDomainEvent } from '../../domain-events/domain-event.decorator';
 import { DomainEventHandler } from '../../domain-events/domain-event.interface';
-import { PgaTournamentCompletedPayload } from '../../pga-tournament/lib/pga-tournament.events';
+import type { PgaTournamentStatusUpdatedPayload } from '../../pga-tournament/lib/pga-tournament.events';
+import { PgaTournamentStatus } from '../../pga-tournament/lib/pga-tournament.interface';
 import { PoolScoringFormat } from '../../pool/lib/pool.interface';
 
 import { PoolTournament } from './pool-tournament.entity';
 import { PoolTournamentService } from './pool-tournament.service';
 
-import { Injectable, Logger, LoggerService, Optional } from '@nestjs/common';
+import { Logger, LoggerService, Optional } from '@nestjs/common';
 
-@OnDomainEvent('pga-tournament.completed')
-@Injectable()
-export class PoolFinalizationReactionHandler implements DomainEventHandler<PgaTournamentCompletedPayload> {
+@OnDomainEvent('pga-tournament.status-updated')
+export class PoolFinalizationReactionHandler implements DomainEventHandler<PgaTournamentStatusUpdatedPayload> {
   constructor(
     private readonly poolTournamentService: PoolTournamentService,
     private readonly dataSource: DataSource,
@@ -20,9 +20,13 @@ export class PoolFinalizationReactionHandler implements DomainEventHandler<PgaTo
     private readonly logger: LoggerService = new Logger(PoolFinalizationReactionHandler.name)
   ) {}
 
-  async handle(payload: PgaTournamentCompletedPayload): Promise<void> {
+  async handle(payload: PgaTournamentStatusUpdatedPayload): Promise<void> {
+    if (payload.newStatus !== PgaTournamentStatus.COMPLETED) {
+      return;
+    }
+
     const poolTournaments = await this.poolTournamentService.listByPgaTournamentId(
-      payload.pgaTournamentId
+      payload.pgaTournament.id
     );
 
     for (const poolTournament of poolTournaments) {

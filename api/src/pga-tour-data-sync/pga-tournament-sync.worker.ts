@@ -1,13 +1,11 @@
-import { SYNC_WINDOW_DAYS } from '../../async-worker/async-worker.constants';
-import { AsyncWorker } from '../../async-worker/async-worker.decorator';
-import { AsyncWorkerContext, AsyncWorkerHandler } from '../../async-worker/async-worker.interface';
+import { SYNC_WINDOW_DAYS } from '../async-worker/async-worker.constants';
+import { AsyncWorker } from '../async-worker/async-worker.decorator';
+import { AsyncWorkerContext, AsyncWorkerHandler } from '../async-worker/async-worker.interface';
+import { PgaTournamentIngestor } from '../pga-tournament/lib/pga-tournament.ingest';
 
-import { PgaTournamentIngestor } from './pga-tournament.ingest';
+import { Logger, LoggerService, Optional } from '@nestjs/common';
 
-import { Injectable, Logger, LoggerService, Optional } from '@nestjs/common';
-
-@AsyncWorker({ interval: 15 * 60 * 1000 }) // 15 minutes
-@Injectable()
+@AsyncWorker({ interval: 900 }) // 15 minutes
 export class PgaTournamentSyncWorker implements AsyncWorkerHandler {
   constructor(
     private readonly pgaTournamentIngestor: PgaTournamentIngestor,

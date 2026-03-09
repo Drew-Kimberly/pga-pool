@@ -129,7 +129,7 @@ describe('PgaTournamentPlayerService', () => {
       };
       vi.spyOn(pgaTourApi, 'getProjectedFedexCupPoints').mockResolvedValue(projectedPointsResponse);
 
-      await service.updateScores(tournament.id!, repo);
+      await service.updateScores(tournament as PgaTournament, repo);
 
       expect(repo.upsert).toHaveBeenCalledTimes(1);
       expect(pgaTourApi.getProjectedFedexCupPoints).toHaveBeenCalledWith(2023, '006');
@@ -247,7 +247,7 @@ describe('PgaTournamentPlayerService', () => {
       };
       vi.spyOn(pgaTourApi, 'getProjectedFedexCupPoints').mockResolvedValue(projectedPointsResponse);
 
-      await service.updateScores(tournament.id!, repo);
+      await service.updateScores(tournament as PgaTournament, repo);
 
       expect(repo.find).toHaveBeenCalledWith({
         where: {

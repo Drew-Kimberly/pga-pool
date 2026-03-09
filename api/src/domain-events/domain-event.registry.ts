@@ -1,4 +1,8 @@
-import { OnDomainEvent } from './domain-event.decorator';
+import {
+  OnDomainEvent,
+  OnDomainEventMetadata,
+  OnDomainEventMetadataValue,
+} from './domain-event.decorator';
 import { DomainEventHandler } from './domain-event.interface';
 import { DomainEventBus } from './domain-event-bus';
 
@@ -40,8 +44,11 @@ export class DomainEventRegistry implements OnApplicationBootstrap {
     for (const wrapper of providers) {
       if (!wrapper.instance || wrapper.isNotMetatype) continue;
 
-      const event = this.discovery.getMetadataByDecorator(OnDomainEvent, wrapper);
-      if (!event) continue;
+      const metadata: OnDomainEventMetadataValue | undefined =
+        this.discovery.getMetadataByDecorator(OnDomainEventMetadata, wrapper);
+      if (!metadata) continue;
+
+      const { event, options } = metadata;
 
       const instance = wrapper.instance as DomainEventHandler;
       if (typeof instance.handle !== 'function') {
@@ -52,14 +59,30 @@ export class DomainEventRegistry implements OnApplicationBootstrap {
 
       this.handlers.push({ instance, event, name: wrapper.name });
 
-      this.eventBus.on(event as Parameters<typeof this.eventBus.on>[0], async (payload) => {
-        try {
-          await instance.handle(payload);
-        } catch (error) {
-          this.logger.error(
-            `Event handler "${wrapper.name}" failed for "${event}": ${error}`,
-            error instanceof Error ? error.stack : undefined
-          );
+      const retryConfig = options.retry;
+      const maxAttempts = retryConfig === false ? 1 : 1 + (retryConfig?.maxRetries ?? 2);
+      const minBackoff = retryConfig === false ? 0 : (retryConfig?.minBackoffMs ?? 0);
+      const maxBackoff = retryConfig === false ? 0 : (retryConfig?.maxBackoffMs ?? 100);
+
+      this.eventBus.on(event, async (payload: unknown) => {
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
+            await instance.handle(payload);
+            return;
+          } catch (error) {
+            if (attempt < maxAttempts) {
+              const backoff = Math.round(minBackoff + Math.random() * (maxBackoff - minBackoff));
+              this.logger.warn(
+                `Event handler "${wrapper.name}" failed for "${event}" (attempt ${attempt}/${maxAttempts}), retrying in ${backoff}ms: ${error}`
+              );
+              await new Promise((resolve) => setTimeout(resolve, backoff));
+            } else {
+              this.logger.error(
+                `Event handler "${wrapper.name}" failed for "${event}" after ${maxAttempts} attempt(s): ${error}`,
+                error instanceof Error ? error.stack : undefined
+              );
+            }
+          }
         }
       });
 
