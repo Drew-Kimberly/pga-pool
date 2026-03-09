@@ -79,8 +79,7 @@ export function PoolTournamentField() {
           Field Not Yet Available
         </Text>
         <Text size="small" color="text-weak" textAlign="center" style={{ maxWidth: '400px' }}>
-          The player field for {tournament.pga_tournament.name} hasn&apos;t been released yet. Check
-          back closer to tournament week.
+          The player field for {tournament.pga_tournament.name} hasn&apos;t been released yet.
         </Text>
         <Box
           margin={{ top: 'small' }}
