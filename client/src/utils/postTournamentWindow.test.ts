@@ -25,15 +25,17 @@ describe('isInPostTournamentWindow', () => {
     expect(isInPostTournamentWindow(saturdayEnd, afterCutoff)).toBe(false);
   });
 
-  // Tournament ends on a Monday (weather delay): next Monday = 7 days later.
-  it('handles non-Sunday end dates (Monday end → next Monday cutoff)', () => {
+  // Tournament ends on a Monday (playoff): cutoff is same Monday 8 AM CT.
+  // By the time a Monday playoff finishes (afternoon), the cutoff has already
+  // passed — so the window is effectively closed immediately.
+  it('handles Monday end dates (playoff — immediate switchover)', () => {
     const mondayEnd = '2026-02-09'; // Monday, CST
-    // Next Monday = 2026-02-16. Cutoff = 2026-02-16T14:00:00Z (CST).
-    const midWeek = new Date('2026-02-12T12:00:00Z');
-    expect(isInPostTournamentWindow(mondayEnd, midWeek)).toBe(true);
+    // Same Monday = 2026-02-09. Cutoff = 2026-02-09T14:00:00Z (8 AM CST).
+    const mondayMorning = new Date('2026-02-09T13:59:00Z');
+    expect(isInPostTournamentWindow(mondayEnd, mondayMorning)).toBe(true);
 
-    const afterNextMonday = new Date('2026-02-16T14:00:00Z');
-    expect(isInPostTournamentWindow(mondayEnd, afterNextMonday)).toBe(false);
+    const mondayAfternoon = new Date('2026-02-09T14:00:00Z');
+    expect(isInPostTournamentWindow(mondayEnd, mondayAfternoon)).toBe(false);
   });
 
   // DST boundary: DST starts 2026-03-08. A tournament ending 2026-03-08 (Sunday)
