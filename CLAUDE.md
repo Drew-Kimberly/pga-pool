@@ -276,6 +276,31 @@ When handling PR reviews, follow this systematic approach:
    - Repeat the process for each review round
    - Always verify previous fixes still work after new changes
 
+### Git Hooks (Lefthook)
+
+The repo uses [Lefthook](https://github.com/evilmartians/lefthook) for git hooks. It is installed as a root devDependency and activates automatically via the `postinstall` script when you run `yarn` at the repo root.
+
+**Setup** (one-time, after cloning):
+```bash
+yarn          # installs lefthook + activates hooks via postinstall
+```
+
+**Pre-commit hooks** (run in parallel):
+
+| Hook | Triggers on | What it does |
+|---|---|---|
+| `api-lint` | `api/**/*.ts` | Runs `eslint --fix` on staged files, auto-stages fixes |
+| `client-lint` | `client/**/*.{ts,tsx}` | Runs `eslint --fix` on staged files, auto-stages fixes |
+| `sdk-check` | `api/openapi.yaml` | Regenerates SDK and fails if `client/sdk/src/` has unstaged changes |
+
+**Key behaviors**:
+- Lint hooks only run on the staged files in the commit, not the entire codebase.
+- Lint hooks auto-fix and re-stage corrected files (`stage_fixed: true`).
+- The SDK check regenerates the SDK in-place. If it fails, run `yarn --cwd api sdk:generate`, stage the output (`git add client/sdk/src/`), and re-commit.
+- Skip hooks temporarily with `LEFTHOOK=0 git commit` (avoid in normal workflow).
+
+**Config**: `lefthook.yml` at the repo root.
+
 ### Pre-Commit Verification Checklist
 
 Before committing any changes, **ALWAYS** run the following verification steps to ensure code quality.
