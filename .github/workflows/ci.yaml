@@ -172,11 +172,12 @@ jobs:
 
   api-test-integration:
     name: (api) Integration Test
-    needs: api-install-dependencies
+    needs: [get-changed-files, api-install-dependencies]
+    if: needs.get-changed-files.outputs.api-changed == 'true'
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:15
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres

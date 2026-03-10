@@ -3,6 +3,7 @@ import fs from 'fs';
 import { Client } from 'pg';
 import { DataSource } from 'typeorm';
 
+import { DB_NAME_FILE } from './constants';
 import { League } from '../src/league/lib/league.entity';
 import { LeagueUser } from '../src/league-user/lib/league-user.entity';
 import { PgaPlayer } from '../src/pga-player/lib/pga-player.entity';
@@ -17,8 +18,6 @@ import { PoolTournamentUser } from '../src/pool-tournament-user/lib/pool-tournam
 import { PoolTournamentUserPick } from '../src/pool-tournament-user-pick/lib/pool-tournament-user-pick.entity';
 import { PoolUser } from '../src/pool-user/lib/pool-user.entity';
 import { User } from '../src/user/lib/user.entity';
-
-const DB_NAME_FILE = '/tmp/.pga-pool-test-db';
 
 const ALL_ENTITIES = [
   PgaPlayer,

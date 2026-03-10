@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
   createPgaPlayer,
@@ -12,7 +12,7 @@ import {
   createPoolTournamentUserPick,
   createPoolUser,
 } from '../../../test-helpers/factories';
-import { setupTestApp } from '../../../test-helpers/setup-test-app';
+import { MockPgaTourApiService, setupTestApp } from '../../../test-helpers/setup-test-app';
 import {
   PgaApiProjectedFedexCupPointsResponse,
   PgaApiTournamentLeaderboardResponse,
@@ -31,7 +31,7 @@ describe('PoolTournamentFinalizerService (integration)', () => {
   let app: INestApplication;
   let ds: DataSource;
   let finalizerService: PoolTournamentFinalizerService;
-  let mockPgaTourApi: Record<string, ReturnType<typeof vi.fn>>;
+  let mockPgaTourApi: MockPgaTourApiService;
 
   beforeAll(async () => {
     const moduleRef = await setupTestApp().compile();

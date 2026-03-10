@@ -1,12 +1,12 @@
 import { DataSource } from 'typeorm';
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
   createPgaPlayer,
   createPgaTournament,
   createPgaTournamentPlayer,
 } from '../../../test-helpers/factories';
-import { setupTestApp } from '../../../test-helpers/setup-test-app';
+import { MockPgaTourApiService, setupTestApp } from '../../../test-helpers/setup-test-app';
 import {
   PgaApiProjectedFedexCupPointsResponse,
   PgaApiTournamentLeaderboardResponse,
@@ -24,7 +24,7 @@ describe('PgaTournamentPlayerService (integration)', () => {
   let app: INestApplication;
   let ds: DataSource;
   let service: PgaTournamentPlayerService;
-  let mockPgaTourApi: Record<string, ReturnType<typeof vi.fn>>;
+  let mockPgaTourApi: MockPgaTourApiService;
 
   beforeAll(async () => {
     const moduleRef = await setupTestApp().compile();

@@ -2,18 +2,21 @@ import fs from 'fs';
 
 import { vi } from 'vitest';
 
+import { DB_NAME_FILE } from './constants';
 import { AppModule } from '../src/app.module';
 import { PgaTourApiService } from '../src/pga-tour-api/lib/v2/pga-tour-api.service';
 
 import { Test, TestingModuleBuilder } from '@nestjs/testing';
 
-const DB_NAME_FILE = '/tmp/.pga-pool-test-db';
+export type MockPgaTourApiService = {
+  [K in keyof PgaTourApiService]: ReturnType<typeof vi.fn>;
+};
 
 function getTestDbName(): string {
   return fs.readFileSync(DB_NAME_FILE, 'utf-8').trim();
 }
 
-export function createMockPgaTourApiService(): Record<string, ReturnType<typeof vi.fn>> {
+export function createMockPgaTourApiService(): MockPgaTourApiService {
   return {
     getPlayers: vi.fn().mockResolvedValue([]),
     getPlayerSeasonResults: vi.fn().mockResolvedValue({ tours: [] }),

@@ -7,7 +7,7 @@ import {
   createPgaTournamentPlayer,
   createPgaTournamentPlayerHole,
 } from '../../../test-helpers/factories';
-import { setupTestApp } from '../../../test-helpers/setup-test-app';
+import { MockPgaTourApiService, setupTestApp } from '../../../test-helpers/setup-test-app';
 import { PgaTourApiService } from '../../pga-tour-api/lib/v2/pga-tour-api.service';
 import { PgaTournamentPlayerStrokeService } from '../../pga-tournament-player-stroke/lib/pga-tournament-player-stroke.service';
 
@@ -21,7 +21,7 @@ describe('PgaTournamentPlayerHoleService (integration)', () => {
   let app: INestApplication;
   let ds: DataSource;
   let service: PgaTournamentPlayerHoleService;
-  let mockPgaTourApi: Record<string, ReturnType<typeof vi.fn>>;
+  let mockPgaTourApi: MockPgaTourApiService;
 
   beforeAll(async () => {
     // Override stroke service to avoid stroke API calls; tests focus on holes

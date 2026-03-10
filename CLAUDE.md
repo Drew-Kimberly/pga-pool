@@ -52,8 +52,11 @@ yarn --cwd api build
 yarn --cwd api lint
 yarn --cwd api lint:fix
 
-# Run tests
+# Run unit tests
 yarn --cwd api test
+
+# Run integration tests (requires PostgreSQL on localhost:5430)
+yarn --cwd api test:integration
 
 # Database migrations
 yarn --cwd api db:migrations:generate -- src/database/migrations/MigrationName
@@ -154,8 +157,9 @@ Key entities and relationships:
 
 3. **Testing**:
    - Unit tests for both API and client
-   - API uses Jest with NestJS testing utilities
+   - API uses Vitest with NestJS testing utilities
    - Client uses React Testing Library
+   - API has integration tests that run against a real PostgreSQL instance (see below)
 
 ### Environment Setup
 
@@ -185,6 +189,27 @@ Key entities and relationships:
 - Client: Static build served via CDN
 - Database: PostgreSQL with migrations
 - API URL: https://api.pga-pool.drewk.dev
+
+### Integration Tests (API)
+
+The API has integration tests that exercise real database operations against a live PostgreSQL instance. These replace heavily-mocked unit tests for services with complex DB interactions (transactions, upserts, GROUP BY aggregations, advisory locks).
+
+**Running**: `yarn --cwd api test:integration` (requires PostgreSQL on `localhost:5430`, or set `POSTGRES_HOST`/`POSTGRES_PORT` env vars).
+
+**How it works**:
+1. **Global setup** (`test-helpers/global-setup.ts`): Creates an ephemeral database with a random name, syncs schema via `synchronize: true`, writes the DB name to a temp file.
+2. **Test app** (`test-helpers/setup-test-app.ts`): Bootstraps the real `AppModule` with only `PgaTourApiService` mocked (the external HTTP boundary). All DB operations are real.
+3. **Teardown**: Drops the ephemeral database after the test run.
+
+**Writing integration tests**:
+- File naming: `*.integration.spec.ts` (these are excluded from `yarn test` and only run via `yarn test:integration`)
+- Use `setupTestApp().compile()` to bootstrap the NestJS app with real DI
+- Use factories from `test-helpers/factories/` to create test data. Factories accept `ds: DataSource` as the first arg, then an optional `opts` object with pre-built entity dependencies and `overrides: Partial<Entity>`.
+- Factories auto-create FK dependencies when not provided (e.g., `createPgaTournamentPlayer(ds)` will auto-create a `PgaPlayer` and `PgaTournament`).
+- The mock for `PgaTourApiService` is typed as `MockPgaTourApiService` (exported from `setup-test-app.ts`). Get it via `moduleRef.get(PgaTourApiService)`.
+- Tests do **not** truncate tables between cases — each test creates its own isolated entity graph with unique IDs. Keep queries scoped to specific entity IDs.
+
+**Config**: `vitest.integration.config.ts` extends the shared base with `pool: 'forks'`, `singleFork: true`, 60s test timeout, 120s hook timeout, and the global setup file.
 
 ### Development Notes
 
