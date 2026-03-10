@@ -1,10 +1,12 @@
 /* eslint-disable prettier/prettier */
 import { strToNum } from '../../common/util';
+import { DomainEventBus } from '../../domain-events/domain-event-bus';
 import { ScheduleQuery } from '../../pga-tour-api/lib/v2/generated/graphql';
 import { PgaTourApiService } from '../../pga-tour-api/lib/v2/pga-tour-api.service';
 
 import { PGA_TOURNAMENT_LENGTH_DAYS } from './pga-tournament.constants';
 import { PgaTournament } from './pga-tournament.entity';
+import { PgaTournamentEventMap } from './pga-tournament.events';
 import { PgaTournamentFeatures, PgaTournamentRoundStatus, PgaTournamentScoringFormat, PgaTournamentStatus, SavePgaTournament } from './pga-tournament.interface';
 import { PgaTournamentService } from './pga-tournament.service';
 
@@ -17,6 +19,7 @@ export class PgaTournamentIngestor {
   constructor(
     private readonly pgaTournamentService: PgaTournamentService,
     private readonly pgaTourApi: PgaTourApiService,
+    private readonly eventBus: DomainEventBus,
     @Optional()
     private readonly logger: LoggerService = new Logger(PgaTournamentIngestor.name)
   ) {}
@@ -95,6 +98,39 @@ export class PgaTournamentIngestor {
 
     const payload = Object.values(tourneysToIngest)
     this.logger.log(`Ingesting ${payload.length} PGA Tour tournaments`);
-    return this.pgaTournamentService.save(Object.values(payload));
+
+    // Snapshot existing statuses to detect status transitions
+    const existingTournaments = await this.pgaTournamentService.listByIds(
+      payload.map((t) => t.id)
+    );
+    const previousStatusMap = new Map(
+      existingTournaments.map((t) => [t.id, t.tournament_status])
+    );
+
+    const saved = await this.pgaTournamentService.save(payload);
+
+    // Build a lookup of saved entities for event payloads
+    const savedById = new Map(saved.map((t) => [t.id, t]));
+
+    // Emit status-updated events for tournaments that changed status
+    for (const t of payload) {
+      const previousStatus = previousStatusMap.get(t.id);
+      const newStatus = t.tournament_status;
+      if (newStatus && previousStatus !== newStatus) {
+        const savedEntity = savedById.get(t.id);
+        if (savedEntity) {
+          this.eventBus.emit<PgaTournamentEventMap>('pga-tournament.status-updated', {
+            pgaTournament: savedEntity,
+            previousStatus: previousStatus ?? PgaTournamentStatus.NOT_STARTED,
+            newStatus,
+          });
+          this.logger.log(
+            `Tournament ${t.id} status changed ${previousStatus ?? 'NEW'} → ${newStatus} — emitted domain event`
+          );
+        }
+      }
+    }
+
+    return saved;
   }
 }

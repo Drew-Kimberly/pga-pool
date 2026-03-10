@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { DomainEventBus } from '../../domain-events/domain-event-bus';
 import { ScheduleQuery, TournamentsQuery } from '../../pga-tour-api/lib/v2/generated/graphql';
 import { PgaTourApiService } from '../../pga-tour-api/lib/v2/pga-tour-api.service';
 
@@ -73,6 +74,7 @@ function makeTournamentData(
 function createMocks() {
   const pgaTournamentService = {
     save: vi.fn().mockResolvedValue([]),
+    listByIds: vi.fn().mockResolvedValue([]),
   } as unknown as PgaTournamentService;
 
   const pgaTourApi = {
@@ -81,15 +83,19 @@ function createMocks() {
     getCourseStats: vi.fn(),
   } as unknown as PgaTourApiService;
 
+  const eventBus = {
+    emit: vi.fn(),
+  } as unknown as DomainEventBus;
+
   const logger = {
     log: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
   } as unknown as LoggerService;
 
-  const ingestor = new PgaTournamentIngestor(pgaTournamentService, pgaTourApi, logger);
+  const ingestor = new PgaTournamentIngestor(pgaTournamentService, pgaTourApi, eventBus, logger);
 
-  return { pgaTournamentService, pgaTourApi, logger, ingestor };
+  return { pgaTournamentService, pgaTourApi, eventBus, logger, ingestor };
 }
 
 function setupScheduleAndTournaments(pgaTourApi: PgaTourApiService, tournamentIds: string[]) {

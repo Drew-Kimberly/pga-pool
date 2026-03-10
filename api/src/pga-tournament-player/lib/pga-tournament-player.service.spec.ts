@@ -1,6 +1,7 @@
 import { InsertQueryBuilder, Repository } from 'typeorm';
 import { describe, expect, it, vi } from 'vitest';
 
+import { DomainEventBus } from '../../domain-events/domain-event-bus';
 import { PgaPlayerService } from '../../pga-player/lib/pga-player.service';
 import {
   PgaApiProjectedFedexCupPointsResponse,
@@ -16,6 +17,10 @@ import { PlayerStatus } from './pga-tournament-player.interface';
 import { PgaTournamentPlayerService } from './pga-tournament-player.service';
 
 import { LoggerService } from '@nestjs/common';
+
+function createEventBusMock(): DomainEventBus {
+  return { emit: vi.fn() } as unknown as DomainEventBus;
+}
 
 describe('PgaTournamentPlayerService', () => {
   describe('updateScores', () => {
@@ -41,11 +46,13 @@ describe('PgaTournamentPlayerService', () => {
         log: vi.fn(),
       } as unknown as LoggerService;
 
+      const eventBus = createEventBusMock();
       const service = new PgaTournamentPlayerService(
         repo,
         pgaTourApi,
         pgaPlayerService,
         pgaTournamentService,
+        eventBus,
         logger
       );
 
@@ -122,7 +129,7 @@ describe('PgaTournamentPlayerService', () => {
       };
       vi.spyOn(pgaTourApi, 'getProjectedFedexCupPoints').mockResolvedValue(projectedPointsResponse);
 
-      await service.updateScores(tournament.id!, repo);
+      await service.updateScores(tournament as PgaTournament, repo);
 
       expect(repo.upsert).toHaveBeenCalledTimes(1);
       expect(pgaTourApi.getProjectedFedexCupPoints).toHaveBeenCalledWith(2023, '006');
@@ -176,11 +183,13 @@ describe('PgaTournamentPlayerService', () => {
         log: vi.fn(),
       } as unknown as LoggerService;
 
+      const eventBus = createEventBusMock();
       const service = new PgaTournamentPlayerService(
         repo,
         pgaTourApi,
         pgaPlayerService,
         pgaTournamentService,
+        eventBus,
         logger
       );
 
@@ -238,7 +247,7 @@ describe('PgaTournamentPlayerService', () => {
       };
       vi.spyOn(pgaTourApi, 'getProjectedFedexCupPoints').mockResolvedValue(projectedPointsResponse);
 
-      await service.updateScores(tournament.id!, repo);
+      await service.updateScores(tournament as PgaTournament, repo);
 
       expect(repo.find).toHaveBeenCalledWith({
         where: {
@@ -280,6 +289,8 @@ describe('PgaTournamentPlayerService', () => {
 
       const pgaTournamentService = {} as unknown as PgaTournamentService;
 
+      const eventBus = createEventBusMock();
+
       const logger = {
         warn: vi.fn(),
         error: vi.fn(),
@@ -291,6 +302,7 @@ describe('PgaTournamentPlayerService', () => {
         pgaTourApi,
         pgaPlayerService,
         pgaTournamentService,
+        eventBus,
         logger
       );
 
@@ -566,6 +578,8 @@ describe('PgaTournamentPlayerService', () => {
         get: vi.fn(),
       } as unknown as PgaTournamentService;
 
+      const eventBus = createEventBusMock();
+
       const logger = {
         warn: vi.fn(),
         error: vi.fn(),
@@ -577,6 +591,7 @@ describe('PgaTournamentPlayerService', () => {
         pgaTourApi,
         pgaPlayerService,
         pgaTournamentService,
+        eventBus,
         logger
       );
 

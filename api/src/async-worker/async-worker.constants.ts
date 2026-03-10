@@ -1,0 +1,4 @@
+export const ASYNC_WORKERS_ENABLED_ENV = 'ASYNC_WORKERS_ENABLED';
+export const DEFAULT_JITTER_FACTOR = 0.15;
+export const SYNC_WINDOW_DAYS = 14;
+export const WINDOW_REFRESH_INTERVAL_MS = 60 * 60 * 1000; // 1 hour

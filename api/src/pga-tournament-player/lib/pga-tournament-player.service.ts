@@ -2,6 +2,7 @@ import { FindOptionsOrder, FindOptionsWhere, In, Repository } from 'typeorm';
 
 import { IListParams, PaginatedCollection } from '../../common/api/list';
 import { DeepPartial } from '../../common/types';
+import { DomainEventBus } from '../../domain-events/domain-event-bus';
 import { PgaPlayerService } from '../../pga-player/lib/pga-player.service';
 import { NullStringValue } from '../../pga-tour-api/lib/v2/pga-tour-api.constants';
 import {
@@ -11,6 +12,7 @@ import {
 } from '../../pga-tour-api/lib/v2/pga-tour-api.interface';
 import { PgaTourApiService } from '../../pga-tour-api/lib/v2/pga-tour-api.service';
 import { PgaTournament } from '../../pga-tournament/lib/pga-tournament.entity';
+import { PgaTournamentEventMap } from '../../pga-tournament/lib/pga-tournament.events';
 import { PgaTournamentStatus } from '../../pga-tournament/lib/pga-tournament.interface';
 import { PgaTournamentService } from '../../pga-tournament/lib/pga-tournament.service';
 
@@ -28,6 +30,7 @@ export class PgaTournamentPlayerService {
     private readonly pgaTourApi: PgaTourApiService,
     private readonly pgaPlayerService: PgaPlayerService,
     private readonly pgaTournamentService: PgaTournamentService,
+    private readonly eventBus: DomainEventBus,
     @Optional()
     private readonly logger: LoggerService = new Logger(PgaTournamentPlayerService.name)
   ) {}
@@ -184,19 +187,16 @@ export class PgaTournamentPlayerService {
   }
 
   async updateScores(
-    pgaTournamentId: string,
+    pgaTournament: PgaTournament,
     repo: Repository<PgaTournamentPlayer> = this.tourneyPlayerRepo
   ) {
-    const pgaTournament = await this.pgaTournamentService.get(pgaTournamentId);
-    if (!pgaTournament) {
-      throw new Error(`PGA Tournament ${pgaTournamentId} does not exist`);
-    }
-
     const pgaLeaderboard = await this.pgaTourApi.getTournamentLeaderboard(
       pgaTournament.year,
       pgaTournament.tournament_id
     );
     await this.updateScoresWithLeaderboard(pgaTournament, pgaLeaderboard, repo);
+
+    this.eventBus.emit<PgaTournamentEventMap>('pga-tournament.scores-updated', { pgaTournament });
   }
 
   async upsertFieldForTournament(
