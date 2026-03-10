@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   postgres:
-    image: postgres
+    image: postgres:15
     ports:
       - 5430:5432
     environment:

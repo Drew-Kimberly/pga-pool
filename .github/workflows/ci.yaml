@@ -170,6 +170,41 @@ jobs:
         working-directory: api
         run: yarn test
 
+  api-test-integration:
+    name: (api) Integration Test
+    needs: [get-changed-files, api-install-dependencies]
+    if: needs.get-changed-files.outputs.api-changed == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5430:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup Node with Yarn Dependencies
+        uses: ./.github/actions/setup-node-with-dependencies/
+        with:
+          cwd: api
+      - name: Run Integration Tests
+        working-directory: api
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5430
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        run: yarn test:integration
+
   api-build:
     name: (api) Build
     needs: [get-changed-files]
@@ -225,6 +260,7 @@ jobs:
       - get-changed-files
       - api-lint-and-validate
       - api-test
+      - api-test-integration
       - api-build
       - sdk-freshness-check
     if: |
