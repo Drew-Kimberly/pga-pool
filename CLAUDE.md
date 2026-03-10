@@ -104,7 +104,8 @@ yarn --cwd client test
 
 2. **Data Flow**:
    - External PGA Tour API → Ingestion Services → PostgreSQL Database
-   - Cron jobs periodically update tournament scores
+   - Async workers periodically poll for tournament data and scores
+   - Domain events trigger reactive updates (pool score recalculation, finalization)
    - RESTful API endpoints serve data to the client
    - CLI tools provide administrative functions
 
@@ -113,6 +114,29 @@ yarn --cwd client test
    - **MetaBet API Service**: Additional data source integration
    - **TypeORM List Service**: Handles pagination and filtering
    - **Seed Data Service**: Manages tournament field data
+
+### Async Worker Framework (full docs: [`docs/ASYNC_WORKERS.md`](docs/ASYNC_WORKERS.md))
+
+In-process, `setTimeout`-based scheduled background jobs. No external broker (Redis/BullMQ).
+
+- **Decorator**: `@AsyncWorker({ interval, scope?, jitter?, retry? })` — automatically applies `@Injectable()`.
+- **Interface**: Implement `AsyncWorkerHandler` with a `run(context: AsyncWorkerContext)` method.
+- **Scopes**: `'global'` (single instance) or `'pga_tournament'` (one instance per tournament in ±14-day sync window).
+- **Features**: Jitter (±15% default), overlap prevention, retry with exponential backoff (2 retries, 100–5000ms), graceful shutdown.
+- **Env**: `ASYNC_WORKERS_ENABLED=false` disables all workers.
+- **Current workers** (`api/src/pga-tour-data-sync/`): `PgaTournamentSyncWorker` (15min, global), `PgaPlayerSyncWorker` (1h, global), `PgaTournamentFieldSyncWorker` (15min, per-tournament), `PgaTournamentScoreSyncWorker` (1min, per-tournament).
+- **Key rule**: Workers should be thin — handle *when* to poll. Delegate *reactions* to domain events.
+
+### Domain Events (full docs: [`docs/DOMAIN_EVENTS.md`](docs/DOMAIN_EVENTS.md))
+
+In-process, fire-and-forget event system for reacting to state changes. Uses a typed `EventEmitter` wrapper.
+
+- **Bus**: `DomainEventBus` — inject anywhere (module is `@Global()`). Emit with type safety: `this.eventBus.emit<PgaTournamentEventMap>('event-name', payload)`.
+- **Handlers**: `@OnDomainEvent('event-name', { retry? })` + implement `DomainEventHandler<T>` with a `handle(payload)` method. Auto-discovered, no manual wiring.
+- **Retry**: 2 retries, 0–100ms backoff (faster defaults than workers — handlers are lightweight DB operations).
+- **Event maps**: Defined per domain in `*.events.ts` files. Maps event names to typed payloads for compile-time safety.
+- **Current events**: `pga-tournament.status-updated` (triggers pool finalization), `pga-tournament.scores-updated` (triggers pool score recalculation).
+- **Naming**: Event handlers use `*ReactionHandler` suffix. Event names follow `{domain}.{verb-past-tense}` pattern.
 
 ### Frontend Architecture
 
