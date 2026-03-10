@@ -56,7 +56,7 @@ export class PgaTournamentPlayer {
     precision: 10,
     scale: 3,
     nullable: true,
-    transformer: new CoerceNumericColumnTransformer(),
+    transformer: new CoerceNumericColumnTransformer({ nullable: true }),
   })
   official_fedex_cup_points: number | null;
 

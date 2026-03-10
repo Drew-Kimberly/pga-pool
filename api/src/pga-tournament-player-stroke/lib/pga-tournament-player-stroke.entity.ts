@@ -53,7 +53,7 @@ export class PgaTournamentPlayerStroke {
     precision: 6,
     scale: 2,
     nullable: true,
-    transformer: new CoerceNumericColumnTransformer(),
+    transformer: new CoerceNumericColumnTransformer({ nullable: true }),
   })
   ball_speed: number | null;
 
@@ -62,7 +62,7 @@ export class PgaTournamentPlayerStroke {
     precision: 6,
     scale: 2,
     nullable: true,
-    transformer: new CoerceNumericColumnTransformer(),
+    transformer: new CoerceNumericColumnTransformer({ nullable: true }),
   })
   club_speed: number | null;
 
@@ -71,7 +71,7 @@ export class PgaTournamentPlayerStroke {
     precision: 4,
     scale: 3,
     nullable: true,
-    transformer: new CoerceNumericColumnTransformer(),
+    transformer: new CoerceNumericColumnTransformer({ nullable: true }),
   })
   smash_factor: number | null;
 
@@ -80,7 +80,7 @@ export class PgaTournamentPlayerStroke {
     precision: 5,
     scale: 2,
     nullable: true,
-    transformer: new CoerceNumericColumnTransformer(),
+    transformer: new CoerceNumericColumnTransformer({ nullable: true }),
   })
   launch_angle: number | null;
 
@@ -89,7 +89,7 @@ export class PgaTournamentPlayerStroke {
     precision: 8,
     scale: 2,
     nullable: true,
-    transformer: new CoerceNumericColumnTransformer(),
+    transformer: new CoerceNumericColumnTransformer({ nullable: true }),
   })
   launch_spin: number | null;
 
@@ -98,7 +98,7 @@ export class PgaTournamentPlayerStroke {
     precision: 6,
     scale: 2,
     nullable: true,
-    transformer: new CoerceNumericColumnTransformer(),
+    transformer: new CoerceNumericColumnTransformer({ nullable: true }),
   })
   spin_axis: number | null;
 
@@ -107,7 +107,7 @@ export class PgaTournamentPlayerStroke {
     precision: 7,
     scale: 2,
     nullable: true,
-    transformer: new CoerceNumericColumnTransformer(),
+    transformer: new CoerceNumericColumnTransformer({ nullable: true }),
   })
   apex_height: number | null;
 
@@ -116,7 +116,7 @@ export class PgaTournamentPlayerStroke {
     precision: 12,
     scale: 6,
     nullable: true,
-    transformer: new CoerceNumericColumnTransformer(),
+    transformer: new CoerceNumericColumnTransformer({ nullable: true }),
   })
   start_x: number | null;
 
@@ -125,7 +125,7 @@ export class PgaTournamentPlayerStroke {
     precision: 12,
     scale: 6,
     nullable: true,
-    transformer: new CoerceNumericColumnTransformer(),
+    transformer: new CoerceNumericColumnTransformer({ nullable: true }),
   })
   start_y: number | null;
 
@@ -134,7 +134,7 @@ export class PgaTournamentPlayerStroke {
     precision: 12,
     scale: 6,
     nullable: true,
-    transformer: new CoerceNumericColumnTransformer(),
+    transformer: new CoerceNumericColumnTransformer({ nullable: true }),
   })
   end_x: number | null;
 
@@ -143,7 +143,7 @@ export class PgaTournamentPlayerStroke {
     precision: 12,
     scale: 6,
     nullable: true,
-    transformer: new CoerceNumericColumnTransformer(),
+    transformer: new CoerceNumericColumnTransformer({ nullable: true }),
   })
   end_y: number | null;
 }
