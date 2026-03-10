@@ -16,7 +16,6 @@
     "test": "vitest run --passWithNoTests",
     "typeorm": "ts-node -r tsconfig-paths/register tools/typeorm.ts",
     "pgapool": "ts-node cli/index.ts",
-    "cron:tournament-score-updater": "ts-node src/cron/jobs/tournament-score-updater.ts",
     "db:migrations:generate": "yarn typeorm migration:generate --pretty",
     "db:migrations:run": "yarn typeorm migration:run",
     "db:migrations:revert": "yarn typeorm migration:revert",
@@ -24,8 +23,6 @@
     "sdk:build": "yarn --cwd ../client/sdk compile",
     "sdk:generate": "yarn openapi-generator-cli generate --generator-key pga-pool-api --remove-operation-id-prefix",
     "sdk:generate:build": "yarn sdk:generate && yarn sdk:build",
-    "async-worker": "ts-node src/async-worker/index.ts",
-    "start:async-worker": "cross-env ASYNC_WORKER_JITTER_MS=10000 ts-node src/async-worker/index.ts",
     "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
@@ -76,7 +73,6 @@
     "@typescript-eslint/eslint-plugin": "8.56.1",
     "@typescript-eslint/parser": "8.56.1",
     "commander": "14.0.3",
-    "cross-env": "10.1.0",
     "dotenv": "17.3.1",
     "eslint": "9.28.0",
     "eslint-config-prettier": "10.1.8",
