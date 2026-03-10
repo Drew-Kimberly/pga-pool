@@ -169,7 +169,28 @@ export class PgaTournamentPlayerHoleService {
 
     // PGA Tour API encodes playoff tournaments as 4xx (e.g. 401), so cap to actual rounds
     const roundLimit = Math.min(currentRound, MAX_ROUNDS);
+
+    // Determine which rounds need ingestion: always the current round,
+    // plus any prior rounds missing hole data (one-time backfill).
+    const ingestedRounds = await this.getIngestedRounds(pgaTournament.id);
+    const roundsToIngest: number[] = [];
     for (let round = 1; round <= roundLimit; round++) {
+      const isPriorRound = round < roundLimit;
+      if (isPriorRound && ingestedRounds.has(round)) {
+        this.logger.debug?.(
+          `Skipping completed round ${round} for tournament ${pgaTournament.id} (already ingested)`
+        );
+        continue;
+      }
+      roundsToIngest.push(round);
+    }
+
+    if (roundsToIngest.length === 0) {
+      return;
+    }
+
+    // Ingest hole-by-hole data for rounds that need it
+    for (const round of roundsToIngest) {
       try {
         await this.ingestHolesForRound(pgaTournament.id, round);
       } catch (e) {
@@ -180,6 +201,7 @@ export class PgaTournamentPlayerHoleService {
       }
     }
 
+    // Ingest stroke data only for rounds that need it
     const activePlayers = await this.pgaTournamentPlayerService.list({
       tournamentId: pgaTournament.id,
     });
@@ -195,7 +217,7 @@ export class PgaTournamentPlayerHoleService {
       await Promise.all(
         batch.map(async (player: PgaTournamentPlayer) => {
           const playerId = String(player.id).split('-')[0];
-          for (let round = 1; round <= roundLimit; round++) {
+          for (const round of roundsToIngest) {
             try {
               await this.strokeService.ingestStrokesForPlayer(pgaTournament.id, playerId, round);
             } catch (e) {
@@ -210,6 +232,19 @@ export class PgaTournamentPlayerHoleService {
     }
 
     this.logger.log(`Scoring data ingestion complete for tournament ${pgaTournament.id}`);
+  }
+
+  private async getIngestedRounds(pgaTournamentId: string): Promise<Set<number>> {
+    const playerIds = [...(await this.getExistingPlayerIds(pgaTournamentId))];
+    if (playerIds.length === 0) return new Set();
+
+    const results = await this.holeRepo
+      .createQueryBuilder('hole')
+      .select('DISTINCT hole.round_number', 'round_number')
+      .where('hole.pga_tournament_player_id IN (:...ids)', { ids: playerIds })
+      .getRawMany<{ round_number: number }>();
+
+    return new Set(results.map((r) => r.round_number));
   }
 
   private async getExistingPlayerIds(pgaTournamentId: string): Promise<Set<string>> {

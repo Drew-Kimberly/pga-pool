@@ -232,27 +232,123 @@ describe('PgaTournamentPlayerHoleService', () => {
   });
 
   describe('ingestScoringData', () => {
-    it('caps round iteration at 4 even when current_round is larger', async () => {
-      const { service, pgaTournamentPlayerService } = createMocks();
-
+    function setupIngestMocks(
+      mocks: ReturnType<typeof createMocks>,
+      opts: { ingestedRounds?: number[] } = {}
+    ) {
+      const { service, holeRepo, pgaTournamentPlayerService } = mocks;
       const ingestSpy = vi
         .spyOn(service, 'ingestHolesForRound' as never)
         .mockResolvedValue(undefined as never);
 
-      vi.spyOn(pgaTournamentPlayerService, 'list').mockResolvedValue([]);
+      // Mock the query builder used by getIngestedRounds
+      const qb = {
+        select: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        getRawMany: vi
+          .fn()
+          .mockResolvedValue((opts.ingestedRounds ?? []).map((r) => ({ round_number: r }))),
+      } as unknown as SelectQueryBuilder<PgaTournamentPlayerHole>;
+
+      vi.spyOn(holeRepo, 'createQueryBuilder').mockReturnValue(qb);
+
+      // list is called by both getExistingPlayerIds (via getIngestedRounds)
+      // and for stroke ingestion
+      vi.spyOn(pgaTournamentPlayerService, 'list').mockResolvedValue(
+        opts.ingestedRounds?.length ? ([{ id: 'p1-T1' }] as PgaTournamentPlayer[]) : []
+      );
+
+      return { ingestSpy };
+    }
+
+    it('caps round iteration at 4 even when current_round is larger', async () => {
+      const mocks = createMocks();
+      const { ingestSpy } = setupIngestMocks(mocks);
 
       const tournament = {
         id: 'R2026003',
         current_round: 400,
       } as never;
 
-      await service.ingestScoringData(tournament);
+      await mocks.service.ingestScoringData(tournament);
 
       expect(ingestSpy).toHaveBeenCalledTimes(4);
       expect(ingestSpy).toHaveBeenCalledWith('R2026003', 1);
       expect(ingestSpy).toHaveBeenCalledWith('R2026003', 2);
       expect(ingestSpy).toHaveBeenCalledWith('R2026003', 3);
       expect(ingestSpy).toHaveBeenCalledWith('R2026003', 4);
+    });
+
+    it('skips prior rounds that already have hole data', async () => {
+      const mocks = createMocks();
+      const { ingestSpy } = setupIngestMocks(mocks, { ingestedRounds: [1, 2] });
+
+      const tournament = {
+        id: 'R2026003',
+        current_round: 3,
+      } as never;
+
+      await mocks.service.ingestScoringData(tournament);
+
+      // Rounds 1 and 2 already ingested, only round 3 (current) should be called
+      expect(ingestSpy).toHaveBeenCalledTimes(1);
+      expect(ingestSpy).toHaveBeenCalledWith('R2026003', 3);
+    });
+
+    it('backfills prior rounds missing hole data', async () => {
+      const mocks = createMocks();
+      // Round 1 is ingested but round 2 is missing
+      const { ingestSpy } = setupIngestMocks(mocks, { ingestedRounds: [1] });
+
+      const tournament = {
+        id: 'R2026003',
+        current_round: 3,
+      } as never;
+
+      await mocks.service.ingestScoringData(tournament);
+
+      // Round 1 skipped, round 2 backfilled, round 3 current
+      expect(ingestSpy).toHaveBeenCalledTimes(2);
+      expect(ingestSpy).toHaveBeenCalledWith('R2026003', 2);
+      expect(ingestSpy).toHaveBeenCalledWith('R2026003', 3);
+    });
+
+    it('always ingests the current round even if it has data', async () => {
+      const mocks = createMocks();
+      // Even though round 2 (the current round) has data, it should still be ingested
+      const { ingestSpy } = setupIngestMocks(mocks, { ingestedRounds: [1, 2] });
+
+      const tournament = {
+        id: 'R2026003',
+        current_round: 2,
+      } as never;
+
+      await mocks.service.ingestScoringData(tournament);
+
+      expect(ingestSpy).toHaveBeenCalledTimes(1);
+      expect(ingestSpy).toHaveBeenCalledWith('R2026003', 2);
+    });
+
+    it('passes roundsToIngest to stroke ingestion', async () => {
+      const mocks = createMocks();
+      // Rounds 1 and 2 already ingested, current round is 3
+      setupIngestMocks(mocks, { ingestedRounds: [1, 2] });
+
+      // Override list to return a player with score_thru for stroke ingestion
+      vi.spyOn(mocks.pgaTournamentPlayerService, 'list').mockResolvedValue([
+        { id: 'p1-R2026003', score_thru: 9 } as PgaTournamentPlayer,
+      ]);
+
+      const tournament = {
+        id: 'R2026003',
+        current_round: 3,
+      } as never;
+
+      await mocks.service.ingestScoringData(tournament);
+
+      // Stroke ingestion should only be called for round 3
+      expect(mocks.strokeService.ingestStrokesForPlayer).toHaveBeenCalledTimes(1);
+      expect(mocks.strokeService.ingestStrokesForPlayer).toHaveBeenCalledWith('R2026003', 'p1', 3);
     });
   });
 
