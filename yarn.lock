@@ -2,3 +2,68 @@
 # yarn lockfile v1
 
 
+lefthook-darwin-arm64@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/lefthook-darwin-arm64/-/lefthook-darwin-arm64-2.1.3.tgz#64c9bdd7869b638a11677ab110100d8779085fd7"
+  integrity sha512-VMSQK5ZUh66mKrEpHt5U81BxOg5xAXLoLZIK6e++4uc28tj8zGBqV9+tZqSRElXXzlnHbfdDVCMaKlTuqUy0Rg==
+
+lefthook-darwin-x64@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/lefthook-darwin-x64/-/lefthook-darwin-x64-2.1.3.tgz#38ae2f42083ed70c0888cef28e0993d81d21953f"
+  integrity sha512-4QhepF4cf+fa7sDow29IEuCfm/6LuV+oVyQGpnr5it1DEZIEEoa6vdH/x4tutYhAg/HH7I2jHq6FGz96HRiJEQ==
+
+lefthook-freebsd-arm64@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/lefthook-freebsd-arm64/-/lefthook-freebsd-arm64-2.1.3.tgz#d23bd92e6a0d554537b8f1cb939c9e7bfd47806a"
+  integrity sha512-kysx/9pjifOgcTZOj1bR0i74FAbMv3BDfrpZDKniBOo4Dp0hXhyOtUmRn4nWKL0bN+cqc4ZePAq4Qdm4fxWafA==
+
+lefthook-freebsd-x64@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/lefthook-freebsd-x64/-/lefthook-freebsd-x64-2.1.3.tgz#1b45df019b702029254a38e436b3f83689e95210"
+  integrity sha512-TLuPHQNg6iihShchrh5DrHvoCZO8FajZBMAEwLIKWlm6bkCcXbYNxy4dBaVK8lzHtS/Kv1bnH0D3BcK65iZFVQ==
+
+lefthook-linux-arm64@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/lefthook-linux-arm64/-/lefthook-linux-arm64-2.1.3.tgz#5276e1227510d415b5395c229445ec37bb14cb4f"
+  integrity sha512-e5x4pq1aZAXc0C642V4HaUoKtcHVmGW1HBIDNfWUhtsThBKjhZBXPspecaAHIRA/8VtsXS3RnJ4VhQpgfrCbww==
+
+lefthook-linux-x64@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/lefthook-linux-x64/-/lefthook-linux-x64-2.1.3.tgz#b521fe2b1191196f26a9ab8d6e536a7b4c66d4a7"
+  integrity sha512-yeVAiV5hoE6Qq8dQDB4XC14x4N9mhn+FetxzqDu5LVci0/sOPqyPq2b0YUtNwJ1ZUKawTz4I/oqnUsHkQrGH0w==
+
+lefthook-openbsd-arm64@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/lefthook-openbsd-arm64/-/lefthook-openbsd-arm64-2.1.3.tgz#f1e4aa1464f037bc5a4acdda74447a3ba35a713b"
+  integrity sha512-8QVvRxIosV6NL2XrbifOPGVhMFE43h02BUNEHYhZhyad7BredfAakg9dA9J/NO0I3eMdvCYU50ubFyDGIqUJog==
+
+lefthook-openbsd-x64@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/lefthook-openbsd-x64/-/lefthook-openbsd-x64-2.1.3.tgz#975c1e03aa683f5dceda5e40898a6a9fbffa7f28"
+  integrity sha512-YTS9qeW9PzzKg9Rk55mQprLIl1OdAIIjeOH8DF+MPWoAPkRqeUyq8Q2Bdlf3+Swy+kJOjoiU1pKvpjjc8upv9Q==
+
+lefthook-windows-arm64@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/lefthook-windows-arm64/-/lefthook-windows-arm64-2.1.3.tgz#a5268f42f65009bd432a4d0cabb88d1ca8635b2d"
+  integrity sha512-Nlp80pWyF67GmxgM5NQmL7JTTccbJAvCNtS5QwHmKq3pJ9Xi0UegP9pGME520n06Rhp+gX7H4boXhm2D5hAghg==
+
+lefthook-windows-x64@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/lefthook-windows-x64/-/lefthook-windows-x64-2.1.3.tgz#280b906c44aec30d79d904dd4fa95b9682a2f4c7"
+  integrity sha512-KByBhvqgUNhjO/03Mr0y66D9B1ZnII7AB0x17cumwHMOYoDaPJh/AlgmEduqUpatqli3lnFzWD0DUkAY6pq/SA==
+
+lefthook@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/lefthook/-/lefthook-2.1.3.tgz#7cdb7cf70093fa508bd414364d6debb499c33549"
+  integrity sha512-2W8PP/EGCvyS/x+Xza0Lgvn/EM3FKnr6m6xkfzpl6RKHl8TwPvs9iYZFQL99CnWTTvO+1mtQvIxGE/bD05038Q==
+  optionalDependencies:
+    lefthook-darwin-arm64 "2.1.3"
+    lefthook-darwin-x64 "2.1.3"
+    lefthook-freebsd-arm64 "2.1.3"
+    lefthook-freebsd-x64 "2.1.3"
+    lefthook-linux-arm64 "2.1.3"
+    lefthook-linux-x64 "2.1.3"
+    lefthook-openbsd-arm64 "2.1.3"
+    lefthook-openbsd-x64 "2.1.3"
+    lefthook-windows-arm64 "2.1.3"
+    lefthook-windows-x64 "2.1.3"

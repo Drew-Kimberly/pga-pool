@@ -1,0 +1,25 @@
+pre-commit:
+  parallel: true
+  commands:
+    api-lint:
+      glob: "api/**/*.ts"
+      stage_fixed: true
+      run: |
+        files=$(echo {staged_files} | tr ' ' '\n' | sed 's|^api/||' | tr '\n' ' ')
+        yarn --cwd api eslint --fix $files
+
+    client-lint:
+      glob: "client/**/*.{ts,tsx}"
+      stage_fixed: true
+      run: |
+        files=$(echo {staged_files} | tr ' ' '\n' | sed 's|^client/||' | tr '\n' ' ')
+        yarn --cwd client eslint --fix $files
+
+    sdk-check:
+      glob: "api/openapi.yaml"
+      run: |
+        yarn --cwd api sdk:generate
+        if ! git diff --quiet client/sdk/src/; then
+          echo "SDK is out of date! Run 'yarn --cwd api sdk:generate' and stage the changes."
+          exit 1
+        fi

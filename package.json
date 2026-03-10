@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "postinstall": "lefthook install --force"
+  },
+  "devDependencies": {
+    "lefthook": "2.1.3"
+  }
+}
