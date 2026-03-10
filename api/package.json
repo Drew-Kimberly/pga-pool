@@ -14,6 +14,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "yarn lint --fix",
     "test": "vitest run --passWithNoTests",
+    "test:integration": "vitest run --config vitest.integration.config.ts --passWithNoTests",
     "typeorm": "ts-node -r tsconfig-paths/register tools/typeorm.ts",
     "pgapool": "ts-node cli/index.ts",
     "db:migrations:generate": "yarn typeorm migration:generate --pretty",

@@ -20,14 +20,17 @@ export class TypeOrmOptionsFactory {
   ) {}
 
   createTypeOrmOptions(entities: DataSourceOptions['entities']): TypeOrmModuleOptions {
+    const migrationsRun = this.databaseConfig.POSTGRES_ENABLE_SCHEMA_MIGRATION;
     return {
       type: 'postgres',
       synchronize: false,
       cache: false,
       logging: this.databaseConfig.ENABLE_SQL_DEBUG_LOG,
       entities,
-      migrationsRun: this.databaseConfig.POSTGRES_ENABLE_SCHEMA_MIGRATION,
-      migrations: [path.resolve(__dirname, 'migrations', '*{.ts,.js}')],
+      migrationsRun,
+      ...(migrationsRun
+        ? { migrations: [path.resolve(__dirname, 'migrations', '*{.ts,.js}')] }
+        : {}),
       migrationsTableName: 'typeorm_migrations',
       host: this.databaseConfig.POSTGRES_HOST,
       port: this.databaseConfig.POSTGRES_PORT,
