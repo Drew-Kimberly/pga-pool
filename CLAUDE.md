@@ -65,9 +65,6 @@ yarn --cwd api pgapool [command]  # Custom CLI for various operations
 
 # Generate SDK from OpenAPI spec
 yarn --cwd api sdk:generate
-
-# Run cron job for tournament score updates
-yarn --cwd api cron:tournament-score-updater
 ```
 
 ### Client Commands
