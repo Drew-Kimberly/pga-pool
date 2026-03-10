@@ -1,5 +1,5 @@
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { PgaTourApiService } from '../../pga-tour-api/lib/v2/pga-tour-api.service';
 import { PgaTournamentPlayer } from '../../pga-tournament-player/lib/pga-tournament-player.entity';
@@ -245,9 +245,9 @@ describe('PgaTournamentPlayerHoleService', () => {
       const qb = {
         select: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
-        getRawMany: vi.fn().mockResolvedValue(
-          (opts.ingestedRounds ?? []).map((r) => ({ round_number: r }))
-        ),
+        getRawMany: vi
+          .fn()
+          .mockResolvedValue((opts.ingestedRounds ?? []).map((r) => ({ round_number: r }))),
       } as unknown as SelectQueryBuilder<PgaTournamentPlayerHole>;
 
       vi.spyOn(holeRepo, 'createQueryBuilder').mockReturnValue(qb);
@@ -255,9 +255,7 @@ describe('PgaTournamentPlayerHoleService', () => {
       // list is called by both getExistingPlayerIds (via getIngestedRounds)
       // and for stroke ingestion
       vi.spyOn(pgaTournamentPlayerService, 'list').mockResolvedValue(
-        opts.ingestedRounds?.length
-          ? ([{ id: 'p1-T1' }] as PgaTournamentPlayer[])
-          : []
+        opts.ingestedRounds?.length ? ([{ id: 'p1-T1' }] as PgaTournamentPlayer[]) : []
       );
 
       return { ingestSpy };
@@ -350,11 +348,7 @@ describe('PgaTournamentPlayerHoleService', () => {
 
       // Stroke ingestion should only be called for round 3
       expect(mocks.strokeService.ingestStrokesForPlayer).toHaveBeenCalledTimes(1);
-      expect(mocks.strokeService.ingestStrokesForPlayer).toHaveBeenCalledWith(
-        'R2026003',
-        'p1',
-        3
-      );
+      expect(mocks.strokeService.ingestStrokesForPlayer).toHaveBeenCalledWith('R2026003', 'p1', 3);
     });
   });
 
