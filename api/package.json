@@ -21,6 +21,7 @@
     "db:migrations:run": "yarn typeorm migration:run",
     "db:migrations:revert": "yarn typeorm migration:revert",
     "db:drop": "yarn typeorm schema:drop",
+    "db:sync-from-deployed": "bash scripts/db-sync-from-deployed.sh",
     "sdk:build": "yarn --cwd ../client/sdk compile",
     "sdk:generate": "yarn openapi-generator-cli generate --generator-key pga-pool-api --remove-operation-id-prefix",
     "sdk:generate:build": "yarn sdk:generate && yarn sdk:build",

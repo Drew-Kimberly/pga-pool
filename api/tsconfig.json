@@ -17,5 +17,5 @@
     "noUncheckedIndexedAccess": false,
     "useUnknownInCatchVariables": false
   },
-  "exclude": ["node_modules", "dist", "sdk", "codegen.ts"]
+  "exclude": ["node_modules", "dist", "sdk", "scripts", "codegen.ts"]
 }
