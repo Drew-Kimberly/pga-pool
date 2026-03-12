@@ -227,6 +227,21 @@ export class AsyncWorkerScheduler implements OnApplicationBootstrap, OnApplicati
       return;
     }
 
+    // Refresh tournament context from DB so workers always see current state
+    // (e.g. tournament_status transitions from NOT_STARTED → IN_PROGRESS).
+    if (context.pgaTournament) {
+      const fresh = await this.pgaTournamentService.get(context.pgaTournament.id);
+      if (!fresh) {
+        this.logger.warn(
+          `Tournament ${context.pgaTournament.id} no longer exists, stopping worker ${key}`
+        );
+        instance.aborted = true;
+        this.instances.delete(key);
+        return;
+      }
+      context = { ...context, pgaTournament: fresh };
+    }
+
     instance.running = true;
     const runPromise = this.executeWorker(worker, context);
     instance.runPromise = runPromise;
