@@ -13,8 +13,8 @@ import { PgaTournamentField } from '../../../src/pga-tournament-field/lib/pga-to
 import { PgaTournamentPlayer } from '../../../src/pga-tournament-player/lib/pga-tournament-player.entity';
 import { PlayerStatus } from '../../../src/pga-tournament-player/lib/pga-tournament-player.interface';
 import { PoolTournament } from '../../../src/pool-tournament/lib/pool-tournament.entity';
-import { PoolTournamentPlayer } from '../../../src/pool-tournament-player/lib/pool-tournament-player.entity';
 import { PoolTournamentService } from '../../../src/pool-tournament/lib/pool-tournament.service';
+import { PoolTournamentPlayer } from '../../../src/pool-tournament-player/lib/pool-tournament-player.entity';
 import { SeedDataService } from '../../../src/seed-data/lib/seed-data.service';
 import { PgaPoolCliModule } from '../../cli.module';
 import { Maths, outputJson } from '../../utils';
@@ -90,7 +90,9 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
     //   odds.forEach((o) => console.log(o.tournamentName));
     // });
 
-    const tournamentOdds = (await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.MGM))
+    const tournamentOdds = (
+      await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.DraftKings)
+    )
       .reverse()
       .find(
         (o) =>
@@ -257,9 +259,7 @@ async function seedPoolTournamentPlayers(
       },
       relations: ['pga_player', 'pga_tournament'],
     });
-    const existingPlayerIdSet = new Set(
-      existingTournamentPlayers.map((p) => p.pga_player.id)
-    );
+    const existingPlayerIdSet = new Set(existingTournamentPlayers.map((p) => p.pga_player.id));
 
     const missingPlayerIds = fieldPlayerIds.filter((id) => !existingPlayerIdSet.has(id));
     if (missingPlayerIds.length > 0) {
