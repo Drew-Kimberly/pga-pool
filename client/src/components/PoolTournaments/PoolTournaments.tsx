@@ -5,9 +5,8 @@ import { useNavigate } from 'react-router';
 
 import { pgaPoolApi } from '../../api/pga-pool';
 import { useThemeContext } from '../../contexts/ThemeContext';
-import { isInPostTournamentWindow } from '../../utils/postTournamentWindow';
 import { Spinner } from '../Spinner';
-import { resolveDefaultTournamentFromList } from '../TournamentLeaderboard/resolveTournament';
+import { resolveCurrentWeekTournamentFromList } from '../TournamentLeaderboard/resolveTournament';
 
 import {
   PgaTournamentTournamentStatusEnum,
@@ -95,53 +94,8 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
   }, [poolId]);
 
   const currentTournaments = React.useMemo(() => {
-    if (!tournaments.length) return [];
-
-    // Priority 1: In-progress tournament
-    const inProgress = tournaments.find(
-      (entry) =>
-        entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.InProgress
-    );
-    if (inProgress) return [inProgress];
-
-    // Priority 2: Most recently completed tournament awaiting official scores
-    const completedPending = tournaments
-      .filter(
-        (entry) =>
-          !entry.scores_are_official &&
-          entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed
-      )
-      .sort(
-        (a, b) =>
-          new Date(b.pga_tournament.date.start).getTime() -
-          new Date(a.pga_tournament.date.start).getTime()
-      );
-    if (completedPending.length) return [completedPending[0]];
-
-    // Priority 3: Official tournament still within the post-tournament window
-    const officialInWindow = tournaments
-      .filter(
-        (entry) =>
-          entry.scores_are_official &&
-          entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed &&
-          isInPostTournamentWindow(entry.pga_tournament.date.end)
-      )
-      .sort(
-        (a, b) =>
-          new Date(b.pga_tournament.date.start).getTime() -
-          new Date(a.pga_tournament.date.start).getTime()
-      );
-    if (officialInWindow.length) return [officialInWindow[0]];
-
-    // Priority 4: This week's tournament from the weekly-field API
-    if (weeklyTournamentId) {
-      const weekly = tournaments.find((entry) => entry.pga_tournament.id === weeklyTournamentId);
-      if (weekly) return [weekly];
-    }
-
-    // Priority 5: Fallback resolver
-    const resolved = resolveDefaultTournamentFromList(tournaments);
-    return resolved ? [resolved] : [];
+    const current = resolveCurrentWeekTournamentFromList(tournaments, weeklyTournamentId);
+    return current ? [current] : [];
   }, [tournaments, weeklyTournamentId]);
 
   const currentTournamentIds = React.useMemo(
@@ -240,7 +194,7 @@ export function PoolTournaments({ poolId }: PoolTournamentsProps) {
 
         <Section title="Current Week">
           {currentTournaments.length === 0 ? (
-            <EmptySectionMessage message="No tournament has been scheduled for this pool yet." />
+            <OffWeekCard nextTournament={upcomingTournaments[0]} />
           ) : (
             <Box gap="small">
               {currentTournaments.map((entry) => {
@@ -713,6 +667,43 @@ function EmptySectionMessage({ message }: EmptySectionMessageProps) {
       <Text size="small" color="text-weak">
         {message}
       </Text>
+    </Box>
+  );
+}
+
+interface OffWeekCardProps {
+  nextTournament?: PoolTournament;
+}
+
+function OffWeekCard({ nextTournament }: OffWeekCardProps) {
+  return (
+    <Box
+      pad="medium"
+      round="small"
+      border={{ size: 'xsmall', color: 'border' }}
+      background="background-front"
+      gap="xsmall"
+    >
+      <Text
+        size="xsmall"
+        color="text-weak"
+        weight="bold"
+        style={{ letterSpacing: '0.08em', textTransform: 'uppercase' }}
+      >
+        Off Week
+      </Text>
+      <Text size="medium" weight="bold" style={{ fontFamily: 'var(--font-display)' }}>
+        No pool tournament this week
+      </Text>
+      {nextTournament && (
+        <Text size="small" color="text-weak">
+          Next up:{' '}
+          <Text size="small" weight="bold">
+            {nextTournament.pga_tournament.name}
+          </Text>{' '}
+          · {nextTournament.pga_tournament.date.display_short}
+        </Text>
+      )}
     </Box>
   );
 }

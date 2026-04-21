@@ -37,6 +37,71 @@ export async function resolveDefaultTournament(poolId: string): Promise<PoolTour
   return resolveDefaultTournamentFromList(tournamentsResponse.data.data);
 }
 
+export async function resolveCurrentWeekTournament(poolId: string): Promise<PoolTournament | null> {
+  const [tournamentsResponse, weeklyTournamentId] = await Promise.all([
+    pgaPoolApi.poolTournaments.listPoolTournaments({
+      poolId,
+      page: { number: 1, size: 200 },
+    }),
+    pgaPoolApi.pgaTournamentField
+      .getWeeklyField()
+      .then((res) => res.data.pga_tournament.id)
+      .catch((e) => {
+        if (pgaPoolApi.is404Error(e as Error)) return null;
+        throw e;
+      }),
+  ]);
+
+  return resolveCurrentWeekTournamentFromList(tournamentsResponse.data.data, weeklyTournamentId);
+}
+
+export function resolveCurrentWeekTournamentFromList(
+  tournaments: PoolTournament[],
+  weeklyTournamentId: string | null
+): PoolTournament | null {
+  if (!tournaments.length) return null;
+
+  const inProgress = tournaments.find(
+    (entry) =>
+      entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.InProgress
+  );
+  if (inProgress) return inProgress;
+
+  const completedPending = tournaments
+    .filter(
+      (entry) =>
+        !entry.scores_are_official &&
+        entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.pga_tournament.date.start).getTime() -
+        new Date(a.pga_tournament.date.start).getTime()
+    );
+  if (completedPending.length) return completedPending[0];
+
+  const officialInWindow = tournaments
+    .filter(
+      (entry) =>
+        entry.scores_are_official &&
+        entry.pga_tournament.tournament_status === PgaTournamentTournamentStatusEnum.Completed &&
+        isInPostTournamentWindow(entry.pga_tournament.date.end)
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.pga_tournament.date.start).getTime() -
+        new Date(a.pga_tournament.date.start).getTime()
+    );
+  if (officialInWindow.length) return officialInWindow[0];
+
+  if (weeklyTournamentId) {
+    const weekly = tournaments.find((entry) => entry.pga_tournament.id === weeklyTournamentId);
+    if (weekly) return weekly;
+  }
+
+  return null;
+}
+
 export function resolveDefaultTournamentFromList(
   tournaments: PoolTournament[]
 ): PoolTournament | null {

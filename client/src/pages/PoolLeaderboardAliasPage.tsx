@@ -5,7 +5,7 @@ import { Navigate, useParams } from 'react-router';
 
 import { pgaPoolApi } from '../api/pga-pool';
 import { Spinner } from '../components/Spinner';
-import { resolveDefaultTournament } from '../components/TournamentLeaderboard/resolveTournament';
+import { resolveCurrentWeekTournament } from '../components/TournamentLeaderboard/resolveTournament';
 
 import { withPageLayout } from './withPageLayout';
 
@@ -32,15 +32,13 @@ function _PoolLeaderboardAliasPage() {
       setError(undefined);
 
       try {
-        const tournament = await resolveDefaultTournament(poolId);
+        const tournament = await resolveCurrentWeekTournament(poolId);
         if (!isMounted) {
           return;
         }
 
         if (!tournament) {
-          setError(
-            new Error('No PGA Tournament event is currently active! Please check back later')
-          );
+          setRedirectPath(`/pools/${poolId}/tournaments`);
           return;
         }
 
