@@ -162,7 +162,38 @@ export class PgaTournamentPlayerService {
       `Ensured ${filteredPlayers.length} player(s) in field for tournament ${pgaTournament.id}`
     );
 
+    const fieldWithdrawnIds = filteredPlayers
+      .filter((p) => p.withdrawn)
+      .map((p) => `${Number(p.id)}-${pgaTournament.id}`);
+
+    if (fieldWithdrawnIds.length > 0) {
+      await repo.update(fieldWithdrawnIds, {
+        active: false,
+        status: PlayerStatus.Withdrawn,
+      });
+    }
+
     if (pgaTournament.tournament_status === PgaTournamentStatus.NOT_STARTED) {
+      // Pre-tournament, the Field API is the only authoritative source for WD
+      // status. Restore any row currently flagged WD whose player the field
+      // now lists as not-withdrawn — this heals false WDs caused by transient
+      // partial leaderboard payloads upstream.
+      const fieldActiveIds = filteredPlayers
+        .filter((p) => !p.withdrawn)
+        .map((p) => `${Number(p.id)}-${pgaTournament.id}`);
+
+      if (fieldActiveIds.length > 0) {
+        const restoreResult = await repo.update(
+          { id: In(fieldActiveIds), status: PlayerStatus.Withdrawn },
+          { active: true, status: PlayerStatus.Active }
+        );
+        if (restoreResult.affected) {
+          this.logger.log(
+            `Restored ${restoreResult.affected} previously-withdrawn player(s) for tournament ${pgaTournament.id}`
+          );
+        }
+      }
+
       const existingRows = await repo.find({
         select: ['id', 'pga_player'],
         relations: ['pga_player'],
@@ -296,7 +327,14 @@ export class PgaTournamentPlayerService {
       await repo.upsert(updates, ['id']);
     }
 
-    if (leaderboardPlayers.length > 0) {
+    // Negative-inference WD sweep: only valid while play is in progress, when
+    // the leaderboard is the authoritative roster. Pre-tournament, the
+    // upstream payload is volatile (partial committed-entrant lists) and a
+    // missing player does not imply withdrawal.
+    if (
+      leaderboardPlayers.length > 0 &&
+      pgaTournament.tournament_status === PgaTournamentStatus.IN_PROGRESS
+    ) {
       const leaderboardPlayerIds = new Set(leaderboardPlayers.map((entry) => Number(entry.id)));
 
       const activePlayers = await repo.find({
