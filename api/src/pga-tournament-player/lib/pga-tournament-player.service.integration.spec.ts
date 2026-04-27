@@ -130,6 +130,70 @@ describe('PgaTournamentPlayerService (integration)', () => {
       expect(stalePlayer?.status).toBe(PlayerStatus.Withdrawn);
       expect(stalePlayer?.active).toBe(false);
     });
+
+    it('propagates field.withdrawn=true to existing rows', async () => {
+      const pgaTournament = await createPgaTournament(ds, {
+        tournament_status: PgaTournamentStatus.IN_PROGRESS,
+      });
+      const player = await createPgaPlayer(ds);
+
+      // Pre-insert player as Active (simulates a previous field sync before WD)
+      await createPgaTournamentPlayer(ds, {
+        pgaPlayer: player,
+        pgaTournament,
+        overrides: { status: PlayerStatus.Active, active: true },
+      });
+
+      // Field API now reports the player as withdrawn
+      mockPgaTourApi.getField.mockResolvedValueOnce({
+        __typename: 'Field',
+        id: pgaTournament.id,
+        tournamentName: pgaTournament.name,
+        players: [
+          { __typename: 'PlayerField', id: String(player.id), status: 'WD', withdrawn: true },
+        ],
+      });
+
+      await service.ensurePlayersFromField(pgaTournament);
+
+      const updated = await ds
+        .getRepository(PgaTournamentPlayer)
+        .findOneBy({ id: `${player.id}-${pgaTournament.id}` });
+      expect(updated?.status).toBe(PlayerStatus.Withdrawn);
+      expect(updated?.active).toBe(false);
+    });
+
+    it('restores stuck-WD rows for NOT_STARTED tournaments when field.withdrawn=false', async () => {
+      const pgaTournament = await createPgaTournament(ds, {
+        tournament_status: PgaTournamentStatus.NOT_STARTED,
+      });
+      const player = await createPgaPlayer(ds);
+
+      // Simulates a previously-incorrect WD flag (e.g. from a partial leaderboard payload)
+      await createPgaTournamentPlayer(ds, {
+        pgaPlayer: player,
+        pgaTournament,
+        overrides: { status: PlayerStatus.Withdrawn, active: false },
+      });
+
+      // Field API correctly lists the player as not withdrawn
+      mockPgaTourApi.getField.mockResolvedValueOnce({
+        __typename: 'Field',
+        id: pgaTournament.id,
+        tournamentName: pgaTournament.name,
+        players: [
+          { __typename: 'PlayerField', id: String(player.id), status: 'ACTIVE', withdrawn: false },
+        ],
+      });
+
+      await service.ensurePlayersFromField(pgaTournament);
+
+      const restored = await ds
+        .getRepository(PgaTournamentPlayer)
+        .findOneBy({ id: `${player.id}-${pgaTournament.id}` });
+      expect(restored?.status).toBe(PlayerStatus.Active);
+      expect(restored?.active).toBe(true);
+    });
   });
 
   describe('updateScores', () => {
@@ -271,6 +335,92 @@ describe('PgaTournamentPlayerService (integration)', () => {
         .findOneBy({ id: `${playerMissing.id}-${pgaTournament.id}` });
       expect(updated?.status).toBe(PlayerStatus.Withdrawn);
       expect(updated?.active).toBe(false);
+    });
+  });
+
+  describe('upsertFieldForTournament', () => {
+    it('does not WD-sweep when tournament is NOT_STARTED, even with a partial leaderboard payload', async () => {
+      const pgaTournament = await createPgaTournament(ds, {
+        tournament_status: PgaTournamentStatus.NOT_STARTED,
+      });
+      const playerInLeaderboard = await createPgaPlayer(ds);
+      const playerNotInLeaderboard = await createPgaPlayer(ds);
+
+      // Field API has both players, neither withdrawn
+      mockPgaTourApi.getField.mockResolvedValueOnce({
+        __typename: 'Field',
+        id: pgaTournament.id,
+        tournamentName: pgaTournament.name,
+        players: [
+          {
+            __typename: 'PlayerField',
+            id: String(playerInLeaderboard.id),
+            status: 'ACTIVE',
+            withdrawn: false,
+          },
+          {
+            __typename: 'PlayerField',
+            id: String(playerNotInLeaderboard.id),
+            status: 'ACTIVE',
+            withdrawn: false,
+          },
+        ],
+      });
+
+      // Leaderboard returns a partial player list (only one of the two field
+      // players). Pre-fix, the negative-inference sweep would falsely flag
+      // playerNotInLeaderboard as WD even though the field has them as IN.
+      const partialLeaderboard: PgaApiTournamentLeaderboardResponse = {
+        leaderboardId: pgaTournament.id,
+        leaderboard: {
+          timezone: 'America/New_York',
+          roundStatus: 'IN_PROGRESS',
+          tournamentStatus: 'IN_PROGRESS',
+          formatType: 'STROKE_PLAY',
+          players: [
+            {
+              id: String(playerInLeaderboard.id).padStart(5, '0'),
+              player: {
+                firstName: playerInLeaderboard.first_name,
+                lastName: playerInLeaderboard.last_name,
+                displayName: playerInLeaderboard.name,
+              },
+              scoringData: {
+                playerState: 'ACTIVE',
+                total: '',
+                totalSort: 0,
+                thru: '',
+                thruSort: 0,
+                position: '',
+                score: '',
+                scoreSort: 0,
+                currentRound: 1,
+                teeTime: -1,
+                courseId: '1',
+                groupNumber: 1,
+                roundHeader: 'R1',
+                roundStatus: 'Pre-tournament',
+                totalStrokes: '',
+                oddsToWin: '',
+              },
+            },
+          ],
+        },
+      };
+      mockPgaTourApi.getTournamentLeaderboard.mockResolvedValueOnce(partialLeaderboard);
+      mockPgaTourApi.getProjectedFedexCupPoints.mockResolvedValueOnce({
+        seasonYear: 2026,
+        lastUpdated: '',
+        points: [],
+      });
+
+      await service.upsertFieldForTournament(pgaTournament.id);
+
+      const notSweptPlayer = await ds
+        .getRepository(PgaTournamentPlayer)
+        .findOneBy({ id: `${playerNotInLeaderboard.id}-${pgaTournament.id}` });
+      expect(notSweptPlayer?.status).toBe(PlayerStatus.Active);
+      expect(notSweptPlayer?.active).toBe(true);
     });
   });
 });
