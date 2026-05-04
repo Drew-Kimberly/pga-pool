@@ -35,15 +35,19 @@ export class WeeklyPoolTournamentFieldController extends ControllerBase {
   ): Promise<PoolTournamentFieldDto> {
     this.logger.log(`Getting weekly field for Pool ${poolId}`);
 
-    const pgaTournament = await this.pgaTournamentService.getWeeklyTournament();
-    if (!pgaTournament) {
+    const pgaTournaments = await this.pgaTournamentService.getWeeklyTournaments();
+    if (pgaTournaments.length === 0) {
       throw new NotFoundException('No PGA Tournament scheduled for this week');
     }
 
-    const poolTournament = await this.poolTournamentService.getByPoolAndPgaTournament(
-      poolId,
-      pgaTournament.id
-    );
+    let poolTournament = null;
+    for (const pgaTournament of pgaTournaments) {
+      poolTournament = await this.poolTournamentService.getByPoolAndPgaTournament(
+        poolId,
+        pgaTournament.id
+      );
+      if (poolTournament) break;
+    }
     if (!poolTournament) {
       throw new NotFoundException('No pool tournament found for this pool and week');
     }

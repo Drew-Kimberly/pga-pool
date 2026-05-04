@@ -8,7 +8,6 @@ import {
   TypeOrmListService,
 } from '../../common/api/list';
 import { getWeekBoundary } from '../../common/util';
-import { HARDCODED_LEAGUE_ID } from '../../league/lib/league.constants';
 
 import { PgaTournament } from './pga-tournament.entity';
 import { SavePgaTournament } from './pga-tournament.interface';
@@ -50,19 +49,15 @@ export class PgaTournamentService implements Listable<PgaTournament> {
     });
   }
 
-  async getWeeklyTournament(): Promise<PgaTournament | null> {
+  async getWeeklyTournaments(): Promise<PgaTournament[]> {
     const now = new Date();
     const weekStart = getWeekBoundary(now, 'start');
     const weekEnd = getWeekBoundary(now, 'end');
 
-    return this.pgaTournamentRepo
-      .createQueryBuilder('pt')
-      .innerJoin('pool_tournament', 'plt', 'plt.pga_tournament_id = pt.id')
-      .where('plt.league_id = :leagueId', { leagueId: HARDCODED_LEAGUE_ID })
-      .andWhere('pt.start_date BETWEEN :weekStart AND :weekEnd', { weekStart, weekEnd })
-      .orderBy('pt.start_date', 'ASC')
-      .addOrderBy('pt.id', 'ASC')
-      .getOne();
+    return this.pgaTournamentRepo.find({
+      where: { start_date: Between(weekStart, weekEnd) },
+      order: { start_date: 'ASC', id: 'ASC' },
+    });
   }
 
   listByDateRange(start: Date, end: Date): Promise<PgaTournament[]> {
