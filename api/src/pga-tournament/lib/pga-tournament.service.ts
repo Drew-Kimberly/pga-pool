@@ -8,6 +8,7 @@ import {
   TypeOrmListService,
 } from '../../common/api/list';
 import { getWeekBoundary } from '../../common/util';
+import { HARDCODED_LEAGUE_ID } from '../../league/lib/league.constants';
 
 import { PgaTournament } from './pga-tournament.entity';
 import { SavePgaTournament } from './pga-tournament.interface';
@@ -54,10 +55,14 @@ export class PgaTournamentService implements Listable<PgaTournament> {
     const weekStart = getWeekBoundary(now, 'start');
     const weekEnd = getWeekBoundary(now, 'end');
 
-    return this.pgaTournamentRepo.findOne({
-      where: { start_date: Between(weekStart, weekEnd) },
-      order: { start_date: 'ASC' },
-    });
+    return this.pgaTournamentRepo
+      .createQueryBuilder('pt')
+      .innerJoin('pool_tournament', 'plt', 'plt.pga_tournament_id = pt.id')
+      .where('plt.league_id = :leagueId', { leagueId: HARDCODED_LEAGUE_ID })
+      .andWhere('pt.start_date BETWEEN :weekStart AND :weekEnd', { weekStart, weekEnd })
+      .orderBy('pt.start_date', 'ASC')
+      .addOrderBy('pt.id', 'ASC')
+      .getOne();
   }
 
   listByDateRange(start: Date, end: Date): Promise<PgaTournament[]> {
