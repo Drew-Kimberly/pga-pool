@@ -43,9 +43,9 @@ export async function resolveCurrentWeekTournament(poolId: string): Promise<Pool
       poolId,
       page: { number: 1, size: 200 },
     }),
-    pgaPoolApi.pgaTournamentField
-      .getWeeklyField()
-      .then((res) => res.data.pga_tournament.id)
+    pgaPoolApi.poolTournamentField
+      .getWeeklyPoolTournamentField({ poolId })
+      .then((res) => res.data.pool_tournament.pga_tournament.id)
       .catch((e) => {
         if (pgaPoolApi.is404Error(e as Error)) return null;
         throw e;

@@ -49,14 +49,14 @@ export class PgaTournamentService implements Listable<PgaTournament> {
     });
   }
 
-  async getWeeklyTournament(): Promise<PgaTournament | null> {
+  async getWeeklyTournaments(): Promise<PgaTournament[]> {
     const now = new Date();
     const weekStart = getWeekBoundary(now, 'start');
     const weekEnd = getWeekBoundary(now, 'end');
 
-    return this.pgaTournamentRepo.findOne({
+    return this.pgaTournamentRepo.find({
       where: { start_date: Between(weekStart, weekEnd) },
-      order: { start_date: 'ASC' },
+      order: { start_date: 'ASC', id: 'ASC' },
     });
   }
 

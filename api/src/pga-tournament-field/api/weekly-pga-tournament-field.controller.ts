@@ -29,14 +29,15 @@ export class WeeklyPgaTournamentFieldController extends ControllerBase {
   async getWeeklyField(): Promise<WeeklyPgaTournamentFieldDto> {
     this.logger.log('Getting weekly tournament field');
 
-    let tournament;
+    let tournaments;
     try {
-      tournament = await this.pgaTourneyService.getWeeklyTournament();
+      tournaments = await this.pgaTourneyService.getWeeklyTournaments();
     } catch (e) {
-      this.logErrorSkipping4xx(e, `Error fetching weekly tournament: ${e}`);
+      this.logErrorSkipping4xx(e, `Error fetching weekly tournaments: ${e}`);
       throw e;
     }
 
+    const tournament = tournaments[0];
     if (!tournament) {
       throw new NotFoundException('No PGA Tournament scheduled for this week');
     }
