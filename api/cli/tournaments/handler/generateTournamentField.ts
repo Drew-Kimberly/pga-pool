@@ -86,13 +86,11 @@ export async function generateTournamentField(pgaTournamentId: string, tierCutof
     }
   } else {
     // Debug metabet tourney names
-    // await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.Consensus).then((odds) => {
+    // await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.DraftKings).then((odds) => {
     //   odds.forEach((o) => console.log(o.tournamentName));
     // });
 
-    const tournamentOdds = (
-      await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.DraftKings)
-    )
+    const tournamentOdds = (await metabetApiService.getOdds(OddsLocation.NewYork, OddsProvider.MGM))
       .reverse()
       .find(
         (o) =>
