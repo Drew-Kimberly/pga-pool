@@ -40,8 +40,10 @@ describe('PoolFinalizationReactionHandler (integration)', () => {
   });
 
   it('increments pool_user.pool_score by fedex_cup_points on COMPLETED', async () => {
+    // A FedEx pool is only ready to finalize once official points are calculated.
     const pgaTournament = await createPgaTournament(ds, {
       tournament_status: PgaTournamentStatus.COMPLETED,
+      official_fedex_cup_points_calculated: true,
     });
     const pool = await createPool(ds, {
       overrides: {
@@ -58,7 +60,12 @@ describe('PoolFinalizationReactionHandler (integration)', () => {
     const tp = await createPgaTournamentPlayer(ds, {
       pgaPlayer: player,
       pgaTournament,
-      overrides: { score_total: -10, projected_fedex_cup_points: 400 },
+      // Finalization recomputes from official points, so those drive the total.
+      overrides: {
+        score_total: -10,
+        projected_fedex_cup_points: 0,
+        official_fedex_cup_points: 400,
+      },
     });
     const ptp = await createPoolTournamentPlayer(ds, {
       pgaTournamentPlayer: tp,
@@ -94,6 +101,71 @@ describe('PoolFinalizationReactionHandler (integration)', () => {
 
     const updatedPt = await ds.getRepository(PoolTournament).findOneBy({ id: poolTournament.id });
     expect(updatedPt?.scores_are_official).toBe(true);
+  });
+
+  it('skips a FedEx pool at COMPLETED until official points are calculated', async () => {
+    // The failure case: COMPLETED before official points land. Finalizing here
+    // would bake in a transient zero and lock the standings.
+    const pgaTournament = await createPgaTournament(ds, {
+      tournament_status: PgaTournamentStatus.COMPLETED,
+      official_fedex_cup_points_calculated: false,
+    });
+    const pool = await createPool(ds, {
+      overrides: {
+        settings: { scoring_format: PoolScoringFormat.FedexCuptPoints },
+      },
+    });
+    const poolTournament = await createPoolTournament(ds, {
+      pool,
+      pgaTournament,
+      league: pool.league,
+    });
+
+    const player = await createPgaPlayer(ds);
+    const tp = await createPgaTournamentPlayer(ds, {
+      pgaPlayer: player,
+      pgaTournament,
+      // Projected has already collapsed to zero for the finished event.
+      overrides: {
+        score_total: -10,
+        projected_fedex_cup_points: 0,
+        official_fedex_cup_points: null,
+      },
+    });
+    const ptp = await createPoolTournamentPlayer(ds, {
+      pgaTournamentPlayer: tp,
+      poolTournament,
+      overrides: { tier: 1 },
+    });
+
+    const poolUser = await createPoolUser(ds, {
+      pool,
+      league: pool.league,
+      overrides: { pool_score: 50 },
+    });
+    const ptu = await createPoolTournamentUser(ds, {
+      poolTournament,
+      poolUser,
+      league: pool.league,
+      overrides: { fedex_cup_points: 0 },
+    });
+    await createPoolTournamentUserPick(ds, {
+      poolTournamentUser: ptu,
+      poolTournamentPlayer: ptp,
+    });
+
+    await handler.handle({
+      pgaTournament,
+      previousStatus: PgaTournamentStatus.IN_PROGRESS,
+      newStatus: PgaTournamentStatus.COMPLETED,
+    });
+
+    const updatedPoolUser = await ds.getRepository(PoolUser).findOneBy({ id: poolUser.id });
+    // Not ready → skipped without locking. No zero baked into the standings.
+    expect(updatedPoolUser?.pool_score).toBe(50);
+
+    const updatedPt = await ds.getRepository(PoolTournament).findOneBy({ id: poolTournament.id });
+    expect(updatedPt?.scores_are_official).toBe(false);
   });
 
   it('increments pool_user.pool_score by tournament_score for Strokes format', async () => {
@@ -245,6 +317,7 @@ describe('PoolFinalizationReactionHandler (integration)', () => {
   it('handles COALESCE for users with zero fedex_cup_points', async () => {
     const pgaTournament = await createPgaTournament(ds, {
       tournament_status: PgaTournamentStatus.COMPLETED,
+      official_fedex_cup_points_calculated: true,
     });
     const pool = await createPool(ds, {
       overrides: {
@@ -261,7 +334,7 @@ describe('PoolFinalizationReactionHandler (integration)', () => {
     const tp = await createPgaTournamentPlayer(ds, {
       pgaPlayer: player,
       pgaTournament,
-      overrides: { score_total: 5, projected_fedex_cup_points: 0 },
+      overrides: { score_total: 5, projected_fedex_cup_points: 0, official_fedex_cup_points: 0 },
     });
     const ptp = await createPoolTournamentPlayer(ds, {
       pgaTournamentPlayer: tp,
