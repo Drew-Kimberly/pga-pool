@@ -11,7 +11,12 @@ export interface PgaTournamentScoresUpdatedPayload {
   pgaTournament: PgaTournament;
 }
 
+export interface PgaTournamentOfficialPointsCalculatedPayload {
+  pgaTournament: PgaTournament;
+}
+
 export type PgaTournamentEventMap = {
   'pga-tournament.status-updated': PgaTournamentStatusUpdatedPayload;
   'pga-tournament.scores-updated': PgaTournamentScoresUpdatedPayload;
+  'pga-tournament.official-points-calculated': PgaTournamentOfficialPointsCalculatedPayload;
 };

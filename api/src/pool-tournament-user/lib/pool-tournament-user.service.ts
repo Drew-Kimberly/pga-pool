@@ -1,4 +1,4 @@
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 
 import { defaultListParams, IListParams, TypeOrmListService } from '../../common/api/list';
 import { PoolTournamentUserPick } from '../../pool-tournament-user-pick/lib/pool-tournament-user-pick.entity';
@@ -107,6 +107,60 @@ export class PoolTournamentUserService {
         repo
       );
     }
+  }
+
+  /**
+   * Recalculates tournament_score and fedex_cup_points for every
+   * pool_tournament_user in a pool tournament with a single set-based UPDATE
+   * that joins through picks → pool_tournament_player → pga_tournament_player.
+   *
+   * FedEx points resolve to the official points once the tournament has
+   * calculated them, otherwise the projected points. Emits nothing — callers
+   * decide whether a follow-up recompute/finalization event is warranted, which
+   * keeps this reusable inside a finalization transaction without self-racing.
+   *
+   * @param manager pass a transaction's EntityManager to run inside it;
+   *   defaults to the repository's manager for standalone calls.
+   * @returns the number of pool_tournament_user rows updated.
+   */
+  async recomputeScores(
+    poolTournamentId: string,
+    manager: EntityManager = this.poolTournamentUserRepo.manager
+  ): Promise<number> {
+    // Note: pool_tournament_user_pick has a typo in the FK column: "pool_tournamnet_user_id"
+    // Also note: pool_tournament_player FK to pga_tournament_player is column "pga_tournament_player" (not _id suffix)
+    const result = await manager.query(
+      `
+      UPDATE pool_tournament_user ptu
+      SET
+        tournament_score = sub.total_score,
+        fedex_cup_points = sub.total_fedex
+      FROM (
+        SELECT
+          ptup.pool_tournamnet_user_id AS user_id,
+          SUM(ptp.score_total)::int AS total_score,
+          COALESCE(SUM(
+            CASE
+              WHEN pgat.official_fedex_cup_points_calculated
+                THEN ptp.official_fedex_cup_points
+              ELSE ptp.projected_fedex_cup_points
+            END
+          ), 0) AS total_fedex
+        FROM pool_tournament_user_pick ptup
+        JOIN pool_tournament_player ptpl ON ptup.pool_tournament_player_id = ptpl.id
+        JOIN pga_tournament_player ptp ON ptpl.pga_tournament_player = ptp.id
+        JOIN pga_tournament pgat ON ptp.pga_tournament = pgat.id
+        WHERE ptup.pool_tournamnet_user_id IN (
+          SELECT id FROM pool_tournament_user WHERE pool_tournament_id = $1
+        )
+        GROUP BY ptup.pool_tournamnet_user_id
+      ) sub
+      WHERE ptu.id = sub.user_id
+      `,
+      [poolTournamentId]
+    );
+
+    return Array.isArray(result) ? (result[1] ?? 0) : 0;
   }
 
   private aggregateScore(picks: PoolTournamentUserPick[]): number | null {

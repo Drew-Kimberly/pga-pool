@@ -398,6 +398,8 @@ export class PgaTournamentPlayerService {
       return;
     }
 
+    let didCalculate = false;
+
     await repo.manager.transaction(async (txManager) => {
       const tournamentRepo = txManager.getRepository(PgaTournament);
       const tournamentPlayerRepo = txManager.getRepository(PgaTournamentPlayer);
@@ -450,7 +452,19 @@ export class PgaTournamentPlayerService {
       await tournamentRepo.update(tournament.id, {
         official_fedex_cup_points_calculated: true,
       });
+
+      didCalculate = true;
     });
+
+    // Emit after commit so handlers observe the persisted official points and
+    // the flipped `official_fedex_cup_points_calculated` flag. This is what
+    // retriggers readiness-gated pool finalization for FedEx-scored pools whose
+    // tournament reached COMPLETED before the official points landed.
+    if (didCalculate) {
+      this.eventBus.emit<PgaTournamentEventMap>('pga-tournament.official-points-calculated', {
+        pgaTournament,
+      });
+    }
   }
 
   private extractOfficialFedexCupPoints(
