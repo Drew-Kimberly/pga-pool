@@ -414,6 +414,7 @@ export class PgaTournamentPlayerService {
       const updateBatchSize = 50;
       const fetchConcurrency = 10;
       const playerIds = leaderboardPlayers.map((player) => Number(player.id));
+      let matchedAnyPlayer = false;
       for (let i = 0; i < playerIds.length; i += updateBatchSize) {
         const batch = playerIds.slice(i, i + updateBatchSize);
         const pointsByPlayer = await this.mapWithConcurrency(
@@ -427,8 +428,12 @@ export class PgaTournamentPlayerService {
               );
               return this.extractOfficialFedexCupPoints(results, tournament.id, playerId);
             } catch (e) {
+              // A failure to FETCH a player's season results is transient
+              // infrastructure (network/HTTP), not a signal that the player
+              // earned zero. Abort so the field-sync worker retries the whole
+              // calc rather than persisting a wrong zero and marking official.
               this.logger.error(
-                `Failed to calculate official FedEx Cup points for player ${playerId} tournament ${tournament.id}: ${e}`,
+                `Failed to fetch season results for player ${playerId} tournament ${tournament.id}: ${e}`,
                 e.stack
               );
               throw e;
@@ -443,10 +448,26 @@ export class PgaTournamentPlayerService {
         );
 
         for (let j = 0; j < batch.length; j++) {
+          if (pointsByPlayer[j].matched) {
+            matchedAnyPlayer = true;
+          }
           await tournamentPlayerRepo.update(`${batch[j]}-${tournament.id}`, {
-            official_fedex_cup_points: pointsByPlayer[j],
+            official_fedex_cup_points: pointsByPlayer[j].points,
           });
         }
+      }
+
+      // Guard against a systemic extraction failure (e.g. an upstream
+      // tournament-id or field-layout change) silently zeroing the whole field
+      // and locking it in as official. If not one player's season results
+      // carried a row for this event, treat it as transient and abort so the
+      // next sync retries — a stuck "Scores Pending" is recoverable, an
+      // all-zero finalization is not.
+      if (playerIds.length > 0 && !matchedAnyPlayer) {
+        throw new Error(
+          `No season-results rows matched tournament ${tournament.id} for any of ` +
+            `${playerIds.length} players; refusing to mark official FedEx Cup points as calculated`
+        );
       }
 
       await tournamentRepo.update(tournament.id, {
@@ -467,41 +488,55 @@ export class PgaTournamentPlayerService {
     }
   }
 
+  /**
+   * Resolves a player's official FedEx Cup points for one tournament from their
+   * season-results feed. Returns `matched: false` when the player has no row for
+   * this event — expected for non-members/amateurs who qualify into a major and
+   * earn no FedEx Cup points. Such a gap must not abort the whole field's calc,
+   * so it resolves to 0 rather than throwing. `matched` lets the caller
+   * distinguish a genuine per-player gap from a systemic (all-players) failure.
+   */
   private extractOfficialFedexCupPoints(
     results: PgaApiPlayerSeasonResultsResponse,
     tournamentId: string,
     playerId: number
-  ): number {
+  ): { points: number; matched: boolean } {
     const data = results?.resultsData?.[0]?.data ?? [];
     const tournamentData = data.find((row) => row.tournamentId === tournamentId);
     if (!tournamentData) {
-      throw new Error(
-        `No results for tournament ${tournamentId} found in season results for player ${playerId}`
+      this.logger.warn(
+        `No season-results row for tournament ${tournamentId} and player ${playerId}; ` +
+          `treating official FedEx Cup points as 0`
       );
+      return { points: 0, matched: false };
     }
 
     const pointsField = tournamentData.fields?.[10];
     if (pointsField === undefined) {
-      throw new Error(
-        `FedEx Cup points missing for tournament ${tournamentId} in season results for player ${playerId}`
+      this.logger.warn(
+        `Official FedEx Cup points field missing for tournament ${tournamentId} and ` +
+          `player ${playerId}; treating as 0`
       );
+      return { points: 0, matched: true };
     }
 
     const normalizedPointsField =
       typeof pointsField === 'string' ? pointsField.trim() : String(pointsField);
 
     if (normalizedPointsField === '-' || normalizedPointsField === '') {
-      return 0;
+      return { points: 0, matched: true };
     }
 
     const points = Number(normalizedPointsField);
     if (Number.isNaN(points)) {
-      throw new Error(
-        `Invalid FedEx Cup points "${pointsField}" for tournament ${tournamentId} and player ${playerId}`
+      this.logger.warn(
+        `Invalid official FedEx Cup points "${pointsField}" for tournament ${tournamentId} ` +
+          `and player ${playerId}; treating as 0`
       );
+      return { points: 0, matched: true };
     }
 
-    return points;
+    return { points, matched: true };
   }
 
   private async mapWithConcurrency<T, R>(
