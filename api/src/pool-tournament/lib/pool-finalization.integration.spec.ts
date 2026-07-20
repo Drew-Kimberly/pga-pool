@@ -309,6 +309,171 @@ describe('Pool finalization (integration)', () => {
     expect((await reloadPoolUser(poolUser.id)).pool_score).toBe(500);
   });
 
+  it('heals a finished FedEx pool when a non-member in the field has no season-results row', async () => {
+    // A member (in the pool) earns 500 official points; a non-member who
+    // qualified into the event (e.g. an Open qualifier) has no FedEx row in
+    // their season results. Pre-fix, that missing row threw and rolled back the
+    // whole calc, leaving the pool stuck in "Scores Pending". Post-fix, the
+    // non-member defaults to 0 and the pool finalizes on the member's points.
+    const {
+      pgaTournament,
+      poolTournament,
+      poolUser,
+      poolTournamentUser,
+      player: memberPlayer,
+    } = await createScenario({
+      officialCalculated: false,
+      projectedPoints: 0,
+      officialPoints: null,
+    });
+
+    const nonMember = await createPgaPlayer(ds);
+    await createPgaTournamentPlayer(ds, {
+      pgaPlayer: nonMember,
+      pgaTournament,
+      overrides: { official_fedex_cup_points: null },
+    });
+
+    // status-updated arrived first and (correctly) skipped this not-ready pool.
+    await finalizationService.finalizeReadyPoolTournaments(pgaTournament.id);
+    expect((await reloadPoolTournament(poolTournament.id)).scores_are_official).toBe(false);
+
+    const completedRow = (id: number) => ({
+      id: String(id).padStart(5, '0'),
+      player: { firstName: 'Player', lastName: String(id), displayName: `Player ${id}` },
+      scoringData: {
+        playerState: 'COMPLETE',
+        total: '-8',
+        totalSort: -8,
+        thru: '18',
+        thruSort: 18,
+        position: '1',
+        score: '-8',
+        scoreSort: -8,
+        currentRound: 4,
+        teeTime: -1,
+        courseId: '1',
+        groupNumber: 1,
+        roundHeader: 'R4',
+        roundStatus: 'Complete',
+        totalStrokes: '272',
+        oddsToWin: '',
+      },
+    });
+
+    mockPgaTourApi.getTournamentLeaderboard.mockResolvedValue({
+      leaderboardId: pgaTournament.id,
+      leaderboard: {
+        timezone: 'America/New_York',
+        roundStatus: 'OFFICIAL',
+        tournamentStatus: 'COMPLETED',
+        formatType: 'STROKE_PLAY',
+        players: [completedRow(memberPlayer.id), completedRow(nonMember.id)],
+      },
+    });
+    mockPgaTourApi.getProjectedFedexCupPoints.mockResolvedValue({
+      seasonYear: pgaTournament.year,
+      lastUpdated: '',
+      points: [],
+    });
+    // Member has a real FedEx row; the non-member's season results carry no row
+    // for this event (the exact upstream shape that used to abort the calc).
+    mockPgaTourApi.getPlayerSeasonResults.mockImplementation(async (playerId: number) =>
+      playerId === memberPlayer.id
+        ? {
+            resultsData: [
+              {
+                title: 'FedExCup',
+                data: [
+                  { tournamentId: pgaTournament.id, fields: Array(10).fill('').concat('500') },
+                ],
+              },
+            ],
+          }
+        : { resultsData: [{ title: 'FedExCup', data: [] }] }
+    );
+
+    await pgaTournamentPlayerService.upsertFieldForTournament(pgaTournament.id);
+
+    await waitFor(async () => (await reloadPoolTournament(poolTournament.id)).scores_are_official);
+
+    const reloadTournamentPlayer = (playerId: number) =>
+      ds
+        .getRepository(PgaTournamentPlayer)
+        .findOneByOrFail({ id: `${playerId}-${pgaTournament.id}` });
+    expect((await reloadTournamentPlayer(memberPlayer.id)).official_fedex_cup_points).toBe(500);
+    expect((await reloadTournamentPlayer(nonMember.id)).official_fedex_cup_points).toBe(0);
+    expect((await reloadPoolTournamentUser(poolTournamentUser.id)).fedex_cup_points).toBe(500);
+    expect((await reloadPoolUser(poolUser.id)).pool_score).toBe(500);
+  });
+
+  it('leaves a FedEx pool pending when no player has a season-results row (systemic gap, no zero lock-in)', async () => {
+    const { pgaTournament, poolTournament, poolUser, player } = await createScenario({
+      officialCalculated: false,
+      projectedPoints: 0,
+      officialPoints: null,
+    });
+
+    mockPgaTourApi.getTournamentLeaderboard.mockResolvedValue({
+      leaderboardId: pgaTournament.id,
+      leaderboard: {
+        timezone: 'America/New_York',
+        roundStatus: 'OFFICIAL',
+        tournamentStatus: 'COMPLETED',
+        formatType: 'STROKE_PLAY',
+        players: [
+          {
+            id: String(player.id).padStart(5, '0'),
+            player: {
+              firstName: 'Player',
+              lastName: String(player.id),
+              displayName: `Player ${player.id}`,
+            },
+            scoringData: {
+              playerState: 'COMPLETE',
+              total: '-8',
+              totalSort: -8,
+              thru: '18',
+              thruSort: 18,
+              position: '1',
+              score: '-8',
+              scoreSort: -8,
+              currentRound: 4,
+              teeTime: -1,
+              courseId: '1',
+              groupNumber: 1,
+              roundHeader: 'R4',
+              roundStatus: 'Complete',
+              totalStrokes: '272',
+              oddsToWin: '',
+            },
+          },
+        ],
+      },
+    });
+    mockPgaTourApi.getProjectedFedexCupPoints.mockResolvedValue({
+      seasonYear: pgaTournament.year,
+      lastUpdated: '',
+      points: [],
+    });
+    // Upstream returns no row for ANY player — e.g. a tournament-id mismatch.
+    // The calc must abort rather than mark an all-zero result official.
+    mockPgaTourApi.getPlayerSeasonResults.mockResolvedValue({
+      resultsData: [{ title: 'FedExCup', data: [] }],
+    });
+
+    await expect(
+      pgaTournamentPlayerService.upsertFieldForTournament(pgaTournament.id)
+    ).rejects.toThrow();
+
+    expect(
+      (await ds.getRepository(PgaTournament).findOneByOrFail({ id: pgaTournament.id }))
+        .official_fedex_cup_points_calculated
+    ).toBe(false);
+    expect((await reloadPoolTournament(poolTournament.id)).scores_are_official).toBe(false);
+    expect((await reloadPoolUser(poolUser.id)).pool_score).toBe(0);
+  });
+
   it('wires the official-points-calculated event to finalization', async () => {
     const { pgaTournament, poolTournament, poolUser } = await createScenario({
       officialCalculated: true,
