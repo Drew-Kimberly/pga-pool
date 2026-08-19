@@ -36,6 +36,7 @@ interface ScenarioOverrides {
   scoreTotal?: number | null;
   projectedPoints?: number;
   officialPoints?: number | null;
+  endDate?: Date;
 }
 
 describe('Pool finalization (integration)', () => {
@@ -73,6 +74,7 @@ describe('Pool finalization (integration)', () => {
       scoreTotal = -8,
       projectedPoints = 0,
       officialPoints = 500,
+      endDate,
     } = overrides;
 
     const pool = await createPool(ds, {
@@ -81,6 +83,7 @@ describe('Pool finalization (integration)', () => {
     const pgaTournament = await createPgaTournament(ds, {
       tournament_status: tournamentStatus,
       official_fedex_cup_points_calculated: officialCalculated,
+      ...(endDate ? { end_date: endDate } : {}),
     });
     const poolTournament = await createPoolTournament(ds, {
       pool,
@@ -309,12 +312,11 @@ describe('Pool finalization (integration)', () => {
     expect((await reloadPoolUser(poolUser.id)).pool_score).toBe(500);
   });
 
-  it('heals a finished FedEx pool when a non-member in the field has no season-results row', async () => {
+  it('heals a finished FedEx pool when a non-member in the field earns no points', async () => {
     // A member (in the pool) earns 500 official points; a non-member who
-    // qualified into the event (e.g. an Open qualifier) has no FedEx row in
-    // their season results. Pre-fix, that missing row threw and rolled back the
-    // whole calc, leaving the pool stuck in "Scores Pending". Post-fix, the
-    // non-member defaults to 0 and the pool finalizes on the member's points.
+    // qualified into the event (e.g. an Open qualifier) has a season-results
+    // row with "-" in the points column. The non-member resolves to 0 and the
+    // pool finalizes on the member's points.
     const {
       pgaTournament,
       poolTournament,
@@ -376,22 +378,23 @@ describe('Pool finalization (integration)', () => {
       lastUpdated: '',
       points: [],
     });
-    // Member has a real FedEx row; the non-member's season results carry no row
-    // for this event (the exact upstream shape that used to abort the calc).
-    mockPgaTourApi.getPlayerSeasonResults.mockImplementation(async (playerId: number) =>
-      playerId === memberPlayer.id
-        ? {
-            resultsData: [
-              {
-                title: 'FedExCup',
-                data: [
-                  { tournamentId: pgaTournament.id, fields: Array(10).fill('').concat('500') },
-                ],
-              },
-            ],
-          }
-        : { resultsData: [{ title: 'FedExCup', data: [] }] }
-    );
+    // Member has a real FedEx row; the non-member's row carries "-" points
+    // (the settled upstream shape for anyone earning nothing).
+    mockPgaTourApi.getPlayerSeasonResults.mockImplementation(async (playerId: number) => ({
+      resultsData: [
+        {
+          title: 'FedExCup',
+          data: [
+            {
+              tournamentId: pgaTournament.id,
+              fields: Array(10)
+                .fill('')
+                .concat(playerId === memberPlayer.id ? '500' : '-'),
+            },
+          ],
+        },
+      ],
+    }));
 
     await pgaTournamentPlayerService.upsertFieldForTournament(pgaTournament.id);
 
@@ -466,6 +469,129 @@ describe('Pool finalization (integration)', () => {
       pgaTournamentPlayerService.upsertFieldForTournament(pgaTournament.id)
     ).rejects.toThrow();
 
+    expect(
+      (await ds.getRepository(PgaTournament).findOneByOrFail({ id: pgaTournament.id }))
+        .official_fedex_cup_points_calculated
+    ).toBe(false);
+    expect((await reloadPoolTournament(poolTournament.id)).scores_are_official).toBe(false);
+    expect((await reloadPoolUser(poolUser.id)).pool_score).toBe(0);
+  });
+
+  const leaderboardRow = (id: number) => ({
+    id: String(id).padStart(5, '0'),
+    player: { firstName: 'Player', lastName: String(id), displayName: `Player ${id}` },
+    scoringData: {
+      playerState: 'COMPLETE',
+      total: '-8',
+      totalSort: -8,
+      thru: '18',
+      thruSort: 18,
+      position: '1',
+      score: '-8',
+      scoreSort: -8,
+      currentRound: 4,
+      teeTime: -1,
+      courseId: '1',
+      groupNumber: 1,
+      roundHeader: 'R4',
+      roundStatus: 'Complete',
+      totalStrokes: '272',
+      oddsToWin: '',
+    },
+  });
+
+  const mockLeaderboard = (tournamentId: string, playerIds: number[]) => {
+    mockPgaTourApi.getTournamentLeaderboard.mockResolvedValue({
+      leaderboardId: tournamentId,
+      leaderboard: {
+        timezone: 'America/New_York',
+        roundStatus: 'OFFICIAL',
+        tournamentStatus: 'COMPLETED',
+        formatType: 'STROKE_PLAY',
+        players: playerIds.map(leaderboardRow),
+      },
+    });
+    mockPgaTourApi.getProjectedFedexCupPoints.mockResolvedValue({
+      seasonYear: 2026,
+      lastUpdated: '',
+      points: [],
+    });
+  };
+
+  it('leaves a FedEx pool pending when the season-results feed is only partially propagated', async () => {
+    // The St. Jude 2026 incident: right after completion, only a fraction of
+    // the field's per-player season-results feeds carry the event's row. The
+    // calc must abort rather than lock the missing players in as zeros.
+    const {
+      pgaTournament,
+      poolTournament,
+      poolUser,
+      player: freshPlayer,
+    } = await createScenario({
+      officialCalculated: false,
+      projectedPoints: 0,
+      officialPoints: null,
+    });
+
+    const stalePlayer = await createPgaPlayer(ds);
+    await createPgaTournamentPlayer(ds, {
+      pgaPlayer: stalePlayer,
+      pgaTournament,
+      overrides: { official_fedex_cup_points: null },
+    });
+
+    mockLeaderboard(pgaTournament.id, [freshPlayer.id, stalePlayer.id]);
+    // One player's feed has propagated; the other's is stale (no row yet).
+    mockPgaTourApi.getPlayerSeasonResults.mockImplementation(async (playerId: number) =>
+      playerId === freshPlayer.id
+        ? {
+            resultsData: [
+              {
+                title: 'FedExCup',
+                data: [
+                  { tournamentId: pgaTournament.id, fields: Array(10).fill('').concat('500') },
+                ],
+              },
+            ],
+          }
+        : { resultsData: [{ title: 'FedExCup', data: [] }] }
+    );
+
+    await expect(
+      pgaTournamentPlayerService.upsertFieldForTournament(pgaTournament.id)
+    ).rejects.toThrow(/unsettled/);
+
+    expect(
+      (await ds.getRepository(PgaTournament).findOneByOrFail({ id: pgaTournament.id }))
+        .official_fedex_cup_points_calculated
+    ).toBe(false);
+    expect(
+      (
+        await ds
+          .getRepository(PgaTournamentPlayer)
+          .findOneByOrFail({ id: `${stalePlayer.id}-${pgaTournament.id}` })
+      ).official_fedex_cup_points
+    ).toBeNull();
+    expect((await reloadPoolTournament(poolTournament.id)).scores_are_official).toBe(false);
+    expect((await reloadPoolUser(poolUser.id)).pool_score).toBe(0);
+  });
+
+  it('defers the official points calc until the settle delay elapses', async () => {
+    // Tournament just finished (end_date is now): even a row that is present
+    // may still carry pending points, so the calc must not run yet at all.
+    const { pgaTournament, poolTournament, poolUser, player } = await createScenario({
+      officialCalculated: false,
+      projectedPoints: 0,
+      officialPoints: null,
+      endDate: new Date(),
+    });
+
+    mockLeaderboard(pgaTournament.id, [player.id]);
+    mockPgaTourApi.getPlayerSeasonResults.mockClear();
+
+    await pgaTournamentPlayerService.upsertFieldForTournament(pgaTournament.id);
+
+    expect(mockPgaTourApi.getPlayerSeasonResults).not.toHaveBeenCalled();
     expect(
       (await ds.getRepository(PgaTournament).findOneByOrFail({ id: pgaTournament.id }))
         .official_fedex_cup_points_calculated
