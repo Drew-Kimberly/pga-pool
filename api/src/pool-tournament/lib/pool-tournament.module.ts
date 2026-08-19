@@ -2,6 +2,7 @@ import { ListModule } from '../../common/api/list';
 import { PgaTournamentPlayerModule } from '../../pga-tournament-player/lib/pga-tournament-player.module';
 import { PoolTournamentUserModule } from '../../pool-tournament-user/lib/pool-tournament-user.module';
 
+import { OfficialPointsResyncService } from './official-points-resync.service';
 import { PoolFinalizationService } from './pool-finalization.service';
 import { PoolFinalizationReactionHandler } from './pool-finalization-reaction.handler';
 import { PoolOfficialPointsFinalizationReactionHandler } from './pool-official-points-finalization-reaction.handler';
@@ -24,10 +25,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     PoolTournamentService,
     PoolTournamentFinalizerService,
     PoolFinalizationService,
+    OfficialPointsResyncService,
     PoolScoreReactionHandler,
     PoolFinalizationReactionHandler,
     PoolOfficialPointsFinalizationReactionHandler,
   ],
-  exports: [PoolTournamentService, PoolTournamentFinalizerService],
+  exports: [PoolTournamentService, PoolTournamentFinalizerService, OfficialPointsResyncService],
 })
 export class PoolTournamentModule {}

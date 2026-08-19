@@ -22,6 +22,32 @@ import { PgaTournamentPlayerFilter, PlayerStatus } from './pga-tournament-player
 import { Injectable, Logger, LoggerService, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
+/**
+ * The season-results feed propagates per player (each player's profile is a
+ * separately cached upstream document), so shortly after a tournament finishes
+ * most players' feeds have no row for it yet. Every player who appeared on a
+ * leaderboard eventually gets a row — non-members, amateurs and withdrawals
+ * included, with "-" in the points column — so a settled feed matches ~100% of
+ * players. A matched ratio below this threshold means the feed is still
+ * propagating and the calc must be retried, not persisted.
+ */
+export const MIN_MATCHED_SEASON_RESULTS_RATIO = 0.9;
+
+/**
+ * A player's row can also appear with points still pending ("-") right after
+ * the finish, which is indistinguishable from a legitimate zero. Waiting out a
+ * settle delay after the tournament's scheduled end sidesteps that window; the
+ * field-sync worker retries within its ±14-day window, so deferring is cheap.
+ */
+const OFFICIAL_POINTS_SETTLE_DELAY_MS = 12 * 60 * 60 * 1000;
+
+export interface OfficialFedexCupPointsFetchResult {
+  /** Official points per PGA player id; unmatched players resolve to 0. */
+  pointsByPlayerId: Map<number, number>;
+  /** Players whose season results carried a row for the tournament. */
+  matchedPlayerIds: Set<number>;
+}
+
 @Injectable()
 export class PgaTournamentPlayerService {
   constructor(
@@ -386,6 +412,66 @@ export class PgaTournamentPlayerService {
     return playerPointMap;
   }
 
+  /**
+   * Fetches official FedEx Cup points for a set of players from their
+   * season-results feeds. Unmatched players (no row for the tournament yet, or
+   * a genuinely point-less appearance that has not posted) resolve to 0;
+   * `matchedPlayerIds` lets callers judge whether the feed has settled before
+   * persisting anything. Throws on a fetch failure — that is transient
+   * infrastructure, not a zero.
+   */
+  async fetchOfficialFedexCupPoints(
+    pgaTournament: PgaTournament,
+    playerIds: number[]
+  ): Promise<OfficialFedexCupPointsFetchResult> {
+    const fetchBatchSize = 50;
+    const fetchConcurrency = 10;
+    const pointsByPlayerId = new Map<number, number>();
+    const matchedPlayerIds = new Set<number>();
+
+    for (let i = 0; i < playerIds.length; i += fetchBatchSize) {
+      const batch = playerIds.slice(i, i + fetchBatchSize);
+      const pointsByPlayer = await this.mapWithConcurrency(
+        batch,
+        fetchConcurrency,
+        async (playerId) => {
+          try {
+            const results = await this.pgaTourApi.getPlayerSeasonResults(
+              playerId,
+              pgaTournament.year
+            );
+            return this.extractOfficialFedexCupPoints(results, pgaTournament.id, playerId);
+          } catch (e) {
+            // A failure to FETCH a player's season results is transient
+            // infrastructure (network/HTTP), not a signal that the player
+            // earned zero. Abort so the caller retries the whole calc rather
+            // than persisting a wrong zero.
+            this.logger.error(
+              `Failed to fetch season results for player ${playerId} tournament ${pgaTournament.id}: ${e}`,
+              e.stack
+            );
+            throw e;
+          }
+        }
+      );
+
+      this.logger.debug?.(
+        `FedExCup official points fetched for ${batch.length} players (${i + 1}-${
+          i + batch.length
+        } of ${playerIds.length})`
+      );
+
+      for (let j = 0; j < batch.length; j++) {
+        pointsByPlayerId.set(batch[j], pointsByPlayer[j].points);
+        if (pointsByPlayer[j].matched) {
+          matchedPlayerIds.add(batch[j]);
+        }
+      }
+    }
+
+    return { pointsByPlayerId, matchedPlayerIds };
+  }
+
   private async tryCalculateOfficialFedexCupPoints(
     pgaTournament: PgaTournament,
     leaderboardPlayers: PgaApiTournamentLeaderboardRow[],
@@ -396,6 +482,35 @@ export class PgaTournamentPlayerService {
       pgaTournament.official_fedex_cup_points_calculated
     ) {
       return;
+    }
+
+    if (Date.now() - new Date(pgaTournament.end_date).getTime() < OFFICIAL_POINTS_SETTLE_DELAY_MS) {
+      this.logger.log(
+        `Official FedEx Cup points settle delay not elapsed for tournament ${pgaTournament.id}, deferring calculation`
+      );
+      return;
+    }
+
+    const playerIds = leaderboardPlayers.map((player) => Number(player.id));
+    if (playerIds.length === 0) {
+      return;
+    }
+
+    const { pointsByPlayerId, matchedPlayerIds } = await this.fetchOfficialFedexCupPoints(
+      pgaTournament,
+      playerIds
+    );
+
+    // Guard against persisting a partially-propagated feed (or a systemic
+    // extraction failure such as an upstream tournament-id change) and locking
+    // it in as official. Abort so the next sync retries — a stuck "Scores
+    // Pending" is recoverable, a wrongly-zeroed finalization is not.
+    if (matchedPlayerIds.size / playerIds.length < MIN_MATCHED_SEASON_RESULTS_RATIO) {
+      throw new Error(
+        `Only ${matchedPlayerIds.size} of ${playerIds.length} players have a season-results row ` +
+          `for tournament ${pgaTournament.id}; feed looks unsettled, refusing to mark official ` +
+          `FedEx Cup points as calculated`
+      );
     }
 
     let didCalculate = false;
@@ -411,63 +526,10 @@ export class PgaTournamentPlayerService {
         return;
       }
 
-      const updateBatchSize = 50;
-      const fetchConcurrency = 10;
-      const playerIds = leaderboardPlayers.map((player) => Number(player.id));
-      let matchedAnyPlayer = false;
-      for (let i = 0; i < playerIds.length; i += updateBatchSize) {
-        const batch = playerIds.slice(i, i + updateBatchSize);
-        const pointsByPlayer = await this.mapWithConcurrency(
-          batch,
-          fetchConcurrency,
-          async (playerId) => {
-            try {
-              const results = await this.pgaTourApi.getPlayerSeasonResults(
-                playerId,
-                tournament.year
-              );
-              return this.extractOfficialFedexCupPoints(results, tournament.id, playerId);
-            } catch (e) {
-              // A failure to FETCH a player's season results is transient
-              // infrastructure (network/HTTP), not a signal that the player
-              // earned zero. Abort so the field-sync worker retries the whole
-              // calc rather than persisting a wrong zero and marking official.
-              this.logger.error(
-                `Failed to fetch season results for player ${playerId} tournament ${tournament.id}: ${e}`,
-                e.stack
-              );
-              throw e;
-            }
-          }
-        );
-
-        this.logger.debug?.(
-          `FedExCup official points fetched for ${batch.length} players (${i + 1}-${
-            i + batch.length
-          } of ${playerIds.length})`
-        );
-
-        for (let j = 0; j < batch.length; j++) {
-          if (pointsByPlayer[j].matched) {
-            matchedAnyPlayer = true;
-          }
-          await tournamentPlayerRepo.update(`${batch[j]}-${tournament.id}`, {
-            official_fedex_cup_points: pointsByPlayer[j].points,
-          });
-        }
-      }
-
-      // Guard against a systemic extraction failure (e.g. an upstream
-      // tournament-id or field-layout change) silently zeroing the whole field
-      // and locking it in as official. If not one player's season results
-      // carried a row for this event, treat it as transient and abort so the
-      // next sync retries — a stuck "Scores Pending" is recoverable, an
-      // all-zero finalization is not.
-      if (playerIds.length > 0 && !matchedAnyPlayer) {
-        throw new Error(
-          `No season-results rows matched tournament ${tournament.id} for any of ` +
-            `${playerIds.length} players; refusing to mark official FedEx Cup points as calculated`
-        );
+      for (const playerId of playerIds) {
+        await tournamentPlayerRepo.update(`${playerId}-${tournament.id}`, {
+          official_fedex_cup_points: pointsByPlayerId.get(playerId) ?? 0,
+        });
       }
 
       await tournamentRepo.update(tournament.id, {
